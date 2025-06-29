@@ -344,10 +344,29 @@
         <div class="flex-grow p-4 md:p-8 bg-slate-100">
             <!-- PAGE: Employees -->
             <main id="page-employees" class="page active">
-                <h2 class="text-3xl font-bold text-slate-800">إدارة الموظفين</h2>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-slate-800">إدارة الموظفين</h2>
+                    <button onclick="openModal('addEmployeeModal')" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">إضافة موظف جديد</button>
+                </div>
                 <div class="bg-white p-6 rounded-xl shadow-lg mt-6">
-                    <p class="text-slate-500">هذا القسم مخصص لإدارة بيانات الموظفين.</p>
-                    <!-- هنا سيتم إضافة جدول الموظفين وأدوات الإدارة -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-slate-500">
+                            <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">الاسم الكامل</th>
+                                    <th scope="col" class="px-6 py-3">المنصب</th>
+                                    <th scope="col" class="px-6 py-3">تاريخ البدء</th>
+                                    <th scope="col" class="px-6 py-3">الراتب (ر.س)</th>
+                                    <th scope="col" class="px-6 py-3">الحالة</th>
+                                    <th scope="col" class="px-6 py-3 text-center">إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employees-table-body">
+                                <!-- سيتم تعبئة بيانات الموظفين هنا بواسطة JavaScript -->
+                                <tr class="border-b"><td colspan="6" class="text-center p-4">لا يوجد موظفون مضافون.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </main>
 
@@ -525,6 +544,45 @@
     <datalist id="locations-datalist"></datalist>
     <div id="printable-invoice"></div>
 
+    <!-- NEW: Add Employee Modal -->
+    <div id="addEmployeeModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-lg p-6 transform scale-95">
+            <h3 class="text-xl font-bold mb-4">إضافة موظف جديد</h3>
+            <form id="addEmployeeForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="employeeName" class="block mb-2 text-sm font-medium">الاسم الكامل</label>
+                        <input type="text" id="employeeName" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required>
+                    </div>
+                    <div>
+                        <label for="employeePosition" class="block mb-2 text-sm font-medium">المنصب</label>
+                        <input type="text" id="employeePosition" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required>
+                    </div>
+                    <div>
+                        <label for="employeeStartDate" class="block mb-2 text-sm font-medium">تاريخ البدء</label>
+                        <input type="date" id="employeeStartDate" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required>
+                    </div>
+                    <div>
+                        <label for="employeeSalary" class="block mb-2 text-sm font-medium">الراتب (ر.س)</label>
+                        <input type="number" id="employeeSalary" min="0" step="0.01" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="employeeStatus" class="block mb-2 text-sm font-medium">الحالة</label>
+                        <select id="employeeStatus" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required>
+                            <option value="نشط">نشط</option>
+                            <option value="إجازة">إجازة</option>
+                            <option value="منتهية الخدمة">منتهية الخدمة</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end space-x-2 rtl:space-x-reverse">
+                    <button type="button" onclick="closeModal('addEmployeeModal')" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">إلغاء</button>
+                    <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">حفظ الموظف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -533,8 +591,8 @@
         const firebaseConfig = { apiKey: "AIzaSyDSlxf95W00Ow6LZba8waAKJINptIRPkU8", authDomain: "sample-firebase-ai-app-960f4.firebaseapp.com", projectId: "sample-firebase-ai-app-960f4", storageBucket: "sample-firebase-ai-app-960f4.appspot.com", messagingSenderId: "741880884079", appId: "1:741880884079:web:8d2f6e233fb65e65e969a" };
         
         let app, auth, db, userId;
-        let companiesUnsubscribe, inventoryUnsubscribe, transactionsUnsubscribe, layoutUnsubscribe, financialsUnsubscribe;
-        let state = { companies: [], inventory: [], transactions: [], warehouseConfig: {}, financials: [] };
+        let companiesUnsubscribe, inventoryUnsubscribe, transactionsUnsubscribe, layoutUnsubscribe, financialsUnsubscribe, employeesUnsubscribe; // إضافة متغير لإلغاء اشتراك الموظفين
+        let state = { companies: [], inventory: [], transactions: [], warehouseConfig: {}, financials: [], employees: [] }; // إضافة صفحة الموظفين
         let parsedFileData = [], confirmationCallback = null, companyValueChart = null, financialSummaryChart = null, allLocations = new Set();
         let skuSearchTimeout;
 
@@ -603,6 +661,9 @@
             } else if (modalId === 'addRevenueModal' || modalId === 'addExpenseModal') {
                 modal.querySelector('form').reset();
                 modal.querySelector('input[type="date"]').valueAsDate = new Date();
+            } else if (modalId === 'addEmployeeModal') { // NEW: Add Employee Modal logic
+                document.getElementById('addEmployeeForm').reset();
+                document.getElementById('employeeStartDate').valueAsDate = new Date(); // Set today's date
             }
             modal.classList.remove('hidden');
             setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('.modal-content').classList.remove('scale-95'); }, 10);
@@ -685,8 +746,7 @@
             renderFinancialDashboard();
             renderFinancialTransactionsPage();
             renderOrUpdateFinancialChart();
-            // ليس هناك حاجة لوظائف render خاصة بصفحات الموارد البشرية الجديدة في هذا التعديل
-            // لأنها تحتوي على محتوى ثابت مبدئيًا. إذا أضفت بيانات ديناميكية، فستحتاج إليها.
+            renderEmployeesPage(); // NEW: Call to render employees
         }
         
         window.renderLayoutView = (view, context) => {
@@ -865,6 +925,27 @@
                     </td>
                 </tr>`;
             }).join('');
+        }
+
+        // NEW: Render Employees Page
+        function renderEmployeesPage() {
+            const tableBody = document.getElementById('employees-table-body');
+            if (state.employees.length === 0) {
+                tableBody.innerHTML = '<tr class="border-b"><td colspan="6" class="text-center p-4">لا يوجد موظفون مضافون.</td></tr>';
+                return;
+            }
+            tableBody.innerHTML = state.employees.sort((a, b) => a.name.localeCompare(b.name)).map(employee => `
+                <tr class="bg-white border-b hover:bg-slate-50">
+                    <td class="px-6 py-4 font-medium text-slate-900">${employee.name}</td>
+                    <td class="px-6 py-4">${employee.position}</td>
+                    <td class="px-6 py-4">${employee.startDate}</td>
+                    <td class="px-6 py-4">${Number(employee.salary).toLocaleString('ar-SA')}</td>
+                    <td class="px-6 py-4">${employee.status}</td>
+                    <td class="px-6 py-4 text-center">
+                        <button onclick="deleteEmployee('${employee.id}')" class="text-red-600 hover:text-red-800 font-bold px-2">حذف</button>
+                    </td>
+                </tr>
+            `).join('');
         }
 
         function populateCompanySelects(selectId) {
@@ -1055,7 +1136,8 @@
             transactionsUnsubscribe && transactionsUnsubscribe();
             layoutUnsubscribe && layoutUnsubscribe();
             financialsUnsubscribe && financialsUnsubscribe();
-            state = { companies: [], inventory: [], transactions: [], warehouseConfig: {}, financials: [] };
+            employeesUnsubscribe && employeesUnsubscribe(); // إلغاء اشتراك الموظفين
+            state = { companies: [], inventory: [], transactions: [], warehouseConfig: {}, financials: [], employees: [] };
             renderAll()
         }
         
@@ -1119,6 +1201,13 @@
                 state.financials = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderAll();
             }, error => console.error("Financials listener failed:", error));
+
+            // NEW: Employee Listener
+            const employeesRef = collection(db, "hr-data", userId, "employees");
+            employeesUnsubscribe = onSnapshot(employeesRef, snapshot => {
+                state.employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderAll();
+            }, error => console.error("Employees listener failed:", error));
         }
         
         window.addCompany = async (event) => { event.preventDefault(); const t = event.target; const o = { name: t.companyName.value.trim(), contact: t.companyContact.value.trim(), address: t.companyAddress.value.trim(), phone: t.companyPhone.value.trim(), }; if (o.name && !state.companies.some(s => s.name === o.name)) try { await addDoc(collection(db, "inventory-data", userId, "companies"), o); closeModal("addCompanyModal"); t.reset(); } catch (err) { showAlert("خطأ", "لم نتمكن من إضافة الشركة."); } else showAlert("خطأ", "اسم الشركة موجود بالفعل أو غير صالح."); };
@@ -1785,6 +1874,47 @@
             printableDiv.innerHTML = '';
         };
 
+        // NEW: Add Employee function
+        window.addEmployee = async (event) => {
+            event.preventDefault();
+            const form = event.target;
+            const newEmployee = {
+                name: form.employeeName.value.trim(),
+                position: form.employeePosition.value.trim(),
+                startDate: form.employeeStartDate.value,
+                salary: Number(form.employeeSalary.value),
+                status: form.employeeStatus.value,
+                createdAt: new Date()
+            };
+
+            if (!newEmployee.name || !newEmployee.position || !newEmployee.startDate || isNaN(newEmployee.salary) || newEmployee.salary <= 0) {
+                showAlert('بيانات ناقصة', 'الرجاء ملء جميع حقول الموظف بشكل صحيح.');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "hr-data", userId, "employees"), newEmployee);
+                showAlert('نجاح', 'تم إضافة الموظف بنجاح.');
+                closeModal('addEmployeeModal');
+            } catch (error) {
+                console.error("Error adding employee: ", error);
+                showAlert('خطأ', 'فشلت عملية إضافة الموظف.');
+            }
+        };
+
+        // NEW: Delete Employee function
+        window.deleteEmployee = async (employeeId) => {
+            showConfirmation('تأكيد الحذف', 'هل أنت متأكد من حذف بيانات هذا الموظف؟ لا يمكن التراجع عن هذا الإجراء.', async () => {
+                try {
+                    await deleteDoc(doc(db, "hr-data", userId, "employees", employeeId));
+                    showAlert('نجاح', 'تم حذف الموظف.');
+                } catch (error) {
+                    console.error("Error deleting employee: ", error);
+                    showAlert('خطأ', 'فشلت عملية الحذف.');
+                }
+            });
+        };
+
         // --- Attach Listeners ---
         document.getElementById('add-trans-sku-select').addEventListener('input', handleSkuSelect);
         document.getElementById('add-new-item-btn').addEventListener('click', () => switchAddTransView('new'));
@@ -1817,6 +1947,7 @@
         document.getElementById('addZoneForm').addEventListener('submit', handleZoneSubmit);
         document.getElementById('addRevenueForm').addEventListener('submit', (e) => addFinancialTransaction(e, 'revenue'));
         document.getElementById('addExpenseForm').addEventListener('submit', (e) => addFinancialTransaction(e, 'expense'));
+        document.getElementById('addEmployeeForm').addEventListener('submit', addEmployee); // NEW: Attach event listener for employee form
 
         ui.searchInput.addEventListener('input', renderInventoryPage);
         ui.importFileInput.addEventListener('change', handleFileImport);
