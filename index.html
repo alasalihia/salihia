@@ -1141,32 +1141,51 @@
             renderAll()
         }
         
-        function setupRealtimeListeners() {
-            clearDataAndListeners();
-            // تحديد userId: إذا لم يكن المستخدم موجودًا، استخدم معرفًا افتراضيًا أو anonymous
-            // هذا لضمان أن التطبيق يعمل حتى لو لم يكن المستخدم مسجلاً للدخول،
-            // مع العلم أن قواعد أمان Firebase يجب أن تسمح بالوصول لهذه البيانات.
-            // إذا كنت ترغب في أن يشارك جميع المستخدمين نفس البيانات بدون تسجيل دخول،
-            // فستحتاج إلى استخدام UID ثابت هنا (مثل 'guest_user' أو 'shared_data_id')
-            // وتعديل قواعد أمان Firestore للسماح للقراءة/الكتابة بدون مصادقة لهذا الـ UID.
-            // حالياً، الكود يفترض وجود مستخدم مصادق عليه (e.uid).
-            // إذا كنت تريد فتح التطبيق بدون مصادقة، ستحتاج إلى تعيين userId بطريقة مختلفة
-            // والسماح بالوصول في قواعد Firestore.
-            if (!userId) { // هذا الجزء مضاف لاحتمال "استثناء الدخول"
-                userId = "shared_public_data"; // معرف ثابت للبيانات العامة
-                // يجب تعديل قواعد أمان Firestore للسماح بالوصول إلى "shared_public_data"
-                // مثال لقاعدة Firestore العامة (للقراءة فقط):
-                // match /inventory-data/shared_public_data/{document=**} {
-                //   allow read: if true;
-                //   allow write: if false; // لا تسمح بالكتابة للمستخدمين غير المصادق عليهم
-                // }
-                // إذا كنت تريد السماح بالكتابة أيضًا، فستكون: allow read, write: if true;
-                // ولكن هذا غير آمن في بيئة عامة.
-                // للحفاظ على الأمان مع "استثناء الدخول" والوصول للبيانات، يفضل استخدام
-                // `signInAnonymously` أو UID محدد مسبقًا مع قواعد أمان محكمة.
-                // لأغراض هذا التعديل (إزالة شاشة الدخول)، سنفترض أن البيانات عامة أو ستتعامل
-                // معها بقواعد أمان تسمح بذلك.
-            }
+          function setupRealtimeListeners() {
+            clearDataAndListeners();
+            if (!userId) { 
+                userId = "shared_public_data"; 
+            }
+
+            const layoutDocRef = doc(db, "inventory-data", userId, "layout", "main");
+            layoutUnsubscribe = onSnapshot(layoutDocRef, (snapshot) => {
+                if (snapshot.exists() && Object.keys(snapshot.data()).length > 0) {
+                    state.warehouseConfig = snapshot.data();
+                } else {
+                    const defaultConfig = { A: { name: "المنطقة أ", columns: 10, shelvesPerColumn: 30 }, B: { name: "المنطقة ب", columns: 8, shelvesPerColumn: 20 } };
+                    setDoc(layoutDocRef, defaultConfig);
+                    state.warehouseConfig = defaultConfig;
+                }
+                allLocations.clear();
+                for (const z in state.warehouseConfig) { for (let c = 1; c <= state.warehouseConfig[z].columns; c++) { for (let s = 1; s <= state.warehouseConfig[z].shelvesPerColumn; s++) { 
+                    const locId = `${z.toUpperCase()}-${c.toString().padStart(2, '0')}-${s.toString().padStart(2, '0')}`;
+                    allLocations.add(locId);
+                } } }
+                renderAll();
+            });
+
+            const companiesRef = collection(db, "inventory-data", userId, "companies");
+            companiesUnsubscribe = onSnapshot(companiesRef, t => { state.companies = t.docs.map(o => ({ id: o.id, ...o.data() })); renderAll() }, o => console.error("Company listener failed:", o));
+            
+            const inventoryRef = collection(db, "inventory-data", userId, "inventory");
+            inventoryUnsubscribe = onSnapshot(inventoryRef, o => { state.inventory = o.docs.map(c => ({ id: c.id, ...c.data() })); renderAll() }, o => console.error("Inventory listener failed:", o));
+
+            const transactionsRef = collection(db, "inventory-data", userId, "transactions");
+            transactionsUnsubscribe = onSnapshot(transactionsRef, t => { state.transactions = t.docs.map(c => ({ id: c.id, ...c.data() })); renderAll() }, c => console.error("Transactions listener failed:", c))
+
+            const financialsRef = collection(db, "inventory-data", userId, "financials");
+            financialsUnsubscribe = onSnapshot(financialsRef, snapshot => {
+                state.financials = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderAll();
+            }, error => console.error("Financials listener failed:", error));
+
+            // Employee Listener (Corrected Path)
+            const employeesRef = collection(db, "inventory-data", userId, "employees");
+            employeesUnsubscribe = onSnapshot(employeesRef, snapshot => {
+                state.employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderAll();
+            }, error => console.error("Employees listener failed:", error));
+        }
 
             const layoutDocRef = doc(db, "inventory-data", userId, "layout", "main");
             layoutUnsubscribe = onSnapshot(layoutDocRef, (snapshot) => {
@@ -1875,45 +1894,44 @@
         };
 
         // NEW: Add Employee function
-        window.addEmployee = async (event) => {
-            event.preventDefault();
-            const form = event.target;
-            const newEmployee = {
-                name: form.employeeName.value.trim(),
-                position: form.employeePosition.value.trim(),
-                startDate: form.employeeStartDate.value,
-                salary: Number(form.employeeSalary.value),
-                status: form.employeeStatus.value,
-                createdAt: new Date()
-            };
+     window.addEmployee = async (event) => {
+            event.preventDefault();
+            const form = event.target;
+            const newEmployee = {
+                name: form.employeeName.value.trim(),
+                position: form.employeePosition.value.trim(),
+                startDate: form.employeeStartDate.value,
+                salary: Number(form.employeeSalary.value),
+                status: form.employeeStatus.value,
+                createdAt: new Date()
+            };
 
-            if (!newEmployee.name || !newEmployee.position || !newEmployee.startDate || isNaN(newEmployee.salary) || newEmployee.salary <= 0) {
-                showAlert('بيانات ناقصة', 'الرجاء ملء جميع حقول الموظف بشكل صحيح.');
-                return;
-            }
+            if (!newEmployee.name || !newEmployee.position || !newEmployee.startDate || isNaN(newEmployee.salary) || newEmployee.salary <= 0) {
+                showAlert('بيانات ناقصة', 'الرجاء ملء جميع حقول الموظف بشكل صحيح.');
+                return;
+            }
 
-            try {
-                await addDoc(collection(db, "hr-data", userId, "employees"), newEmployee);
-                showAlert('نجاح', 'تم إضافة الموظف بنجاح.');
-                closeModal('addEmployeeModal');
-            } catch (error) {
-                console.error("Error adding employee: ", error);
-                showAlert('خطأ', 'فشلت عملية إضافة الموظف.');
-            }
-        };
+            try {
+                await addDoc(collection(db, "inventory-data", userId, "employees"), newEmployee);
+                showAlert('نجاح', 'تم إضافة الموظف بنجاح.');
+                closeModal('addEmployeeModal');
+            } catch (error) {
+                console.error("Error adding employee: ", error);
+                showAlert('خطأ', 'فشلت عملية إضافة الموظف.');
+            }
+        };
 
-        // NEW: Delete Employee function
-        window.deleteEmployee = async (employeeId) => {
-            showConfirmation('تأكيد الحذف', 'هل أنت متأكد من حذف بيانات هذا الموظف؟ لا يمكن التراجع عن هذا الإجراء.', async () => {
-                try {
-                    await deleteDoc(doc(db, "hr-data", userId, "employees", employeeId));
-                    showAlert('نجاح', 'تم حذف الموظف.');
-                } catch (error) {
-                    console.error("Error deleting employee: ", error);
-                    showAlert('خطأ', 'فشلت عملية الحذف.');
-                }
-            });
-        };
+        // NEW: Delete Employee function window.deleteEmployee = async (employeeId) => {
+            showConfirmation('تأكيد الحذف', 'هل أنت متأكد من حذف بيانات هذا الموظف؟ لا يمكن التراجع عن هذا الإجراء.', async () => {
+                try {
+                    await deleteDoc(doc(db, "inventory-data", userId, "employees", employeeId));
+                    showAlert('نجاح', 'تم حذف الموظف.');
+                } catch (error) {
+                    console.error("Error deleting employee: ", error);
+                    showAlert('خطأ', 'فشلت عملية الحذف.');
+                }
+            });
+        };
 
         // --- Attach Listeners ---
         document.getElementById('add-trans-sku-select').addEventListener('input', handleSkuSelect);
