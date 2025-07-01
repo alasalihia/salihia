@@ -23,6 +23,9 @@
         .sidebar-link svg { margin-left: 0.75rem; }
         .module-card { transition: transform 0.2s, box-shadow 0.2s; }
         .module-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+        /* Toggle Switch Styles */
+        .toggle-checkbox:checked { right: 0; border-color: #8b5cf6; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #8b5cf6; }
         @media print {
             body * { visibility: hidden; }
             #printable-payroll, #printable-payroll * { visibility: visible; }
@@ -214,7 +217,7 @@
                     <button onclick="addDeductionRow()" class="mt-2 text-sm text-blue-600 hover:underline">+ إضافة خصم</button>
                 </div>
                 <div class="border-t pt-4 mt-4 font-bold text-xl flex justify-between">
-                    <span>صافي الراتب:</span>
+                    <span>صافي الراتب (لأغراض المسير):</span>
                     <span id="net-salary-display">0.00 ر.س</span>
                 </div>
             </div>
@@ -725,9 +728,14 @@
             const items = state.currentEmployee[type];
             tableBody.innerHTML = items.map(item => `
                 <tr class="border-b">
-                    <td class="p-2">${item.name}</td>
-                    <td class="p-2">${item.amount.toLocaleString('ar-SA')} ر.س</td>
-                    <td class="p-2 text-left">
+                    <td class="p-2 w-1/3">${item.name}</td>
+                    <td class="p-2 w-1/3">${item.amount.toLocaleString('ar-SA')} ر.س</td>
+                    <td class="p-2 w-1/3 text-left flex items-center justify-end">
+                        <span class="text-xs mr-2">${item.includedInPayroll ? 'يحتسب بالراتب' : 'لا يحتسب'}</span>
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" onchange="toggleInclusion('${type}', '${item.id}', this.checked)" name="toggle" id="toggle-${type}-${item.id}" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" ${item.includedInPayroll ? 'checked' : ''}/>
+                            <label for="toggle-${type}-${item.id}" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                        </div>
                         <button onclick="deleteSalaryAdjustment('${type}', '${item.id}')" class="text-red-500 hover:text-red-700">حذف</button>
                     </td>
                 </tr>
@@ -766,8 +774,7 @@
 
             try {
                 const collectionRef = collection(db, "hr-data", userId, "employees", employeeId, type);
-                await addDoc(collectionRef, { name, amount });
-                // The onSnapshot listener will automatically re-render the table
+                await addDoc(collectionRef, { name, amount, includedInPayroll: true }); // Default to true
             } catch (e) {
                 console.error(`Error saving ${type}:`, e);
                 showAlert('خطأ', 'فشل حفظ البند.');
@@ -783,6 +790,17 @@
                 showAlert('خطأ', 'فشل حذف البند.');
             }
         };
+        
+        window.toggleInclusion = async (type, docId, isIncluded) => {
+            const employeeId = document.getElementById('salary-details-employee-id').value;
+             try {
+                const docRef = doc(db, "hr-data", userId, "employees", employeeId, type, docId);
+                await updateDoc(docRef, { includedInPayroll: isIncluded });
+            } catch(e) {
+                console.error(`Error updating ${type}:`, e);
+                showAlert('خطأ', 'فشل تحديث حالة البند.');
+            }
+        };
 
         const updateNetSalary = () => {
             const employeeId = document.getElementById('salary-details-employee-id').value;
@@ -790,8 +808,12 @@
             if (!employee) return;
 
             const baseSalary = Number(employee.salary) || 0;
-            const totalAllowances = state.currentEmployee.allowances.reduce((sum, item) => sum + Number(item.amount), 0);
-            const totalDeductions = state.currentEmployee.deductions.reduce((sum, item) => sum + Number(item.amount), 0);
+            const totalAllowances = state.currentEmployee.allowances
+                .filter(a => a.includedInPayroll)
+                .reduce((sum, item) => sum + Number(item.amount), 0);
+            const totalDeductions = state.currentEmployee.deductions
+                .filter(d => d.includedInPayroll)
+                .reduce((sum, item) => sum + Number(item.amount), 0);
             const netSalary = baseSalary + totalAllowances - totalDeductions;
             
             document.getElementById('net-salary-display').textContent = `${netSalary.toLocaleString('ar-SA')} ر.س`;
@@ -822,11 +844,11 @@
                 // 1. Get salary components
                 const allowancesSnapshot = await getDocs(collection(db, "hr-data", userId, "employees", emp.id, "allowances"));
                 const deductionsSnapshot = await getDocs(collection(db, "hr-data", userId, "employees", emp.id, "deductions"));
-                const allowances = allowancesSnapshot.docs.map(d => d.data());
-                const fixedDeductions = deductionsSnapshot.docs.map(d => d.data());
+                const allowances = allowancesSnapshot.docs.map(d => ({id: d.id, ...d.data()}));
+                const fixedDeductions = deductionsSnapshot.docs.map(d => ({id: d.id, ...d.data()}));
 
-                const empTotalAllowances = allowances.reduce((s, i) => s + i.amount, 0);
-                const empTotalFixedDeductions = fixedDeductions.reduce((s, i) => s + i.amount, 0);
+                const empTotalAllowances = allowances.filter(a => a.includedInPayroll).reduce((s, i) => s + i.amount, 0);
+                const empTotalFixedDeductions = fixedDeductions.filter(d => d.includedInPayroll).reduce((s, i) => s + i.amount, 0);
                 const grossSalary = emp.salary + empTotalAllowances;
 
                 // 2. Get attendance data for the month
@@ -943,7 +965,7 @@
                     <td class="p-2 text-red-600">-${(r.absenceDeduction || 0).toFixed(2)}</td>
                     <td class="p-2 text-red-600">-${(r.lateDeduction || 0).toFixed(2)}</td>
                     <td class="p-2 text-green-600">+${(r.overtimePay || 0).toFixed(2)}</td>
-                    <td class="p-2 text-red-600">-${r.deductions.reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
+                    <td class="p-2 text-red-600">-${r.deductions.filter(d=>d.includedInPayroll).reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
                     <td class="p-2 font-bold">${r.netPay.toLocaleString('ar-SA')}</td>
                 </tr>
             `).join('');
@@ -1019,7 +1041,7 @@
                                     <td class="p-2 border border-slate-300">-${(r.absenceDeduction || 0).toFixed(2)}</td>
                                     <td class="p-2 border border-slate-300">-${(r.lateDeduction || 0).toFixed(2)}</td>
                                     <td class="p-2 border border-slate-300">+${(r.overtimePay || 0).toFixed(2)}</td>
-                                    <td class="p-2 border border-slate-300">-${r.deductions.reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
+                                    <td class="p-2 border border-slate-300">-${r.deductions.filter(d=>d.includedInPayroll).reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
                                     <td class="p-2 border border-slate-300 font-bold">${r.netPay.toLocaleString('ar-SA')}</td>
                                 </tr>
                             `).join('')}
