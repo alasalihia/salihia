@@ -1096,32 +1096,40 @@
         function generatePayslipHTML(record, payroll) {
             const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
             return `
-                <div class="p-8 bg-white text-black payslip-page" style="width: 210mm; height: 297mm; margin: auto; display: flex; flex-direction: column;">
-                    <header class="flex justify-between items-start pb-4 border-b mb-4">
+                <div class="payslip-page bg-white text-black p-8" style="width: 210mm; height: 297mm; margin: auto; display: flex; flex-direction: column; border: 1px solid #e2e8f0;">
+                    <header class="flex justify-between items-start pb-4 border-b border-slate-200 mb-6">
                         <div class="text-right">
-                            <h2 class="text-2xl font-bold">${state.settings.name || 'اسم الشركة'}</h2>
+                            <h2 class="text-3xl font-bold text-violet-700">${state.settings.name || 'اسم الشركة'}</h2>
                         </div>
-                        <img src="${state.settings.logoUrl || 'https://placehold.co/150x150/e9d5ff/4c1d95?text=Logo'}" alt="Company Logo" class="h-20 object-contain">
+                        <img src="${state.settings.logoUrl || 'https://placehold.co/150x150/e9d5ff/4c1d95?text=Logo'}" alt="Company Logo" class="h-24 w-24 object-contain">
                     </header>
-                    <h1 class="text-2xl font-bold text-center mb-4">بيان راتب - ${months[payroll.month]} ${payroll.year}</h1>
-                    <div class="flex justify-between mb-6 border-b pb-4 text-sm">
+                    <h1 class="text-2xl font-bold text-center text-slate-800 mb-4">بيان راتب - ${months[payroll.month]} ${payroll.year}</h1>
+                    <div class="grid grid-cols-2 gap-4 mb-6 border-b pb-4 text-sm">
                         <div>
-                            <p><strong>اسم الموظف:</strong> ${record.name}</p>
-                            <p><strong>الرقم الوظيفي:</strong> ${record.employeeId}</p>
+                            <p class="text-slate-500">اسم الموظف</p>
+                            <p class="font-semibold text-slate-800">${record.name}</p>
                         </div>
                         <div>
-                            <p><strong>المنصب:</strong> ${record.position}</p>
-                            <p><strong>تاريخ الطباعة:</strong> ${formatGregorianDate(new Date())}</p>
+                            <p class="text-slate-500">الرقم الوظيفي</p>
+                            <p class="font-semibold text-slate-800">${record.employeeId}</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-500">المنصب</p>
+                            <p class="font-semibold text-slate-800">${record.position}</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-500">تاريخ الطباعة</p>
+                            <p class="font-semibold text-slate-800">${formatGregorianDate(new Date())}</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-8 flex-grow">
                         <div>
-                            <h3 class="text-lg font-bold mb-2 border-b text-green-700">الاستحقاقات</h3>
+                            <h3 class="text-lg font-bold mb-2 pb-1 border-b text-green-600">الاستحقاقات</h3>
                             <table class="w-full text-sm">
                                 <tbody>
-                                    <tr><td class="py-1">الراتب الأساسي</td><td class="py-1 text-left">${formatNumber(record.salary)}</td></tr>
-                                    ${record.allowances.filter(a => a.includedInPayroll).map(a => `<tr><td class="py-1">${a.name}</td><td class="py-1 text-left">${formatNumber(a.amount)}</td></tr>`).join('')}
-                                    <tr><td class="py-1">أجر العمل الإضافي</td><td class="py-1 text-left">${formatNumber(record.overtimePay || 0)}</td></tr>
+                                    <tr><td class="py-1.5">الراتب الأساسي</td><td class="py-1.5 text-left font-semibold">${formatNumber(record.salary)}</td></tr>
+                                    ${record.allowances.filter(a => a.includedInPayroll).map(a => `<tr><td class="py-1.5">${a.name}</td><td class="py-1.5 text-left">${formatNumber(a.amount)}</td></tr>`).join('')}
+                                    <tr><td class="py-1.5">أجر العمل الإضافي</td><td class="py-1.5 text-left text-green-600">${formatNumber(record.overtimePay || 0)}</td></tr>
                                 </tbody>
                                 <tfoot class="font-bold border-t-2">
                                     <tr><td class="py-2">إجمالي الاستحقاقات</td><td class="py-2 text-left">${formatNumber(record.grossSalary + (record.overtimePay || 0))}</td></tr>
@@ -1129,12 +1137,12 @@
                             </table>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold mb-2 border-b text-red-700">الاستقطاعات</h3>
+                            <h3 class="text-lg font-bold mb-2 pb-1 border-b text-red-600">الاستقطاعات</h3>
                             <table class="w-full text-sm">
                                 <tbody>
-                                    <tr><td class="py-1">خصم الغياب</td><td class="py-1 text-left">${formatNumber(record.absenceDeduction || 0)}</td></tr>
-                                    <tr><td class="py-1">خصم التأخير</td><td class="py-1 text-left">${formatNumber(record.lateDeduction || 0)}</td></tr>
-                                    ${record.deductions.filter(d => d.includedInPayroll).map(d => `<tr><td class="py-1">${d.name}</td><td class="py-1 text-left">${formatNumber(d.amount)}</td></tr>`).join('')}
+                                    <tr><td class="py-1.5">خصم الغياب</td><td class="py-1.5 text-left">${formatNumber(record.absenceDeduction || 0)}</td></tr>
+                                    <tr><td class="py-1.5">خصم التأخير</td><td class="py-1.5 text-left">${formatNumber(record.lateDeduction || 0)}</td></tr>
+                                    ${record.deductions.filter(d => d.includedInPayroll).map(d => `<tr><td class="py-1.5">${d.name}</td><td class="py-1.5 text-left">${formatNumber(d.amount)}</td></tr>`).join('')}
                                 </tbody>
                                 <tfoot class="font-bold border-t-2">
                                     <tr><td class="py-2">إجمالي الاستقطاعات</td><td class="py-2 text-left">${formatNumber(record.absenceDeduction + record.lateDeduction + record.deductions.filter(d=>d.includedInPayroll).reduce((s, i) => s + i.amount, 0))}</td></tr>
@@ -1145,7 +1153,7 @@
                     <div class="mt-8 bg-violet-600 text-white rounded-lg p-4 text-center">
                         <p class="text-xl font-bold">صافي الراتب المستحق: ${formatNumber(record.netPay)} ر.س</p>
                     </div>
-                    <div class="mt-auto pt-12 flex justify-around text-sm">
+                    <div class="mt-auto pt-16 flex justify-around text-sm">
                         <div>
                             <p class="mb-8">توقيع الموظف</p>
                             <p>..............................</p>
