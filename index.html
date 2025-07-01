@@ -358,16 +358,18 @@
         // --- Firebase Functions ---
         async function initializeFirebase() {
             appId = typeof __app_id !== 'undefined' ? __app_id : 'hr-app-default';
-            const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
             
-            if (!firebaseConfigStr) {
-                showAlert('خطأ في الإعداد', 'لم يتم العثور على إعدادات Firebase.');
-                console.error("Firebase config is missing.");
-                return;
-            }
-
+            // Re-hardcoding the config to ensure it's always present.
+            const firebaseConfig = { 
+                apiKey: "AIzaSyDSlxf95W00Ow6LZba8waAKJINptIRPkU8", 
+                authDomain: "sample-firebase-ai-app-960f4.firebaseapp.com", 
+                projectId: "sample-firebase-ai-app-960f4", 
+                storageBucket: "sample-firebase-ai-app-960f4.appspot.com", 
+                messagingSenderId: "741880884079", 
+                appId: "1:741880884079:web:8d2f6e233fb65e65e969a" 
+            };
+            
             try {
-                const firebaseConfig = JSON.parse(firebaseConfigStr);
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
