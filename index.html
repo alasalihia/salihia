@@ -31,6 +31,7 @@
             #printable-payroll, #printable-payroll * { visibility: visible; }
             #printable-payroll { position: absolute; left: 0; top: 0; width: 100%; font-family: 'Cairo', sans-serif; }
             .payslip-page { page-break-after: always; }
+            .payslip-page:last-child { page-break-after: auto; }
         }
     </style>
 </head>
@@ -342,7 +343,8 @@
         function formatNumber(value, fractionDigits = 2) {
             return Number(value).toLocaleString('en-US', {
                 minimumFractionDigits: fractionDigits,
-                maximumFractionDigits: fractionDigits
+                maximumFractionDigits: fractionDigits,
+                useGrouping: false
             });
         }
 
@@ -984,9 +986,9 @@
                     <td class="p-2">${r.name}</td>
                     <td class="p-2">${formatNumber(r.salary)}</td>
                     <td class="p-2">${formatNumber(r.allowances.filter(a => a.includedInPayroll).reduce((s, i) => s + i.amount, 0))}</td>
-                    <td class="p-2 text-red-600">-${(r.absenceDeduction || 0).toFixed(2)}</td>
-                    <td class="p-2 text-red-600">-${(r.lateDeduction || 0).toFixed(2)}</td>
-                    <td class="p-2 text-green-600">+${(r.overtimePay || 0).toFixed(2)}</td>
+                    <td class="p-2 text-red-600">-${formatNumber(r.absenceDeduction || 0)}</td>
+                    <td class="p-2 text-red-600">-${formatNumber(r.lateDeduction || 0)}</td>
+                    <td class="p-2 text-green-600">+${formatNumber(r.overtimePay || 0)}</td>
                     <td class="p-2 text-red-600">-${formatNumber(r.deductions.filter(d=>d.includedInPayroll).reduce((s, i) => s + i.amount, 0))}</td>
                     <td class="p-2 font-bold">${formatNumber(r.netPay)}</td>
                     <td class="p-2 text-center"><button onclick="printEmployeePayslip('${payrollId}', '${r.id}')" class="text-xs bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">طباعة</button></td>
@@ -1060,7 +1062,7 @@
                                 <tbody>
                                     <tr><td class="py-1">الراتب الأساسي</td><td class="py-1 text-left">${formatNumber(record.salary)}</td></tr>
                                     ${record.allowances.filter(a => a.includedInPayroll).map(a => `<tr><td class="py-1">${a.name}</td><td class="py-1 text-left">${formatNumber(a.amount)}</td></tr>`).join('')}
-                                    <tr><td class="py-1">أجر العمل الإضافي</td><td class="py-1 text-left">${(record.overtimePay || 0).toFixed(2)}</td></tr>
+                                    <tr><td class="py-1">أجر العمل الإضافي</td><td class="py-1 text-left">${formatNumber(record.overtimePay || 0)}</td></tr>
                                 </tbody>
                                 <tfoot class="font-bold border-t-2">
                                     <tr><td class="py-2">إجمالي الاستحقاقات</td><td class="py-2 text-left">${formatNumber(record.grossSalary + (record.overtimePay || 0))}</td></tr>
@@ -1071,8 +1073,8 @@
                             <h3 class="text-lg font-bold mb-2 border-b">الاستقطاعات</h3>
                             <table class="w-full text-sm">
                                 <tbody>
-                                    <tr><td class="py-1">خصم الغياب</td><td class="py-1 text-left">${(record.absenceDeduction || 0).toFixed(2)}</td></tr>
-                                    <tr><td class="py-1">خصم التأخير</td><td class="py-1 text-left">${(record.lateDeduction || 0).toFixed(2)}</td></tr>
+                                    <tr><td class="py-1">خصم الغياب</td><td class="py-1 text-left">${formatNumber(record.absenceDeduction || 0)}</td></tr>
+                                    <tr><td class="py-1">خصم التأخير</td><td class="py-1 text-left">${formatNumber(record.lateDeduction || 0)}</td></tr>
                                     ${record.deductions.filter(d => d.includedInPayroll).map(d => `<tr><td class="py-1">${d.name}</td><td class="py-1 text-left">${formatNumber(d.amount)}</td></tr>`).join('')}
                                 </tbody>
                                 <tfoot class="font-bold border-t-2">
@@ -1108,6 +1110,7 @@
             const printableDiv = document.getElementById('printable-payroll');
             printableDiv.innerHTML = records.map(record => generatePayslipHTML(record, payroll)).join('');
             window.print();
+            printableDiv.innerHTML = '';
         };
 
         window.printPayrollSummary = async (payrollId) => {
@@ -1140,9 +1143,9 @@
                                 <tr class="border-b">
                                     <td class="p-2 border border-slate-300">${r.name}</td>
                                     <td class="p-2 border border-slate-300">${formatNumber(r.grossSalary || 0)}</td>
-                                    <td class="p-2 border border-slate-300">-${(r.absenceDeduction || 0).toFixed(2)}</td>
-                                    <td class="p-2 border border-slate-300">-${(r.lateDeduction || 0).toFixed(2)}</td>
-                                    <td class="p-2 border border-slate-300">+${(r.overtimePay || 0).toFixed(2)}</td>
+                                    <td class="p-2 border border-slate-300">-${formatNumber(r.absenceDeduction || 0)}</td>
+                                    <td class="p-2 border border-slate-300">-${formatNumber(r.lateDeduction || 0)}</td>
+                                    <td class="p-2 border border-slate-300">+${formatNumber(r.overtimePay || 0)}</td>
                                     <td class="p-2 border border-slate-300">-${formatNumber(r.deductions.filter(d=>d.includedInPayroll).reduce((s, i) => s + i.amount, 0))}</td>
                                     <td class="p-2 border border-slate-300 font-bold">${formatNumber(r.netPay)}</td>
                                 </tr>
@@ -1163,6 +1166,7 @@
                 </div>
             `;
             window.print();
+            printableDiv.innerHTML = '';
         };
         
         window.printEmployeePayslip = async (payrollId, recordId) => {
@@ -1177,6 +1181,7 @@
             const printableDiv = document.getElementById('printable-payroll');
             printableDiv.innerHTML = generatePayslipHTML(record, payroll);
             window.print();
+            printableDiv.innerHTML = '';
         };
 
         // --- Attendance Functions ---
