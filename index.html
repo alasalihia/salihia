@@ -117,7 +117,6 @@
                                     <th scope="col" class="px-6 py-3">اسم الموظف</th>
                                     <th scope="col" class="px-6 py-3">الرقم الوظيفي</th>
                                     <th scope="col" class="px-6 py-3">المنصب</th>
-                                    <th scope="col" class="px-6 py-3">صافي الراتب</th>
                                     <th scope="col" class="px-6 py-3">الحالة</th>
                                     <th scope="col" class="px-6 py-3 text-center">إجراءات</th>
                                 </tr>
@@ -410,7 +409,7 @@
 
         function renderEmployeesPage() {
             if (state.employees.length === 0) {
-                ui.employeesTableBody.innerHTML = '<tr class="border-b"><td colspan="6" class="text-center p-4">لا يوجد موظفين مضافين.</td></tr>';
+                ui.employeesTableBody.innerHTML = '<tr class="border-b"><td colspan="5" class="text-center p-4">لا يوجد موظفين مضافين.</td></tr>';
                 return;
             }
             ui.employeesTableBody.innerHTML = state.employees.sort((a, b) => a.name.localeCompare(b.name)).map(emp => {
@@ -428,7 +427,6 @@
                     <td class="px-6 py-4 font-medium text-slate-900">${emp.name}</td>
                     <td class="px-6 py-4">${emp.employeeId}</td>
                     <td class="px-6 py-4">${emp.position}</td>
-                    <td class="px-6 py-4">${(emp.netSalary || emp.salary).toLocaleString('ar-SA')} ر.س</td>
                     <td class="px-6 py-4"><span class="px-2 py-1 text-xs font-medium rounded-full ${statusClasses[emp.status] || ''}">${statusText[emp.status] || emp.status}</span></td>
                     <td class="px-6 py-4 text-center">
                         <button onclick="openModal('salaryDetailsModal', '${emp.id}')" class="text-green-600 hover:text-green-800 font-semibold px-2">الراتب</button>
