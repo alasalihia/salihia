@@ -963,19 +963,21 @@
             if (!payroll) return;
 
             const recordsSnapshot = await getDocs(collection(db, "hr-data", userId, "payrolls", payrollId, "records"));
-            const records = recordsSnapshot.docs.map(d => d.data());
+            const records = recordsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
 
             const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
             
             let tableHTML = records.map(r => `
                 <tr class="border-b">
                     <td class="p-2">${r.name}</td>
-                    <td class="p-2">${(r.grossSalary || 0).toLocaleString('ar-SA')}</td>
+                    <td class="p-2">${r.salary.toLocaleString('ar-SA')}</td>
+                    <td class="p-2">${r.allowances.filter(a => a.includedInPayroll).reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
                     <td class="p-2 text-red-600">-${(r.absenceDeduction || 0).toFixed(2)}</td>
                     <td class="p-2 text-red-600">-${(r.lateDeduction || 0).toFixed(2)}</td>
                     <td class="p-2 text-green-600">+${(r.overtimePay || 0).toFixed(2)}</td>
                     <td class="p-2 text-red-600">-${r.deductions.filter(d=>d.includedInPayroll).reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
                     <td class="p-2 font-bold">${r.netPay.toLocaleString('ar-SA')}</td>
+                    <td class="p-2 text-center"><button onclick="printEmployeePayslip('${payrollId}', '${r.id}')" class="text-xs bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">طباعة</button></td>
                 </tr>
             `).join('');
 
@@ -983,31 +985,35 @@
                 <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="flex justify-between items-center mb-4">
                          <h3 class="font-bold text-lg">تفاصيل مسير رواتب ${months[payroll.month]} ${payroll.year}</h3>
-                         <button onclick="printPayroll('${payrollId}')" class="text-sm bg-slate-200 px-3 py-1 rounded-md hover:bg-slate-300">طباعة</button>
+                         <button onclick="printPayrollSummary('${payrollId}')" class="text-sm bg-slate-200 px-3 py-1 rounded-md hover:bg-slate-300">طباعة الملخص</button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
                             <thead class="bg-slate-50">
                                 <tr>
                                     <th class="p-2 text-right font-semibold">الموظف</th>
-                                    <th class="p-2 text-right font-semibold">إجمالي الراتب</th>
+                                    <th class="p-2 text-right font-semibold">الراتب الأساسي</th>
+                                    <th class="p-2 text-right font-semibold">إجمالي البدلات</th>
                                     <th class="p-2 text-right font-semibold">خصم الغياب</th>
                                     <th class="p-2 text-right font-semibold">خصم التأخير</th>
                                     <th class="p-2 text-right font-semibold">إضافي</th>
                                     <th class="p-2 text-right font-semibold">خصومات أخرى</th>
                                     <th class="p-2 text-right font-semibold">صافي المستحق</th>
+                                    <th class="p-2 text-center font-semibold">قسيمة</th>
                                 </tr>
                             </thead>
                             <tbody>${tableHTML}</tbody>
                             <tfoot class="font-bold bg-slate-100">
                                 <tr>
                                     <td class="p-2">الإجمالي (ر.س)</td>
-                                    <td class="p-2">${(payroll.totalBaseSalary + payroll.totalAllowances).toLocaleString('ar-SA')}</td>
+                                    <td class="p-2">${payroll.totalBaseSalary.toLocaleString('ar-SA')}</td>
+                                    <td class="p-2">${payroll.totalAllowances.toLocaleString('ar-SA')}</td>
                                     <td class="p-2 text-red-600">-${(payroll.totalAbsenceDeduction || 0).toLocaleString('ar-SA')}</td>
                                     <td class="p-2 text-red-600">-${(payroll.totalLateDeduction || 0).toLocaleString('ar-SA')}</td>
                                     <td class="p-2 text-green-600">+${(payroll.totalOvertimePay || 0).toLocaleString('ar-SA')}</td>
                                     <td class="p-2 text-red-600">-${payroll.totalFixedDeductions.toLocaleString('ar-SA')}</td>
                                     <td class="p-2">${payroll.netPay.toLocaleString('ar-SA')}</td>
+                                    <td></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -1017,7 +1023,7 @@
             ui.payrollDetailsContainer.classList.remove('hidden');
         };
 
-        window.printPayroll = async (payrollId) => {
+        window.printPayrollSummary = async (payrollId) => {
             const payroll = state.payrolls.find(p => p.id === payrollId);
             if (!payroll) return;
 
@@ -1067,6 +1073,76 @@
                             </tr>
                         </tfoot>
                     </table>
+                </div>
+            `;
+            window.print();
+        };
+        
+        window.printEmployeePayslip = async (payrollId, recordId) => {
+            const recordDoc = await getDoc(doc(db, "hr-data", userId, "payrolls", payrollId, "records", recordId));
+            if (!recordDoc.exists()) {
+                showAlert('خطأ', 'لم يتم العثور على سجل الموظف في هذا المسير.');
+                return;
+            }
+            const record = recordDoc.data();
+            const payroll = state.payrolls.find(p => p.id === payrollId);
+            const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+
+            const printableDiv = document.getElementById('printable-payroll');
+            printableDiv.innerHTML = `
+                <div class="p-8 bg-white text-black" style="width: 210mm; height: 297mm; margin: auto;">
+                    <h1 class="text-2xl font-bold text-center mb-4">بيان راتب - ${months[payroll.month]} ${payroll.year}</h1>
+                    <div class="flex justify-between mb-6 border-b pb-4">
+                        <div>
+                            <p><strong>اسم الموظف:</strong> ${record.name}</p>
+                            <p><strong>الرقم الوظيفي:</strong> ${record.employeeId}</p>
+                        </div>
+                        <div>
+                            <p><strong>المنصب:</strong> ${record.position}</p>
+                            <p><strong>تاريخ الطباعة:</strong> ${formatGregorianDate(new Date())}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-lg font-bold mb-2 border-b">الاستحقاقات</h3>
+                            <table class="w-full text-sm">
+                                <tbody>
+                                    <tr><td class="py-1">الراتب الأساسي</td><td class="py-1 text-left">${record.salary.toLocaleString('ar-SA')}</td></tr>
+                                    ${record.allowances.filter(a => a.includedInPayroll).map(a => `<tr><td class="py-1">${a.name}</td><td class="py-1 text-left">${a.amount.toLocaleString('ar-SA')}</td></tr>`).join('')}
+                                    <tr><td class="py-1">أجر العمل الإضافي</td><td class="py-1 text-left">${(record.overtimePay || 0).toFixed(2)}</td></tr>
+                                </tbody>
+                                <tfoot class="font-bold border-t-2">
+                                    <tr><td class="py-2">إجمالي الاستحقاقات</td><td class="py-2 text-left">${(record.grossSalary + (record.overtimePay || 0)).toLocaleString('ar-SA')}</td></tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold mb-2 border-b">الاستقطاعات</h3>
+                            <table class="w-full text-sm">
+                                <tbody>
+                                    <tr><td class="py-1">خصم الغياب</td><td class="py-1 text-left">${(record.absenceDeduction || 0).toFixed(2)}</td></tr>
+                                    <tr><td class="py-1">خصم التأخير</td><td class="py-1 text-left">${(record.lateDeduction || 0).toFixed(2)}</td></tr>
+                                    ${record.deductions.filter(d => d.includedInPayroll).map(d => `<tr><td class="py-1">${d.name}</td><td class="py-1 text-left">${d.amount.toLocaleString('ar-SA')}</td></tr>`).join('')}
+                                </tbody>
+                                <tfoot class="font-bold border-t-2">
+                                    <tr><td class="py-2">إجمالي الاستقطاعات</td><td class="py-2 text-left">${(record.absenceDeduction + record.lateDeduction + record.deductions.filter(d=>d.includedInPayroll).reduce((s, i) => s + i.amount, 0)).toLocaleString('ar-SA')}</td></tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="mt-8 border-t-4 border-double pt-4 text-center">
+                        <p class="text-xl font-bold">صافي الراتب المستحق: ${record.netPay.toLocaleString('ar-SA')} ر.س</p>
+                    </div>
+                    <div class="mt-24 flex justify-around">
+                        <div>
+                            <p class="mb-8">توقيع الموظف</p>
+                            <p>..............................</p>
+                        </div>
+                        <div>
+                            <p class="mb-8">توقيع المدير</p>
+                            <p>..............................</p>
+                        </div>
+                    </div>
                 </div>
             `;
             window.print();
