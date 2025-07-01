@@ -70,19 +70,19 @@
             <h2 class="text-xl font-bold text-violet-700 text-center mb-4 mt-4">شؤون الموظفين</h2>
             <button onclick="showModule('main-menu-screen')" class="mb-4 text-sm text-blue-600 hover:underline"> &larr; العودة للقائمة الرئيسية</button>
             <nav class="flex-grow space-y-2">
-                <a href="#" onclick="showPage('page-hr-dashboard', 'hr-module-container')" class="sidebar-link">
+                <a href="#" onclick="showPage('page-hr-dashboard')" class="sidebar-link">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
                     <span>لوحة التحكم</span>
                 </a>
-                <a href="#" onclick="showPage('page-hr-employees', 'hr-module-container')" class="sidebar-link">
+                <a href="#" onclick="showPage('page-hr-employees')" class="sidebar-link">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                     <span>قائمة الموظفين</span>
                 </a>
-                <a href="#" onclick="showPage('page-hr-salaries', 'hr-module-container')" class="sidebar-link">
+                <a href="#" onclick="showPage('page-hr-salaries')" class="sidebar-link">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                     <span>الرواتب</span>
                 </a>
-                <a href="#" onclick="showPage('page-hr-attendance', 'hr-module-container')" class="sidebar-link">
+                <a href="#" onclick="showPage('page-hr-attendance')" class="sidebar-link">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     <span>الحضور والانصراف</span>
                 </a>
@@ -92,7 +92,7 @@
             <!-- PAGE: HR Dashboard -->
             <main id="page-hr-dashboard" class="page active">
                 <h2 class="text-3xl font-bold text-slate-800 mb-6">لوحة تحكم الموظفين</h2>
-                <div id="hr-dashboard-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div id="hr-dashboard-stats" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                      <!-- Stats will be rendered here by JS -->
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-lg">
@@ -344,8 +344,8 @@
         const showConfirmation = (title, message, onConfirm) => {
             document.getElementById('alertModalTitle').textContent = title;
             document.getElementById('alertModalMessage').textContent = message;
-            document.getElementById('alertModalButtons').innerHTML = `<button type="button" onclick="closeModal('alertModal')" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-6 rounded-lg transition-colors">إلغاء</button><button type="button" onclick="handleConfirm()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">تأكيد</button>`;
             confirmationCallback = onConfirm;
+            document.getElementById('alertModalButtons').innerHTML = `<button type="button" onclick="closeModal('alertModal')" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-6 rounded-lg transition-colors">إلغاء</button><button type="button" onclick="handleConfirm()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">تأكيد</button>`;
             openModal('alertModal');
         };
         window.handleConfirm = () => { if (confirmationCallback) { confirmationCallback(); } closeModal('alertModal'); confirmationCallback = null; };
@@ -357,13 +357,13 @@
             if (targetModule) {
                 targetModule.style.display = moduleId === 'main-menu-screen' ? 'block' : 'flex';
                 if (moduleId === 'hr-module-container') {
-                    showPage('page-hr-dashboard', moduleId);
+                    showPage('page-hr-dashboard');
                 }
             }
         };
 
-        window.showPage = (pageId, moduleContainerId) => {
-            const module = document.getElementById(moduleContainerId);
+        window.showPage = (pageId) => {
+            const module = document.getElementById('hr-module-container');
             module.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
             module.querySelector(`#${pageId}`).classList.add('active');
             module.querySelectorAll('.sidebar-link').forEach(e => e.classList.remove('active'));
@@ -385,8 +385,7 @@
             const totalEmployees = state.employees.length;
             const activeEmployees = state.employees.filter(e => e.status === 'active').length;
             const onLeaveEmployees = state.employees.filter(e => e.status === 'on_leave').length;
-            const totalSalary = state.employees.reduce((sum, e) => sum + (e.status === 'active' ? Number(e.salary) : 0), 0);
-
+            
             ui.hrDashboardStats.innerHTML = `
                 <div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 rtl:space-x-reverse">
                     <div class="bg-violet-100 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
@@ -400,10 +399,6 @@
                     <div class="bg-amber-100 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
                     <div><h3 class="text-slate-500">في إجازة</h3><p class="text-2xl font-bold">${onLeaveEmployees}</p></div>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 rtl:space-x-reverse">
-                    <div class="bg-sky-100 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01" /></svg></div>
-                    <div><h3 class="text-slate-500">إجمالي الرواتب الشهرية</h3><p class="text-2xl font-bold">${totalSalary.toLocaleString('ar-SA')} ر.س</p></div>
-                </div>
             `;
         }
 
@@ -413,16 +408,8 @@
                 return;
             }
             ui.employeesTableBody.innerHTML = state.employees.sort((a, b) => a.name.localeCompare(b.name)).map(emp => {
-                const statusClasses = {
-                    active: 'bg-green-100 text-green-800',
-                    on_leave: 'bg-amber-100 text-amber-800',
-                    terminated: 'bg-red-100 text-red-800'
-                };
-                const statusText = {
-                    active: 'على رأس العمل',
-                    on_leave: 'في إجازة',
-                    terminated: 'منتهية خدماته'
-                };
+                const statusClasses = { active: 'bg-green-100 text-green-800', on_leave: 'bg-amber-100 text-amber-800', terminated: 'bg-red-100 text-red-800' };
+                const statusText = { active: 'على رأس العمل', on_leave: 'في إجازة', terminated: 'منتهية خدماته' };
                 return `<tr class="bg-white border-b hover:bg-slate-50">
                     <td class="px-6 py-4 font-medium text-slate-900">${emp.name}</td>
                     <td class="px-6 py-4">${emp.employeeId}</td>
@@ -467,16 +454,7 @@
                 departmentChart.update();
             } else { 
                 departmentChart = new Chart(ctx, { 
-                    type: 'pie', 
-                    data: chartData, 
-                    options: { 
-                        responsive: true, 
-                        maintainAspectRatio: false, 
-                        plugins: { 
-                            legend: { position: 'top', labels: { font: { family: 'Cairo' } } },
-                            tooltip: { bodyFont: { family: 'Cairo' }, titleFont: { family: 'Cairo' } }
-                        } 
-                    } 
+                    type: 'pie', data: chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { font: { family: 'Cairo' } } }, tooltip: { bodyFont: { family: 'Cairo' }, titleFont: { family: 'Cairo' } } } } 
                 }); 
             }
         }
@@ -621,7 +599,7 @@
         };
 
         window.deleteEmployee = (docId) => {
-            showConfirmation("تأكيد الحذف", "هل أنت متأكد من حذف هذا الموظف؟ لا يمكن التراجع عن هذا الإجراء.", async () => {
+            showConfirmation("تأكيد الحذف", "هل أنت متأكد من حذف هذا الموظف؟", async () => {
                 try {
                     if (!db || !userId) {
                        showAlert("خطأ في الاتصال", "لا يمكن الاتصال بقاعدة البيانات.");
@@ -734,10 +712,6 @@
             const netSalary = baseSalary + totalAllowances - totalDeductions;
             
             document.getElementById('net-salary-display').textContent = `${netSalary.toLocaleString('ar-SA')} ر.س`;
-            
-            // Update the net salary in the main employee object for display purposes
-            const employeeInState = state.employees.find(e => e.id === employeeId);
-            if(employeeInState) employeeInState.netSalary = netSalary;
         };
 
         // --- Payroll Functions ---
@@ -891,10 +865,8 @@
                     <table class="w-full text-sm border-collapse border border-slate-400">
                         <thead class="bg-slate-200">
                             <tr>
-                                <th class="p-2 border border-slate-300">الموظف</th>
-                                <th class="p-2 border border-slate-300">الراتب الأساسي</th>
-                                <th class="p-2 border border-slate-300">إجمالي البدلات</th>
-                                <th class="p-2 border border-slate-300">إجمالي الخصومات</th>
+                                <th class="p-2 border border-slate-300">الموظف</th><th class="p-2 border border-slate-300">الراتب الأساسي</th>
+                                <th class="p-2 border border-slate-300">إجمالي البدلات</th><th class="p-2 border border-slate-300">إجمالي الخصومات</th>
                                 <th class="p-2 border border-slate-300">صافي الراتب</th>
                             </tr>
                         </thead>
