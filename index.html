@@ -30,6 +30,7 @@
             body * { visibility: hidden; }
             #printable-payroll, #printable-payroll * { visibility: visible; }
             #printable-payroll { position: absolute; left: 0; top: 0; width: 100%; font-family: 'Cairo', sans-serif; }
+            .payslip-page { page-break-after: always; }
         }
     </style>
 </head>
@@ -985,7 +986,10 @@
                 <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="flex justify-between items-center mb-4">
                          <h3 class="font-bold text-lg">تفاصيل مسير رواتب ${months[payroll.month]} ${payroll.year}</h3>
-                         <button onclick="printPayrollSummary('${payrollId}')" class="text-sm bg-slate-200 px-3 py-1 rounded-md hover:bg-slate-300">طباعة الملخص</button>
+                         <div>
+                            <button onclick="printAllPayslips('${payrollId}')" class="text-sm bg-green-100 text-green-800 px-3 py-1 rounded-md hover:bg-green-200 ml-2">طباعة كل القسائم</button>
+                            <button onclick="printPayrollSummary('${payrollId}')" class="text-sm bg-slate-200 px-3 py-1 rounded-md hover:bg-slate-300">طباعة الملخص</button>
+                         </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
@@ -993,7 +997,7 @@
                                 <tr>
                                     <th class="p-2 text-right font-semibold">الموظف</th>
                                     <th class="p-2 text-right font-semibold">الراتب الأساسي</th>
-                                    <th class="p-2 text-right font-semibold">إجمالي البدلات</th>
+                                    <th class="p-2 text-right font-semibold">البدلات</th>
                                     <th class="p-2 text-right font-semibold">خصم الغياب</th>
                                     <th class="p-2 text-right font-semibold">خصم التأخير</th>
                                     <th class="p-2 text-right font-semibold">إضافي</th>
@@ -1021,6 +1025,78 @@
                 </div>
             `;
             ui.payrollDetailsContainer.classList.remove('hidden');
+        };
+
+        function generatePayslipHTML(record, payroll) {
+            const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+            return `
+                <div class="p-8 bg-white text-black payslip-page" style="width: 210mm; height: 297mm; margin: auto;">
+                    <h1 class="text-2xl font-bold text-center mb-4">بيان راتب - ${months[payroll.month]} ${payroll.year}</h1>
+                    <div class="flex justify-between mb-6 border-b pb-4">
+                        <div>
+                            <p><strong>اسم الموظف:</strong> ${record.name}</p>
+                            <p><strong>الرقم الوظيفي:</strong> ${record.employeeId}</p>
+                        </div>
+                        <div>
+                            <p><strong>المنصب:</strong> ${record.position}</p>
+                            <p><strong>تاريخ الطباعة:</strong> ${formatGregorianDate(new Date())}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-lg font-bold mb-2 border-b">الاستحقاقات</h3>
+                            <table class="w-full text-sm">
+                                <tbody>
+                                    <tr><td class="py-1">الراتب الأساسي</td><td class="py-1 text-left">${record.salary.toLocaleString('ar-SA')}</td></tr>
+                                    ${record.allowances.filter(a => a.includedInPayroll).map(a => `<tr><td class="py-1">${a.name}</td><td class="py-1 text-left">${a.amount.toLocaleString('ar-SA')}</td></tr>`).join('')}
+                                    <tr><td class="py-1">أجر العمل الإضافي</td><td class="py-1 text-left">${(record.overtimePay || 0).toFixed(2)}</td></tr>
+                                </tbody>
+                                <tfoot class="font-bold border-t-2">
+                                    <tr><td class="py-2">إجمالي الاستحقاقات</td><td class="py-2 text-left">${(record.grossSalary + (record.overtimePay || 0)).toLocaleString('ar-SA')}</td></tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold mb-2 border-b">الاستقطاعات</h3>
+                            <table class="w-full text-sm">
+                                <tbody>
+                                    <tr><td class="py-1">خصم الغياب</td><td class="py-1 text-left">${(record.absenceDeduction || 0).toFixed(2)}</td></tr>
+                                    <tr><td class="py-1">خصم التأخير</td><td class="py-1 text-left">${(record.lateDeduction || 0).toFixed(2)}</td></tr>
+                                    ${record.deductions.filter(d => d.includedInPayroll).map(d => `<tr><td class="py-1">${d.name}</td><td class="py-1 text-left">${d.amount.toLocaleString('ar-SA')}</td></tr>`).join('')}
+                                </tbody>
+                                <tfoot class="font-bold border-t-2">
+                                    <tr><td class="py-2">إجمالي الاستقطاعات</td><td class="py-2 text-left">${(record.absenceDeduction + record.lateDeduction + record.deductions.filter(d=>d.includedInPayroll).reduce((s, i) => s + i.amount, 0)).toLocaleString('ar-SA')}</td></tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="mt-8 border-t-4 border-double pt-4 text-center">
+                        <p class="text-xl font-bold">صافي الراتب المستحق: ${record.netPay.toLocaleString('ar-SA')} ر.س</p>
+                    </div>
+                    <div class="mt-24 flex justify-around">
+                        <div>
+                            <p class="mb-8">توقيع الموظف</p>
+                            <p>..............................</p>
+                        </div>
+                        <div>
+                            <p class="mb-8">توقيع المدير</p>
+                            <p>..............................</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.printAllPayslips = async (payrollId) => {
+            const payroll = state.payrolls.find(p => p.id === payrollId);
+            if (!payroll) return;
+            const recordsSnapshot = await getDocs(collection(db, "hr-data", userId, "payrolls", payrollId, "records"));
+            const records = recordsSnapshot.docs.map(d => d.data());
+            if (records.length === 0) return showAlert('لا توجد بيانات', 'لا يوجد موظفين في هذا المسير.');
+
+            const printableDiv = document.getElementById('printable-payroll');
+            printableDiv.innerHTML = records.map(record => generatePayslipHTML(record, payroll)).join('');
+            window.print();
         };
 
         window.printPayrollSummary = async (payrollId) => {
@@ -1086,65 +1162,9 @@
             }
             const record = recordDoc.data();
             const payroll = state.payrolls.find(p => p.id === payrollId);
-            const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-
+            
             const printableDiv = document.getElementById('printable-payroll');
-            printableDiv.innerHTML = `
-                <div class="p-8 bg-white text-black" style="width: 210mm; height: 297mm; margin: auto;">
-                    <h1 class="text-2xl font-bold text-center mb-4">بيان راتب - ${months[payroll.month]} ${payroll.year}</h1>
-                    <div class="flex justify-between mb-6 border-b pb-4">
-                        <div>
-                            <p><strong>اسم الموظف:</strong> ${record.name}</p>
-                            <p><strong>الرقم الوظيفي:</strong> ${record.employeeId}</p>
-                        </div>
-                        <div>
-                            <p><strong>المنصب:</strong> ${record.position}</p>
-                            <p><strong>تاريخ الطباعة:</strong> ${formatGregorianDate(new Date())}</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-8">
-                        <div>
-                            <h3 class="text-lg font-bold mb-2 border-b">الاستحقاقات</h3>
-                            <table class="w-full text-sm">
-                                <tbody>
-                                    <tr><td class="py-1">الراتب الأساسي</td><td class="py-1 text-left">${record.salary.toLocaleString('ar-SA')}</td></tr>
-                                    ${record.allowances.filter(a => a.includedInPayroll).map(a => `<tr><td class="py-1">${a.name}</td><td class="py-1 text-left">${a.amount.toLocaleString('ar-SA')}</td></tr>`).join('')}
-                                    <tr><td class="py-1">أجر العمل الإضافي</td><td class="py-1 text-left">${(record.overtimePay || 0).toFixed(2)}</td></tr>
-                                </tbody>
-                                <tfoot class="font-bold border-t-2">
-                                    <tr><td class="py-2">إجمالي الاستحقاقات</td><td class="py-2 text-left">${(record.grossSalary + (record.overtimePay || 0)).toLocaleString('ar-SA')}</td></tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold mb-2 border-b">الاستقطاعات</h3>
-                            <table class="w-full text-sm">
-                                <tbody>
-                                    <tr><td class="py-1">خصم الغياب</td><td class="py-1 text-left">${(record.absenceDeduction || 0).toFixed(2)}</td></tr>
-                                    <tr><td class="py-1">خصم التأخير</td><td class="py-1 text-left">${(record.lateDeduction || 0).toFixed(2)}</td></tr>
-                                    ${record.deductions.filter(d => d.includedInPayroll).map(d => `<tr><td class="py-1">${d.name}</td><td class="py-1 text-left">${d.amount.toLocaleString('ar-SA')}</td></tr>`).join('')}
-                                </tbody>
-                                <tfoot class="font-bold border-t-2">
-                                    <tr><td class="py-2">إجمالي الاستقطاعات</td><td class="py-2 text-left">${(record.absenceDeduction + record.lateDeduction + record.deductions.filter(d=>d.includedInPayroll).reduce((s, i) => s + i.amount, 0)).toLocaleString('ar-SA')}</td></tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="mt-8 border-t-4 border-double pt-4 text-center">
-                        <p class="text-xl font-bold">صافي الراتب المستحق: ${record.netPay.toLocaleString('ar-SA')} ر.س</p>
-                    </div>
-                    <div class="mt-24 flex justify-around">
-                        <div>
-                            <p class="mb-8">توقيع الموظف</p>
-                            <p>..............................</p>
-                        </div>
-                        <div>
-                            <p class="mb-8">توقيع المدير</p>
-                            <p>..............................</p>
-                        </div>
-                    </div>
-                </div>
-            `;
+            printableDiv.innerHTML = generatePayslipHTML(record, payroll);
             window.print();
         };
 
