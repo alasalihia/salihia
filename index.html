@@ -183,7 +183,7 @@
         const firebaseConfig = { apiKey: "AIzaSyDSlxf95W00Ow6LZba8waAKJINptIRPkU8", authDomain: "sample-firebase-ai-app-960f4.firebaseapp.com", projectId: "sample-firebase-ai-app-960f4", storageBucket: "sample-firebase-ai-app-960f4.appspot.com", messagingSenderId: "741880884079", appId: "1:741880884079:web:8d2f6e233fb65e65e969a" };
         
         // --- Global Variables ---
-        let app, auth, db, userId;
+        let app, auth, db, userId, appId;
         let employeesUnsubscribe;
         let state = { employees: [] };
         let confirmationCallback = null;
@@ -365,6 +365,7 @@
 
         // --- Firebase Functions ---
         async function initializeFirebase() {
+            appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             try {
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
@@ -403,12 +404,15 @@
 
         function setupRealtimeListeners() {
             clearDataAndListeners();
-            // Note: The Firestore path is now 'hr-data'
-            const employeesRef = collection(db, "hr-data", userId, "employees");
+            if (!userId || !appId) return;
+            const employeesRef = collection(db, "artifacts", appId, "users", userId, "employees");
             employeesUnsubscribe = onSnapshot(employeesRef, snapshot => {
                 state.employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderAll();
-            }, error => console.error("Employees listener failed:", error));
+            }, error => {
+                console.error("Employees listener failed:", error);
+                showAlert('خطأ في الاتصال', 'فشل تحميل بيانات الموظفين. قد تكون هناك مشكلة في الأذونات.');
+            });
         }
 
         // --- HR Data Functions ---
@@ -431,19 +435,21 @@
             }
             
             try {
-                if (!db || !userId) {
+                if (!db || !userId || !appId) {
                     showAlert("خطأ في الاتصال", "لا يمكن الاتصال بقاعدة البيانات. يرجى تسجيل الدخول مرة أخرى.");
                     return;
                 }
 
-                const q = query(collection(db, "hr-data", userId, "employees"), where("employeeId", "==", newEmployee.employeeId));
+                const employeesCollectionRef = collection(db, "artifacts", appId, "users", userId, "employees");
+                const q = query(employeesCollectionRef, where("employeeId", "==", newEmployee.employeeId));
                 const querySnapshot = await getDocs(q);
+                
                 if (!querySnapshot.empty) {
                     showAlert("خطأ", "الرقم الوظيفي المدخل موجود بالفعل لموظف آخر.");
                     return;
                 }
 
-                await addDoc(collection(db, "hr-data", userId, "employees"), newEmployee);
+                await addDoc(employeesCollectionRef, newEmployee);
                 closeModal("addEmployeeModal");
                 showAlert("نجاح", "تمت إضافة الموظف بنجاح.");
             } catch (err) {
@@ -455,7 +461,11 @@
         window.deleteEmployee = (docId) => {
             showConfirmation("تأكيد الحذف", "هل أنت متأكد من حذف هذا الموظف؟ لا يمكن التراجع عن هذا الإجراء.", async () => {
                 try {
-                    await deleteDoc(doc(db, "hr-data", userId, "employees", docId));
+                    if (!db || !userId || !appId) {
+                       showAlert("خطأ في الاتصال", "لا يمكن الاتصال بقاعدة البيانات.");
+                       return;
+                    }
+                    await deleteDoc(doc(db, "artifacts", appId, "users", userId, "employees", docId));
                     showAlert("نجاح", "تم حذف الموظف بنجاح.");
                 } catch (err) {
                     showAlert("خطأ", "فشلت عملية حذف الموظف.");
