@@ -816,30 +816,75 @@
             }
 
             const batch = writeBatch(db);
-            let totalBaseSalary = 0, totalAllowances = 0, totalDeductions = 0, netPay = 0;
+            let totalBaseSalary = 0, totalAllowances = 0, totalFixedDeductions = 0, totalAbsenceDeduction = 0, totalLateDeduction = 0, totalOvertimePay = 0, netPay = 0;
             
             for (const emp of activeEmployees) {
+                // 1. Get salary components
                 const allowancesSnapshot = await getDocs(collection(db, "hr-data", userId, "employees", emp.id, "allowances"));
                 const deductionsSnapshot = await getDocs(collection(db, "hr-data", userId, "employees", emp.id, "deductions"));
-
                 const allowances = allowancesSnapshot.docs.map(d => d.data());
-                const deductions = deductionsSnapshot.docs.map(d => d.data());
+                const fixedDeductions = deductionsSnapshot.docs.map(d => d.data());
 
                 const empTotalAllowances = allowances.reduce((s, i) => s + i.amount, 0);
-                const empTotalDeductions = deductions.reduce((s, i) => s + i.amount, 0);
-                const empNet = emp.salary + empTotalAllowances - empTotalDeductions;
+                const empTotalFixedDeductions = fixedDeductions.reduce((s, i) => s + i.amount, 0);
+                const grossSalary = emp.salary + empTotalAllowances;
 
+                // 2. Get attendance data for the month
+                const attendanceId = `${year}-${String(parseInt(month) + 1).padStart(2, '0')}`;
+                const attendanceDocRef = doc(db, "hr-data", userId, "employees", emp.id, "attendance", attendanceId);
+                const attendanceSnap = await getDoc(attendanceDocRef);
+                
+                let absenceDeduction = 0, lateDeduction = 0, overtimePay = 0;
+                
+                if (attendanceSnap.exists()) {
+                    const attendanceData = attendanceSnap.data();
+                    const daysInMonth = attendanceData.totalDaysInMonth;
+                    const dailyRate = grossSalary / daysInMonth; 
+                    const hourlyRate = dailyRate / 8; // Assuming 8-hour workday
+
+                    // Absence Deduction
+                    const absentDays = attendanceData.totalDaysInMonth - attendanceData.attendedDays;
+                    if (absentDays > 0) {
+                        absenceDeduction = dailyRate * absentDays;
+                    }
+
+                    // Late Deduction
+                    const totalLateMinutes = (attendanceData.lateHours * 60) + attendanceData.lateMinutes;
+                    if (totalLateMinutes > 0) {
+                        lateDeduction = (hourlyRate / 60) * totalLateMinutes;
+                    }
+
+                    // Overtime Pay
+                    const totalOvertimeMinutes = (attendanceData.overtimeHours * 60) + attendanceData.overtimeMinutes;
+                    if (totalOvertimeMinutes > 0) {
+                        const overtimeRate = hourlyRate * 1.5; // Standard overtime rate
+                        overtimePay = (overtimeRate / 60) * totalOvertimeMinutes;
+                    }
+                }
+                
+                // 3. Calculate Final Net Pay
+                const empNet = (grossSalary - absenceDeduction - lateDeduction + overtimePay) - empTotalFixedDeductions;
+
+                // 4. Prepare data for batch write
                 const payrollRecordRef = doc(db, "hr-data", userId, "payrolls", payrollId, "records", emp.id);
                 batch.set(payrollRecordRef, {
                     ...emp,
                     allowances,
-                    deductions,
+                    deductions: fixedDeductions,
+                    grossSalary,
+                    absenceDeduction,
+                    lateDeduction,
+                    overtimePay,
                     netPay: empNet
                 });
 
+                // 5. Aggregate totals
                 totalBaseSalary += emp.salary;
                 totalAllowances += empTotalAllowances;
-                totalDeductions += empTotalDeductions;
+                totalFixedDeductions += empTotalFixedDeductions;
+                totalAbsenceDeduction += absenceDeduction;
+                totalLateDeduction += lateDeduction;
+                totalOvertimePay += overtimePay;
                 netPay += empNet;
             }
 
@@ -850,7 +895,10 @@
                 year: parseInt(year),
                 totalBaseSalary,
                 totalAllowances,
-                totalDeductions,
+                totalFixedDeductions,
+                totalAbsenceDeduction,
+                totalLateDeduction,
+                totalOvertimePay,
                 netPay,
                 employeeCount: activeEmployees.length
             });
@@ -891,9 +939,11 @@
             let tableHTML = records.map(r => `
                 <tr class="border-b">
                     <td class="p-2">${r.name}</td>
-                    <td class="p-2">${r.salary.toLocaleString('ar-SA')}</td>
-                    <td class="p-2">${r.allowances.reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
-                    <td class="p-2">${r.deductions.reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
+                    <td class="p-2">${(r.grossSalary || 0).toLocaleString('ar-SA')}</td>
+                    <td class="p-2 text-red-600">-${(r.absenceDeduction || 0).toFixed(2)}</td>
+                    <td class="p-2 text-red-600">-${(r.lateDeduction || 0).toFixed(2)}</td>
+                    <td class="p-2 text-green-600">+${(r.overtimePay || 0).toFixed(2)}</td>
+                    <td class="p-2 text-red-600">-${r.deductions.reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
                     <td class="p-2 font-bold">${r.netPay.toLocaleString('ar-SA')}</td>
                 </tr>
             `).join('');
@@ -909,19 +959,23 @@
                             <thead class="bg-slate-50">
                                 <tr>
                                     <th class="p-2 text-right font-semibold">الموظف</th>
-                                    <th class="p-2 text-right font-semibold">الراتب الأساسي</th>
-                                    <th class="p-2 text-right font-semibold">إجمالي البدلات</th>
-                                    <th class="p-2 text-right font-semibold">إجمالي الخصومات</th>
-                                    <th class="p-2 text-right font-semibold">صافي الراتب (ر.س)</th>
+                                    <th class="p-2 text-right font-semibold">إجمالي الراتب</th>
+                                    <th class="p-2 text-right font-semibold">خصم الغياب</th>
+                                    <th class="p-2 text-right font-semibold">خصم التأخير</th>
+                                    <th class="p-2 text-right font-semibold">إضافي</th>
+                                    <th class="p-2 text-right font-semibold">خصومات أخرى</th>
+                                    <th class="p-2 text-right font-semibold">صافي المستحق</th>
                                 </tr>
                             </thead>
                             <tbody>${tableHTML}</tbody>
                             <tfoot class="font-bold bg-slate-100">
                                 <tr>
-                                    <td class="p-2">الإجمالي</td>
-                                    <td class="p-2">${payroll.totalBaseSalary.toLocaleString('ar-SA')}</td>
-                                    <td class="p-2">${payroll.totalAllowances.toLocaleString('ar-SA')}</td>
-                                    <td class="p-2">${payroll.totalDeductions.toLocaleString('ar-SA')}</td>
+                                    <td class="p-2">الإجمالي (ر.س)</td>
+                                    <td class="p-2">${(payroll.totalBaseSalary + payroll.totalAllowances).toLocaleString('ar-SA')}</td>
+                                    <td class="p-2 text-red-600">-${(payroll.totalAbsenceDeduction || 0).toLocaleString('ar-SA')}</td>
+                                    <td class="p-2 text-red-600">-${(payroll.totalLateDeduction || 0).toLocaleString('ar-SA')}</td>
+                                    <td class="p-2 text-green-600">+${(payroll.totalOvertimePay || 0).toLocaleString('ar-SA')}</td>
+                                    <td class="p-2 text-red-600">-${payroll.totalFixedDeductions.toLocaleString('ar-SA')}</td>
                                     <td class="p-2">${payroll.netPay.toLocaleString('ar-SA')}</td>
                                 </tr>
                             </tfoot>
@@ -948,18 +1002,24 @@
                     <table class="w-full text-sm border-collapse border border-slate-400">
                         <thead class="bg-slate-200">
                             <tr>
-                                <th class="p-2 border border-slate-300">الموظف</th><th class="p-2 border border-slate-300">الراتب الأساسي</th>
-                                <th class="p-2 border border-slate-300">إجمالي البدلات</th><th class="p-2 border border-slate-300">إجمالي الخصومات</th>
-                                <th class="p-2 border border-slate-300">صافي الراتب</th>
+                                <th class="p-2 border border-slate-300">الموظف</th>
+                                <th class="p-2 border border-slate-300">إجمالي الراتب</th>
+                                <th class="p-2 border border-slate-300">خصم الغياب</th>
+                                <th class="p-2 border border-slate-300">خصم التأخير</th>
+                                <th class="p-2 border border-slate-300">إضافي</th>
+                                <th class="p-2 border border-slate-300">خصومات أخرى</th>
+                                <th class="p-2 border border-slate-300">صافي المستحق</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${records.map(r => `
                                 <tr class="border-b">
                                     <td class="p-2 border border-slate-300">${r.name}</td>
-                                    <td class="p-2 border border-slate-300">${r.salary.toLocaleString('ar-SA')}</td>
-                                    <td class="p-2 border border-slate-300">${r.allowances.reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
-                                    <td class="p-2 border border-slate-300">${r.deductions.reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
+                                    <td class="p-2 border border-slate-300">${(r.grossSalary || 0).toLocaleString('ar-SA')}</td>
+                                    <td class="p-2 border border-slate-300">-${(r.absenceDeduction || 0).toFixed(2)}</td>
+                                    <td class="p-2 border border-slate-300">-${(r.lateDeduction || 0).toFixed(2)}</td>
+                                    <td class="p-2 border border-slate-300">+${(r.overtimePay || 0).toFixed(2)}</td>
+                                    <td class="p-2 border border-slate-300">-${r.deductions.reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
                                     <td class="p-2 border border-slate-300 font-bold">${r.netPay.toLocaleString('ar-SA')}</td>
                                 </tr>
                             `).join('')}
@@ -967,9 +1027,11 @@
                         <tfoot class="font-bold bg-slate-200">
                             <tr>
                                 <td class="p-2 border border-slate-300">الإجمالي (ر.س)</td>
-                                <td class="p-2 border border-slate-300">${payroll.totalBaseSalary.toLocaleString('ar-SA')}</td>
-                                <td class="p-2 border border-slate-300">${payroll.totalAllowances.toLocaleString('ar-SA')}</td>
-                                <td class="p-2 border border-slate-300">${payroll.totalDeductions.toLocaleString('ar-SA')}</td>
+                                <td class="p-2 border border-slate-300">${(payroll.totalBaseSalary + payroll.totalAllowances).toLocaleString('ar-SA')}</td>
+                                <td class="p-2 border border-slate-300">-${(payroll.totalAbsenceDeduction || 0).toLocaleString('ar-SA')}</td>
+                                <td class="p-2 border border-slate-300">-${(payroll.totalLateDeduction || 0).toLocaleString('ar-SA')}</td>
+                                <td class="p-2 border border-slate-300">+${(payroll.totalOvertimePay || 0).toLocaleString('ar-SA')}</td>
+                                <td class="p-2 border border-slate-300">-${payroll.totalFixedDeductions.toLocaleString('ar-SA')}</td>
                                 <td class="p-2 border border-slate-300">${payroll.netPay.toLocaleString('ar-SA')}</td>
                             </tr>
                         </tfoot>
