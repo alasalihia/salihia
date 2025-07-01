@@ -261,7 +261,7 @@
                         <input type="number" id="attendance-year" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
                     </div>
                     <div class="md:col-span-2 bg-slate-100 p-3 rounded-lg text-center">
-                        <p class="text-sm">أيام العمل الرسمية للشهر المحدد: <span id="working-days-display" class="font-bold">0</span> يوم</p>
+                        <p class="text-sm">عدد أيام الشهر: <span id="month-days-display" class="font-bold">0</span> يوم</p>
                     </div>
                     <div><label for="attended-days" class="block mb-2 text-sm font-medium">أيام الحضور الفعلية</label><input type="number" id="attended-days" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
                     <div></div>
@@ -331,18 +331,8 @@
         };
 
         // --- Utility Functions ---
-        function getWorkingDays(year, month) {
-            let count = 0;
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            for (let day = 1; day <= daysInMonth; day++) {
-                const d = new Date(year, month, day);
-                const dayOfWeek = d.getDay();
-                // 5 = Friday, 6 = Saturday (Weekends in KSA)
-                if (dayOfWeek !== 5 && dayOfWeek !== 6) {
-                    count++;
-                }
-            }
-            return count;
+        function getDaysInMonth(year, month) {
+            return new Date(year, month + 1, 0).getDate();
         }
 
         // --- Modal & Alert Functions ---
@@ -388,9 +378,12 @@
                 if (modalId === 'attendanceModal') {
                     const employee = state.employees.find(e => e.id === context);
                     if (employee) {
+                        ui.attendanceForm.reset();
+                        monthSelect.value = now.getMonth();
+                        yearInput.value = now.getFullYear();
                         document.getElementById('attendance-employee-name').textContent = employee.name;
                         document.getElementById('attendance-employee-id').value = employee.id;
-                        updateWorkingDaysDisplay(); // Initial calculation
+                        updateMonthDaysDisplay(); // Initial calculation
                         // Load existing data for this month if available
                         const attendanceId = `${yearInput.value}-${String(now.getMonth() + 1).padStart(2, '0')}`;
                         const attendanceDocRef = doc(db, "hr-data", userId, "employees", employee.id, "attendance", attendanceId);
@@ -402,10 +395,6 @@
                             document.getElementById('late-minutes').value = data.lateMinutes || 0;
                             document.getElementById('overtime-hours').value = data.overtimeHours || 0;
                             document.getElementById('overtime-minutes').value = data.overtimeMinutes || 0;
-                        } else {
-                            ui.attendanceForm.reset(); // Reset if no data
-                            monthSelect.value = now.getMonth();
-                            yearInput.value = now.getFullYear();
                         }
                     }
                 }
@@ -999,10 +988,10 @@
             const year = form['attendance-year'].value;
             const attendanceId = `${year}-${String(parseInt(month) + 1).padStart(2, '0')}`;
             
-            const workingDays = getWorkingDays(parseInt(year), parseInt(month));
+            const totalDaysInMonth = getDaysInMonth(parseInt(year), parseInt(month));
 
             const attendanceData = {
-                workingDays: workingDays,
+                totalDaysInMonth: totalDaysInMonth,
                 attendedDays: Number(form['attended-days'].value),
                 lateHours: Number(form['late-hours'].value) || 0,
                 lateMinutes: Number(form['late-minutes'].value) || 0,
@@ -1042,12 +1031,12 @@
             }).join("");
         }
         
-        function updateWorkingDaysDisplay() {
+        function updateMonthDaysDisplay() {
             const month = parseInt(document.getElementById('attendance-month').value);
             const year = parseInt(document.getElementById('attendance-year').value);
             if (!isNaN(month) && !isNaN(year)) {
-                const days = getWorkingDays(year, month);
-                document.getElementById('working-days-display').textContent = days;
+                const days = getDaysInMonth(year, month);
+                document.getElementById('month-days-display').textContent = days;
             }
         }
 
@@ -1056,8 +1045,8 @@
         ui.addEmployeeForm.addEventListener('submit', handleEmployeeFormSubmit);
         ui.generatePayrollForm.addEventListener('submit', handlePayrollGeneration);
         ui.attendanceForm.addEventListener('submit', handleAttendanceFormSubmit);
-        document.getElementById('attendance-month').addEventListener('change', updateWorkingDaysDisplay);
-        document.getElementById('attendance-year').addEventListener('change', updateWorkingDaysDisplay);
+        document.getElementById('attendance-month').addEventListener('change', updateMonthDaysDisplay);
+        document.getElementById('attendance-year').addEventListener('change', updateMonthDaysDisplay);
 
         initializeFirebase();
 
