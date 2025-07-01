@@ -150,10 +150,23 @@
 
             <!-- PAGE: HR Attendance -->
             <main id="page-hr-attendance" class="page">
-                 <h2 class="text-3xl font-bold text-slate-800 mb-6">صفحة الحضور والانصراف (قيد التطوير)</h2>
-                  <div class="bg-white p-8 rounded-xl shadow-lg text-center">
-                    <p class="text-slate-500">هذه الصفحة لتسجيل وتتبع حضور وانصراف الموظفين، سيتم تفعيلها قريباً.</p>
-                 </div>
+                 <h2 class="text-3xl font-bold text-slate-800 mb-6">سجل الحضور والانصراف</h2>
+                 <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-slate-500">
+                            <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">اسم الموظف</th>
+                                    <th scope="col" class="px-6 py-3">المنصب</th>
+                                    <th scope="col" class="px-6 py-3 text-center">إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendance-table-body">
+                                <!-- Attendance employee list will be rendered here by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
@@ -233,6 +246,33 @@
         </div>
     </div>
 
+    <div id="attendanceModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-lg p-6 transform scale-95">
+            <h3 class="text-xl font-bold mb-4">تسجيل الحضور لـ <span id="attendance-employee-name"></span></h3>
+            <form id="attendanceForm">
+                <input type="hidden" id="attendance-employee-id">
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="attendance-month" class="block mb-2 text-sm font-medium">الشهر</label>
+                        <select id="attendance-month" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></select>
+                    </div>
+                    <div>
+                        <label for="attendance-year" class="block mb-2 text-sm font-medium">السنة</label>
+                        <input type="number" id="attendance-year" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
+                    </div>
+                    <div><label for="working-days" class="block mb-2 text-sm font-medium">أيام العمل الرسمية</label><input type="number" id="working-days" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
+                    <div><label for="attended-days" class="block mb-2 text-sm font-medium">أيام الحضور الفعلية</label><input type="number" id="attended-days" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
+                    <div><label for="late-minutes" class="block mb-2 text-sm font-medium">إجمالي دقائق التأخير</label><input type="number" id="late-minutes" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" value="0"></div>
+                    <div><label for="overtime-hours" class="block mb-2 text-sm font-medium">إجمالي ساعات الإضافي</label><input type="number" id="overtime-hours" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" value="0"></div>
+                </div>
+                <div class="mt-6 flex justify-end space-x-2 rtl:space-x-reverse">
+                    <button type="button" onclick="closeModal('attendanceModal')" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">إلغاء</button>
+                    <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="alertModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
         <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-sm p-6 transform scale-95 text-center">
             <h3 id="alertModalTitle" class="text-xl font-bold mb-4"></h3>
@@ -246,7 +286,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, onSnapshot, deleteDoc, query, where, getDocs, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, addDoc, onSnapshot, deleteDoc, query, where, getDocs, updateDoc, writeBatch, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // --- Global Variables ---
         let app, auth, db, userId;
@@ -270,6 +310,7 @@
             userDisplayName: document.getElementById('main-menu-user-display-name'),
             addEmployeeForm: document.getElementById('addEmployeeForm'),
             employeesTableBody: document.getElementById('employees-table-body'),
+            attendanceTableBody: document.getElementById('attendance-table-body'),
             hrDashboardStats: document.getElementById('hr-dashboard-stats'),
             employeeModalTitle: document.getElementById('employeeModalTitle'),
             employeeModalSubmitButton: document.getElementById('employeeModalSubmitButton'),
@@ -277,6 +318,7 @@
             payrollHistoryContainer: document.getElementById('payroll-history-container'),
             payrollDetailsContainer: document.getElementById('payroll-details-container'),
             generatePayrollForm: document.getElementById('generatePayrollForm'),
+            attendanceForm: document.getElementById('attendanceForm'),
         };
 
         // --- Modal & Alert Functions ---
@@ -308,14 +350,24 @@
                 }
             } else if (modalId === 'salaryDetailsModal') {
                 openSalaryDetailsModal(context);
-            } else if (modalId === 'generatePayrollModal') {
-                const monthSelect = document.getElementById('payroll-month');
-                const yearInput = document.getElementById('payroll-year');
+            } else if (modalId === 'generatePayrollModal' || modalId === 'attendanceModal') {
+                const monthSelectId = modalId === 'generatePayrollModal' ? 'payroll-month' : 'attendance-month';
+                const yearInputId = modalId === 'generatePayrollModal' ? 'payroll-year' : 'attendance-year';
+                const monthSelect = document.getElementById(monthSelectId);
+                const yearInput = document.getElementById(yearInputId);
                 const now = new Date();
                 const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
                 monthSelect.innerHTML = months.map((m, i) => `<option value="${i}">${m}</option>`).join('');
                 monthSelect.value = now.getMonth();
                 yearInput.value = now.getFullYear();
+
+                if (modalId === 'attendanceModal') {
+                    const employee = state.employees.find(e => e.id === context);
+                    if (employee) {
+                        document.getElementById('attendance-employee-name').textContent = employee.name;
+                        document.getElementById('attendance-employee-id').value = employee.id;
+                    }
+                }
             }
             modal.classList.remove('hidden');
             setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('.modal-content').classList.remove('scale-95'); }, 10);
@@ -377,6 +429,7 @@
         function renderAll() {
             renderHrDashboard();
             renderEmployeesPage();
+            renderAttendancePage();
             renderOrUpdateDepartmentChart();
             renderPayrollHistory();
         }
@@ -896,10 +949,59 @@
             window.print();
         };
 
+        // --- Attendance Functions ---
+        const handleAttendanceFormSubmit = async (event) => {
+            event.preventDefault();
+            const form = event.target;
+            const employeeId = form['attendance-employee-id'].value;
+            const month = form['attendance-month'].value;
+            const year = form['attendance-year'].value;
+            const attendanceId = `${year}-${String(parseInt(month) + 1).padStart(2, '0')}`;
+
+            const attendanceData = {
+                workingDays: Number(form['working-days'].value),
+                attendedDays: Number(form['attended-days'].value),
+                lateMinutes: Number(form['late-minutes'].value),
+                overtimeHours: Number(form['overtime-hours'].value),
+            };
+
+            if (isNaN(attendanceData.workingDays) || isNaN(attendanceData.attendedDays)) {
+                showAlert('بيانات ناقصة', 'يرجى إدخال أيام العمل والحضور بشكل صحيح.');
+                return;
+            }
+
+            try {
+                const attendanceDocRef = doc(db, "hr-data", userId, "employees", employeeId, "attendance", attendanceId);
+                await setDoc(attendanceDocRef, attendanceData);
+                showAlert('نجاح', 'تم حفظ بيانات الحضور بنجاح.');
+                closeModal('attendanceModal');
+            } catch (e) {
+                console.error("Error saving attendance:", e);
+                showAlert('خطأ', 'فشل حفظ بيانات الحضور.');
+            }
+        };
+
+        function renderAttendancePage() {
+            if (state.employees.length === 0) {
+                ui.attendanceTableBody.innerHTML = '<tr class="border-b"><td colspan="3" class="text-center p-4">لا يوجد موظفين لعرضهم.</td></tr>';
+                return;
+            }
+            ui.attendanceTableBody.innerHTML = state.employees.sort((a, b) => a.name.localeCompare(b.name)).map(emp => {
+                return `<tr class="bg-white border-b hover:bg-slate-50">
+                    <td class="px-6 py-4 font-medium text-slate-900">${emp.name}</td>
+                    <td class="px-6 py-4">${emp.position}</td>
+                    <td class="px-6 py-4 text-center">
+                        <button onclick="openModal('attendanceModal', '${emp.id}')" class="bg-green-100 text-green-800 font-semibold px-4 py-1 rounded-full hover:bg-green-200">تسجيل الحضور</button>
+                    </td>
+                </tr>`;
+            }).join("");
+        }
+
 
         // --- Initial Application Load ---
         ui.addEmployeeForm.addEventListener('submit', handleEmployeeFormSubmit);
         ui.generatePayrollForm.addEventListener('submit', handlePayrollGeneration);
+        ui.attendanceForm.addEventListener('submit', handleAttendanceFormSubmit);
         initializeFirebase();
 
     </script>
