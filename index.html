@@ -260,10 +260,19 @@
                         <label for="attendance-year" class="block mb-2 text-sm font-medium">السنة</label>
                         <input type="number" id="attendance-year" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
                     </div>
-                    <div><label for="working-days" class="block mb-2 text-sm font-medium">أيام العمل الرسمية</label><input type="number" id="working-days" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
+                    <div class="md:col-span-2 bg-slate-100 p-3 rounded-lg text-center">
+                        <p class="text-sm">أيام العمل الرسمية للشهر المحدد: <span id="working-days-display" class="font-bold">0</span> يوم</p>
+                    </div>
                     <div><label for="attended-days" class="block mb-2 text-sm font-medium">أيام الحضور الفعلية</label><input type="number" id="attended-days" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
-                    <div><label for="late-minutes" class="block mb-2 text-sm font-medium">إجمالي دقائق التأخير</label><input type="number" id="late-minutes" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" value="0"></div>
-                    <div><label for="overtime-hours" class="block mb-2 text-sm font-medium">إجمالي ساعات الإضافي</label><input type="number" id="overtime-hours" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" value="0"></div>
+                    <div></div>
+                    <div class="md:col-span-2 grid grid-cols-2 gap-4">
+                        <div><label for="late-hours" class="block mb-2 text-sm font-medium">ساعات التأخير</label><input type="number" id="late-hours" min="0" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
+                        <div><label for="late-minutes" class="block mb-2 text-sm font-medium">دقائق التأخير</label><input type="number" id="late-minutes" min="0" max="59" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
+                    </div>
+                     <div class="md:col-span-2 grid grid-cols-2 gap-4">
+                        <div><label for="overtime-hours" class="block mb-2 text-sm font-medium">ساعات الإضافي</label><input type="number" id="overtime-hours" min="0" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
+                        <div><label for="overtime-minutes" class="block mb-2 text-sm font-medium">دقائق الإضافي</label><input type="number" id="overtime-minutes" min="0" max="59" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
+                    </div>
                 </div>
                 <div class="mt-6 flex justify-end space-x-2 rtl:space-x-reverse">
                     <button type="button" onclick="closeModal('attendanceModal')" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">إلغاء</button>
@@ -286,7 +295,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, onSnapshot, deleteDoc, query, where, getDocs, updateDoc, writeBatch, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, addDoc, onSnapshot, deleteDoc, query, where, getDocs, updateDoc, writeBatch, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // --- Global Variables ---
         let app, auth, db, userId;
@@ -321,8 +330,23 @@
             attendanceForm: document.getElementById('attendanceForm'),
         };
 
+        // --- Utility Functions ---
+        function getWorkingDays(year, month) {
+            let count = 0;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const d = new Date(year, month, day);
+                const dayOfWeek = d.getDay();
+                // 5 = Friday, 6 = Saturday (Weekends in KSA)
+                if (dayOfWeek !== 5 && dayOfWeek !== 6) {
+                    count++;
+                }
+            }
+            return count;
+        }
+
         // --- Modal & Alert Functions ---
-        window.openModal = (modalId, context = null) => {
+        window.openModal = async (modalId, context = null) => {
             const modal = document.getElementById(modalId);
             if (modalId === 'addEmployeeModal') {
                 ui.addEmployeeForm.reset();
@@ -366,6 +390,23 @@
                     if (employee) {
                         document.getElementById('attendance-employee-name').textContent = employee.name;
                         document.getElementById('attendance-employee-id').value = employee.id;
+                        updateWorkingDaysDisplay(); // Initial calculation
+                        // Load existing data for this month if available
+                        const attendanceId = `${yearInput.value}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                        const attendanceDocRef = doc(db, "hr-data", userId, "employees", employee.id, "attendance", attendanceId);
+                        const docSnap = await getDoc(attendanceDocRef);
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            document.getElementById('attended-days').value = data.attendedDays || 0;
+                            document.getElementById('late-hours').value = data.lateHours || 0;
+                            document.getElementById('late-minutes').value = data.lateMinutes || 0;
+                            document.getElementById('overtime-hours').value = data.overtimeHours || 0;
+                            document.getElementById('overtime-minutes').value = data.overtimeMinutes || 0;
+                        } else {
+                            ui.attendanceForm.reset(); // Reset if no data
+                            monthSelect.value = now.getMonth();
+                            yearInput.value = now.getFullYear();
+                        }
                     }
                 }
             }
@@ -957,16 +998,20 @@
             const month = form['attendance-month'].value;
             const year = form['attendance-year'].value;
             const attendanceId = `${year}-${String(parseInt(month) + 1).padStart(2, '0')}`;
+            
+            const workingDays = getWorkingDays(parseInt(year), parseInt(month));
 
             const attendanceData = {
-                workingDays: Number(form['working-days'].value),
+                workingDays: workingDays,
                 attendedDays: Number(form['attended-days'].value),
-                lateMinutes: Number(form['late-minutes'].value),
-                overtimeHours: Number(form['overtime-hours'].value),
+                lateHours: Number(form['late-hours'].value) || 0,
+                lateMinutes: Number(form['late-minutes'].value) || 0,
+                overtimeHours: Number(form['overtime-hours'].value) || 0,
+                overtimeMinutes: Number(form['overtime-minutes'].value) || 0,
             };
 
-            if (isNaN(attendanceData.workingDays) || isNaN(attendanceData.attendedDays)) {
-                showAlert('بيانات ناقصة', 'يرجى إدخال أيام العمل والحضور بشكل صحيح.');
+            if (isNaN(attendanceData.attendedDays)) {
+                showAlert('بيانات ناقصة', 'يرجى إدخال أيام الحضور الفعلية.');
                 return;
             }
 
@@ -996,12 +1041,24 @@
                 </tr>`;
             }).join("");
         }
+        
+        function updateWorkingDaysDisplay() {
+            const month = parseInt(document.getElementById('attendance-month').value);
+            const year = parseInt(document.getElementById('attendance-year').value);
+            if (!isNaN(month) && !isNaN(year)) {
+                const days = getWorkingDays(year, month);
+                document.getElementById('working-days-display').textContent = days;
+            }
+        }
 
 
         // --- Initial Application Load ---
         ui.addEmployeeForm.addEventListener('submit', handleEmployeeFormSubmit);
         ui.generatePayrollForm.addEventListener('submit', handlePayrollGeneration);
         ui.attendanceForm.addEventListener('submit', handleAttendanceFormSubmit);
+        document.getElementById('attendance-month').addEventListener('change', updateWorkingDaysDisplay);
+        document.getElementById('attendance-year').addEventListener('change', updateWorkingDaysDisplay);
+
         initializeFirebase();
 
     </script>
