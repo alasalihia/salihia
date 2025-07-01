@@ -91,6 +91,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     <span>الحضور والانصراف</span>
                 </a>
+                <a href="#" onclick="showPage('page-hr-settings')" class="sidebar-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    <span>الإعدادات</span>
+                </a>
             </nav>
         </aside>
         <div class="flex-grow p-4 md:p-8 bg-slate-100">
@@ -172,6 +176,33 @@
                         </table>
                     </div>
                 </div>
+            </main>
+
+            <!-- PAGE: HR Settings -->
+            <main id="page-hr-settings" class="page">
+                 <h2 class="text-3xl font-bold text-slate-800 mb-6">إعدادات الشركة</h2>
+                 <div class="bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto">
+                    <form id="settings-form">
+                        <div class="space-y-6">
+                            <div>
+                                <label for="company-name-input" class="block mb-2 text-sm font-medium text-gray-900">اسم الشركة</label>
+                                <input type="text" id="company-name-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="أدخل اسم شركتك هنا">
+                            </div>
+                            <div>
+                                <label for="logo-upload-input" class="block mb-2 text-sm font-medium text-gray-900">شعار الشركة</label>
+                                <input type="file" id="logo-upload-input" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
+                                <p class="mt-1 text-sm text-gray-500">ارفع صورة الشعار (يفضل أن تكون مربعة)</p>
+                                <div class="mt-4">
+                                    <p class="text-sm font-medium">الشعار الحالي:</p>
+                                    <img id="logo-preview" src="https://placehold.co/150x150/e9d5ff/4c1d95?text=Logo" alt="Company Logo Preview" class="mt-2 h-24 w-24 object-contain rounded-md bg-slate-100 border p-1">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-8 pt-4 border-t">
+                            <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">حفظ الإعدادات</button>
+                        </div>
+                    </form>
+                 </div>
             </main>
         </div>
     </div>
@@ -301,14 +332,16 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, addDoc, onSnapshot, deleteDoc, query, where, getDocs, updateDoc, writeBatch, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
         
         // --- Global Variables ---
-        let app, auth, db, userId;
-        let employeesUnsubscribe, payrollsUnsubscribe;
+        let app, auth, db, storage, userId;
+        let employeesUnsubscribe, payrollsUnsubscribe, settingsUnsubscribe;
         let allowancesUnsubscribe, deductionsUnsubscribe;
         let state = { 
             employees: [], 
             payrolls: [],
+            settings: { name: 'شركتك', logoUrl: 'https://placehold.co/150x150/e9d5ff/4c1d95?text=Logo' },
             currentEmployee: {
                 allowances: [],
                 deductions: []
@@ -333,6 +366,9 @@
             payrollDetailsContainer: document.getElementById('payroll-details-container'),
             generatePayrollForm: document.getElementById('generatePayrollForm'),
             attendanceForm: document.getElementById('attendanceForm'),
+            settingsForm: document.getElementById('settings-form'),
+            companyNameInput: document.getElementById('company-name-input'),
+            logoPreview: document.getElementById('logo-preview'),
         };
 
         // --- Utility Functions ---
@@ -488,6 +524,7 @@
             renderAttendancePage();
             renderOrUpdateDepartmentChart();
             renderPayrollHistory();
+            renderSettingsPage();
         }
 
         function renderHrDashboard() {
@@ -567,6 +604,11 @@
                 }); 
             }
         }
+        
+        function renderSettingsPage() {
+            ui.companyNameInput.value = state.settings.name || '';
+            ui.logoPreview.src = state.settings.logoUrl || 'https://placehold.co/150x150/e9d5ff/4c1d95?text=Logo';
+        }
 
         // --- Firebase Functions ---
         async function initializeFirebase() {
@@ -583,6 +625,7 @@
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
+                storage = getStorage(app);
 
                 onAuthStateChanged(auth, user => {
                     if (user) {
@@ -624,9 +667,11 @@
         function clearDataAndListeners() {
             if (employeesUnsubscribe) employeesUnsubscribe();
             if (payrollsUnsubscribe) payrollsUnsubscribe();
+            if (settingsUnsubscribe) settingsUnsubscribe();
             employeesUnsubscribe = null;
             payrollsUnsubscribe = null;
-            state = { employees: [], payrolls: [], currentEmployee: { allowances: [], deductions: [] } };
+            settingsUnsubscribe = null;
+            state = { employees: [], payrolls: [], settings: { name: 'شركتك', logoUrl: 'https://placehold.co/150x150/e9d5ff/4c1d95?text=Logo' }, currentEmployee: { allowances: [], deductions: [] } };
             renderAll();
         }
 
@@ -649,6 +694,14 @@
             payrollsUnsubscribe = onSnapshot(payrollsRef, snapshot => {
                 state.payrolls = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderPayrollHistory();
+            });
+            
+            const settingsRef = doc(db, "hr-data", userId, "settings", "companyProfile");
+            settingsUnsubscribe = onSnapshot(settingsRef, (doc) => {
+                if (doc.exists()) {
+                    state.settings = doc.data();
+                }
+                renderSettingsPage();
             });
         }
 
@@ -1044,6 +1097,12 @@
             const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
             return `
                 <div class="p-8 bg-white text-black payslip-page" style="width: 210mm; height: 297mm; margin: auto;">
+                    <header class="flex justify-between items-start pb-4 border-b mb-4">
+                        <div class="text-right">
+                            <h2 class="text-2xl font-bold">${state.settings.name || 'اسم الشركة'}</h2>
+                        </div>
+                        <img src="${state.settings.logoUrl || 'https://placehold.co/150x150/e9d5ff/4c1d95?text=Logo'}" alt="Company Logo" class="h-20 object-contain">
+                    </header>
                     <h1 class="text-2xl font-bold text-center mb-4">بيان راتب - ${months[payroll.month]} ${payroll.year}</h1>
                     <div class="flex justify-between mb-6 border-b pb-4">
                         <div>
@@ -1124,7 +1183,11 @@
             const printableDiv = document.getElementById('printable-payroll');
             printableDiv.innerHTML = `
                 <div class="p-8">
-                    <h1 class="text-2xl font-bold text-center mb-2">مسير رواتب شهر ${months[payroll.month]} ${payroll.year}</h1>
+                    <header class="flex justify-between items-center mb-6">
+                        <img src="${state.settings.logoUrl || ''}" alt="Logo" class="h-20 object-contain">
+                        <h1 class="text-3xl font-bold">${state.settings.name || 'ملخص الرواتب'}</h1>
+                    </header>
+                    <h2 class="text-2xl font-bold text-center mb-2">مسير رواتب شهر ${months[payroll.month]} ${payroll.year}</h2>
                     <p class="text-center text-sm mb-6">تاريخ الطباعة: ${formatGregorianDate(new Date())}</p>
                     <table class="w-full text-sm border-collapse border border-slate-400">
                         <thead class="bg-slate-200">
@@ -1245,11 +1308,45 @@
             }
         }
 
+        // --- Settings Functions ---
+        const handleSettingsSubmit = async (event) => {
+            event.preventDefault();
+            const companyName = ui.companyNameInput.value.trim();
+            const logoFile = document.getElementById('logo-upload-input').files[0];
+            let logoUrl = state.settings.logoUrl;
+
+            if (!db || !userId) {
+                showAlert('خطأ', 'غير قادر على حفظ الإعدادات. يرجى تسجيل الدخول.');
+                return;
+            }
+
+            try {
+                if (logoFile) {
+                    const storageRef = ref(storage, `logos/${userId}/company_logo`);
+                    await uploadBytes(storageRef, logoFile);
+                    logoUrl = await getDownloadURL(storageRef);
+                }
+
+                const settingsData = {
+                    name: companyName,
+                    logoUrl: logoUrl
+                };
+
+                const settingsRef = doc(db, "hr-data", userId, "settings", "companyProfile");
+                await setDoc(settingsRef, settingsData);
+                showAlert('نجاح', 'تم حفظ الإعدادات بنجاح.');
+            } catch (e) {
+                console.error("Error saving settings: ", e);
+                showAlert('خطأ', 'فشل حفظ الإعدادات.');
+            }
+        };
+
 
         // --- Initial Application Load ---
         ui.addEmployeeForm.addEventListener('submit', handleEmployeeFormSubmit);
         ui.generatePayrollForm.addEventListener('submit', handlePayrollGeneration);
         ui.attendanceForm.addEventListener('submit', handleAttendanceFormSubmit);
+        ui.settingsForm.addEventListener('submit', handleSettingsSubmit);
         document.getElementById('attendance-month').addEventListener('change', updateMonthDaysDisplay);
         document.getElementById('attendance-year').addEventListener('change', updateMonthDaysDisplay);
 
