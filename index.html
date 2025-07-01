@@ -1096,7 +1096,7 @@
         function generatePayslipHTML(record, payroll) {
             const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
             return `
-                <div class="p-8 bg-white text-black payslip-page" style="width: 210mm; height: 297mm; margin: auto;">
+                <div class="p-8 bg-white text-black payslip-page" style="width: 210mm; height: 297mm; margin: auto; display: flex; flex-direction: column;">
                     <header class="flex justify-between items-start pb-4 border-b mb-4">
                         <div class="text-right">
                             <h2 class="text-2xl font-bold">${state.settings.name || 'اسم الشركة'}</h2>
@@ -1104,7 +1104,7 @@
                         <img src="${state.settings.logoUrl || 'https://placehold.co/150x150/e9d5ff/4c1d95?text=Logo'}" alt="Company Logo" class="h-20 object-contain">
                     </header>
                     <h1 class="text-2xl font-bold text-center mb-4">بيان راتب - ${months[payroll.month]} ${payroll.year}</h1>
-                    <div class="flex justify-between mb-6 border-b pb-4">
+                    <div class="flex justify-between mb-6 border-b pb-4 text-sm">
                         <div>
                             <p><strong>اسم الموظف:</strong> ${record.name}</p>
                             <p><strong>الرقم الوظيفي:</strong> ${record.employeeId}</p>
@@ -1114,9 +1114,9 @@
                             <p><strong>تاريخ الطباعة:</strong> ${formatGregorianDate(new Date())}</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-8">
+                    <div class="grid grid-cols-2 gap-8 flex-grow">
                         <div>
-                            <h3 class="text-lg font-bold mb-2 border-b">الاستحقاقات</h3>
+                            <h3 class="text-lg font-bold mb-2 border-b text-green-700">الاستحقاقات</h3>
                             <table class="w-full text-sm">
                                 <tbody>
                                     <tr><td class="py-1">الراتب الأساسي</td><td class="py-1 text-left">${formatNumber(record.salary)}</td></tr>
@@ -1129,7 +1129,7 @@
                             </table>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold mb-2 border-b">الاستقطاعات</h3>
+                            <h3 class="text-lg font-bold mb-2 border-b text-red-700">الاستقطاعات</h3>
                             <table class="w-full text-sm">
                                 <tbody>
                                     <tr><td class="py-1">خصم الغياب</td><td class="py-1 text-left">${formatNumber(record.absenceDeduction || 0)}</td></tr>
@@ -1142,10 +1142,10 @@
                             </table>
                         </div>
                     </div>
-                    <div class="mt-8 border-t-4 border-double pt-4 text-center">
+                    <div class="mt-8 bg-violet-600 text-white rounded-lg p-4 text-center">
                         <p class="text-xl font-bold">صافي الراتب المستحق: ${formatNumber(record.netPay)} ر.س</p>
                     </div>
-                    <div class="mt-24 flex justify-around">
+                    <div class="mt-auto pt-12 flex justify-around text-sm">
                         <div>
                             <p class="mb-8">توقيع الموظف</p>
                             <p>..............................</p>
