@@ -37,7 +37,7 @@
         <div class="text-center bg-white p-12 rounded-2xl shadow-xl max-w-lg w-full">
             <h1 class="text-3xl md:text-4xl font-bold text-violet-700 mb-4">منصة إدارة شؤون الموظفين</h1>
             <p class="text-slate-600 mb-8">يرجى تسجيل الدخول للوصول إلى النظام.</p>
-            <button id="login-button" onclick="signInWithGoogle()" class="flex items-center justify-center w-full bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm">
+            <button id="login-button" class="flex items-center justify-center w-full bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm">
                 <svg class="w-6 h-6 ml-3" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path><path fill="none" d="M0 0h48v48H0z"></path></svg>
                 تسجيل الدخول باستخدام جوجل
             </button>
@@ -50,11 +50,11 @@
             <h1 class="text-3xl font-bold text-slate-800">القائمة الرئيسية</h1>
             <div id="main-menu-user-info" class="flex items-center">
                 <span id="main-menu-user-display-name" class="font-semibold ml-4 text-slate-600"></span>
-                <button onclick="signOutUser()" class="text-sm text-red-600 hover:underline mr-2">تسجيل الخروج</button>
+                <button id="sign-out-button" class="text-sm text-red-600 hover:underline mr-2">تسجيل الخروج</button>
             </div>
         </header>
         <div class="flex justify-center items-center">
-            <div onclick="showModule('hr-module-container')" class="module-card bg-white p-8 rounded-2xl shadow-lg text-center cursor-pointer w-full max-w-sm">
+            <div id="hr-module-card" class="module-card bg-white p-8 rounded-2xl shadow-lg text-center cursor-pointer w-full max-w-sm">
                 <div class="bg-violet-100 text-violet-600 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 </div>
@@ -68,21 +68,21 @@
     <div id="hr-module-container" class="module-container flex min-h-screen w-full">
         <aside class="w-64 bg-white shadow-lg flex flex-col p-4">
             <h2 class="text-xl font-bold text-violet-700 text-center mb-4 mt-4">شؤون الموظفين</h2>
-            <button onclick="showModule('main-menu-screen')" class="mb-4 text-sm text-blue-600 hover:underline"> &larr; العودة للقائمة الرئيسية</button>
-            <nav class="flex-grow space-y-2">
-                <a href="#" onclick="showPage('page-hr-dashboard', 'hr-module-container')" class="sidebar-link">
+            <button id="back-to-main-menu" class="mb-4 text-sm text-blue-600 hover:underline"> &larr; العودة للقائمة الرئيسية</button>
+            <nav id="sidebar-nav" class="flex-grow space-y-2">
+                <a href="#" data-page="page-hr-dashboard" class="sidebar-link">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
                     <span>لوحة التحكم</span>
                 </a>
-                <a href="#" onclick="showPage('page-hr-employees', 'hr-module-container')" class="sidebar-link">
+                <a href="#" data-page="page-hr-employees" class="sidebar-link">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                     <span>قائمة الموظفين</span>
                 </a>
-                <a href="#" onclick="showPage('page-hr-salaries', 'hr-module-container')" class="sidebar-link">
+                <a href="#" data-page="page-hr-salaries" class="sidebar-link">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                     <span>الرواتب</span>
                 </a>
-                <a href="#" onclick="showPage('page-hr-attendance', 'hr-module-container')" class="sidebar-link">
+                <a href="#" data-page="page-hr-attendance" class="sidebar-link">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     <span>الحضور والانصراف</span>
                 </a>
@@ -92,7 +92,7 @@
             <!-- PAGE: HR Dashboard -->
             <main id="page-hr-dashboard" class="page active">
                 <h2 class="text-3xl font-bold text-slate-800 mb-6">لوحة تحكم الموظفين</h2>
-                <div id="hr-dashboard-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div id="hr-dashboard-stats" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                      <!-- Stats will be rendered here by JS -->
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-lg">
@@ -107,7 +107,7 @@
             <main id="page-hr-employees" class="page">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold text-slate-800">إدارة الموظفين</h2>
-                    <button onclick="openModal('addEmployeeModal')" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">إضافة موظف جديد</button>
+                    <button id="add-employee-button" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">إضافة موظف جديد</button>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="overflow-x-auto">
@@ -133,7 +133,7 @@
             <main id="page-hr-salaries" class="page">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold text-slate-800">مسير الرواتب</h2>
-                    <button onclick="openModal('generatePayrollModal')" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">إصدار مسير رواتب جديد</button>
+                    <button id="generate-payroll-button" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">إصدار مسير رواتب جديد</button>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg">
@@ -174,7 +174,7 @@
                     <div class="md:col-span-2"><label for="employeeStatus" class="block mb-2 text-sm font-medium">حالة الموظف</label><select id="employeeStatus" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required><option value="active">على رأس العمل</option><option value="on_leave">في إجازة</option><option value="terminated">منتهية خدماته</option></select></div>
                 </div>
                 <div class="mt-6 flex justify-end space-x-2 rtl:space-x-reverse">
-                    <button type="button" onclick="closeModal('addEmployeeModal')" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">إلغاء</button>
+                    <button type="button" class="modal-cancel-button bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">إلغاء</button>
                     <button id="employeeModalSubmitButton" type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">حفظ الموظف</button>
                 </div>
             </form>
@@ -191,14 +191,14 @@
                     <table class="w-full mt-2 text-sm">
                         <tbody id="allowances-table-body"></tbody>
                     </table>
-                    <button onclick="addAllowanceRow()" class="mt-2 text-sm text-blue-600 hover:underline">+ إضافة بدل</button>
+                    <button id="add-allowance-row-button" class="mt-2 text-sm text-blue-600 hover:underline">+ إضافة بدل</button>
                 </div>
                 <div class="border-t pt-4">
                     <h4 class="font-semibold text-lg">الخصومات</h4>
                      <table class="w-full mt-2 text-sm">
                         <tbody id="deductions-table-body"></tbody>
                     </table>
-                    <button onclick="addDeductionRow()" class="mt-2 text-sm text-blue-600 hover:underline">+ إضافة خصم</button>
+                    <button id="add-deduction-row-button" class="mt-2 text-sm text-blue-600 hover:underline">+ إضافة خصم</button>
                 </div>
                 <div class="border-t pt-4 mt-4 font-bold text-xl flex justify-between">
                     <span>صافي الراتب:</span>
@@ -206,7 +206,7 @@
                 </div>
             </div>
              <div class="mt-6 flex justify-end space-x-2 rtl:space-x-reverse">
-                <button type="button" onclick="closeModal('salaryDetailsModal')" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">إغلاق</button>
+                <button type="button" class="modal-cancel-button bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">إغلاق</button>
             </div>
         </div>
     </div>
@@ -226,7 +226,7 @@
                     </div>
                 </div>
                 <div class="mt-6 flex justify-end space-x-2 rtl:space-x-reverse">
-                    <button type="button" onclick="closeModal('generatePayrollModal')" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">إلغاء</button>
+                    <button type="button" class="modal-cancel-button bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">إلغاء</button>
                     <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">إصدار</button>
                 </div>
             </form>
@@ -248,687 +248,662 @@
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, addDoc, onSnapshot, deleteDoc, query, where, getDocs, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // --- Global Variables ---
-        let app, auth, db, userId;
-        let employeesUnsubscribe, payrollsUnsubscribe;
-        let allowancesUnsubscribe, deductionsUnsubscribe;
-        let state = { 
+        // --- Application State ---
+        const state = { 
             employees: [], 
             payrolls: [],
             currentEmployee: {
+                id: null,
+                data: null,
                 allowances: [],
                 deductions: []
+            },
+            listeners: {
+                employees: null,
+                payrolls: null,
+                allowances: null,
+                deductions: null,
+            },
+            firebase: {
+                app: null,
+                auth: null,
+                db: null,
+                userId: null,
             }
         };
-        let confirmationCallback = null;
-        let departmentChart = null;
 
-        // --- UI Elements ---
-        const ui = {
-            loginScreen: document.getElementById('login-screen'),
-            mainMenuScreen: document.getElementById('main-menu-screen'),
-            userDisplayName: document.getElementById('main-menu-user-display-name'),
-            addEmployeeForm: document.getElementById('addEmployeeForm'),
-            employeesTableBody: document.getElementById('employees-table-body'),
-            hrDashboardStats: document.getElementById('hr-dashboard-stats'),
-            employeeModalTitle: document.getElementById('employeeModalTitle'),
-            employeeModalSubmitButton: document.getElementById('employeeModalSubmitButton'),
-            employeeEditIdInput: document.getElementById('employee-edit-id'),
-            payrollHistoryContainer: document.getElementById('payroll-history-container'),
-            payrollDetailsContainer: document.getElementById('payroll-details-container'),
-            generatePayrollForm: document.getElementById('generatePayrollForm'),
-        };
+        // --- UI Module ---
+        const UI = {
+            elements: {
+                loginScreen: document.getElementById('login-screen'),
+                mainMenuScreen: document.getElementById('main-menu-screen'),
+                userDisplayName: document.getElementById('main-menu-user-display-name'),
+                addEmployeeForm: document.getElementById('addEmployeeForm'),
+                employeesTableBody: document.getElementById('employees-table-body'),
+                hrDashboardStats: document.getElementById('hr-dashboard-stats'),
+                employeeModalTitle: document.getElementById('employeeModalTitle'),
+                employeeModalSubmitButton: document.getElementById('employeeModalSubmitButton'),
+                employeeEditIdInput: document.getElementById('employee-edit-id'),
+                payrollHistoryContainer: document.getElementById('payroll-history-container'),
+                payrollDetailsContainer: document.getElementById('payroll-details-container'),
+                generatePayrollForm: document.getElementById('generatePayrollForm'),
+                departmentChartCanvas: document.getElementById('department-chart'),
+            },
+            departmentChart: null,
+            confirmationCallback: null,
 
-        // --- Modal & Alert Functions ---
-        window.openModal = (modalId, context = null) => {
-            const modal = document.getElementById(modalId);
-            if (modalId === 'addEmployeeModal') {
-                ui.addEmployeeForm.reset();
-                ui.employeeEditIdInput.value = '';
-
-                if (context) { // This is an edit operation
-                    const employeeId = context;
-                    const employee = state.employees.find(emp => emp.id === employeeId);
-                    if (employee) {
-                        ui.employeeModalTitle.textContent = 'تعديل بيانات الموظف';
-                        ui.employeeModalSubmitButton.textContent = 'حفظ التعديلات';
-                        ui.employeeEditIdInput.value = employee.id;
-                        document.getElementById('employeeName').value = employee.name;
-                        document.getElementById('employeeId').value = employee.employeeId;
-                        document.getElementById('employeePosition').value = employee.position;
-                        document.getElementById('employeeDepartment').value = employee.department;
-                        document.getElementById('employeeStartDate').value = employee.startDate;
-                        document.getElementById('employeeSalary').value = employee.salary;
-                        document.getElementById('employeeStatus').value = employee.status;
+            openModal(modalId, context = null) {
+                const modal = document.getElementById(modalId);
+                if (modalId === 'addEmployeeModal') {
+                    this.elements.addEmployeeForm.reset();
+                    this.elements.employeeEditIdInput.value = '';
+                    if (context) { // Edit mode
+                        const employee = state.employees.find(emp => emp.id === context);
+                        if (employee) {
+                            this.elements.employeeModalTitle.textContent = 'تعديل بيانات الموظف';
+                            this.elements.employeeModalSubmitButton.textContent = 'حفظ التعديلات';
+                            this.elements.employeeEditIdInput.value = employee.id;
+                            document.getElementById('employeeName').value = employee.name;
+                            document.getElementById('employeeId').value = employee.employeeId;
+                            document.getElementById('employeePosition').value = employee.position;
+                            document.getElementById('employeeDepartment').value = employee.department;
+                            document.getElementById('employeeStartDate').value = employee.startDate;
+                            document.getElementById('employeeSalary').value = employee.salary;
+                            document.getElementById('employeeStatus').value = employee.status;
+                        }
+                    } else { // Add mode
+                        this.elements.employeeModalTitle.textContent = 'إضافة موظف جديد';
+                        this.elements.employeeModalSubmitButton.textContent = 'حفظ الموظف';
+                        document.getElementById('employeeStartDate').valueAsDate = new Date();
                     }
-                } else { // This is an add operation
-                    ui.employeeModalTitle.textContent = 'إضافة موظف جديد';
-                    ui.employeeModalSubmitButton.textContent = 'حفظ الموظف';
-                    document.getElementById('employeeStartDate').valueAsDate = new Date();
+                } else if (modalId === 'salaryDetailsModal') {
+                    SalaryService.openDetailsModal(context);
+                } else if (modalId === 'generatePayrollModal') {
+                    const monthSelect = document.getElementById('payroll-month');
+                    const yearInput = document.getElementById('payroll-year');
+                    const now = new Date();
+                    const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+                    monthSelect.innerHTML = months.map((m, i) => `<option value="${i}">${m}</option>`).join('');
+                    monthSelect.value = now.getMonth();
+                    yearInput.value = now.getFullYear();
                 }
-            } else if (modalId === 'salaryDetailsModal') {
-                openSalaryDetailsModal(context);
-            } else if (modalId === 'generatePayrollModal') {
-                const monthSelect = document.getElementById('payroll-month');
-                const yearInput = document.getElementById('payroll-year');
-                const now = new Date();
-                const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-                monthSelect.innerHTML = months.map((m, i) => `<option value="${i}">${m}</option>`).join('');
-                monthSelect.value = now.getMonth();
-                yearInput.value = now.getFullYear();
-            }
-            modal.classList.remove('hidden');
-            setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('.modal-content').classList.remove('scale-95'); }, 10);
-        };
+                modal.classList.remove('hidden');
+                setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('.modal-content').classList.remove('scale-95'); }, 10);
+            },
 
-        window.closeModal = (modalId) => {
-            const modal = document.getElementById(modalId);
-            modal.classList.add('opacity-0');
-            modal.querySelector('.modal-content').classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                if (modalId === 'salaryDetailsModal') {
-                    if (allowancesUnsubscribe) allowancesUnsubscribe();
-                    if (deductionsUnsubscribe) deductionsUnsubscribe();
-                }
-            }, 300);
-        };
-
-        const showAlert = (title, message) => {
-            document.getElementById('alertModalTitle').textContent = title;
-            document.getElementById('alertModalMessage').innerHTML = message;
-            document.getElementById('alertModalButtons').innerHTML = `<button type="button" onclick="closeModal('alertModal')" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">حسنًا</button>`;
-            openModal('alertModal');
-        };
-
-        const showConfirmation = (title, message, onConfirm) => {
-            document.getElementById('alertModalTitle').textContent = title;
-            document.getElementById('alertModalMessage').textContent = message;
-            document.getElementById('alertModalButtons').innerHTML = `<button type="button" onclick="closeModal('alertModal')" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-6 rounded-lg transition-colors">إلغاء</button><button type="button" onclick="handleConfirm()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">تأكيد</button>`;
-            confirmationCallback = onConfirm;
-            openModal('alertModal');
-        };
-        window.handleConfirm = () => { if (confirmationCallback) { confirmationCallback(); } closeModal('alertModal'); confirmationCallback = null; };
-
-        // --- Navigation Functions ---
-        window.showModule = (moduleId) => {
-            document.querySelectorAll('.module-container, #main-menu-screen').forEach(el => el.style.display = 'none');
-            const targetModule = document.getElementById(moduleId);
-            if (targetModule) {
-                targetModule.style.display = moduleId === 'main-menu-screen' ? 'block' : 'flex';
-                if (moduleId === 'hr-module-container') {
-                    showPage('page-hr-dashboard', moduleId);
-                }
-            }
-        };
-
-        window.showPage = (pageId, moduleContainerId) => {
-            const module = document.getElementById(moduleContainerId);
-            module.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
-            module.querySelector(`#${pageId}`).classList.add('active');
-            module.querySelectorAll('.sidebar-link').forEach(e => e.classList.remove('active'));
-            const activeLink = module.querySelector(`.sidebar-link[onclick*="'${pageId}'"]`);
-            if (activeLink) {
-                activeLink.classList.add('active');
-            }
-        };
-
-        // --- Rendering Functions ---
-        function renderAll() {
-            renderHrDashboard();
-            renderEmployeesPage();
-            renderOrUpdateDepartmentChart();
-            renderPayrollHistory();
-        }
-
-        function renderHrDashboard() {
-            const totalEmployees = state.employees.length;
-            const activeEmployees = state.employees.filter(e => e.status === 'active').length;
-            const onLeaveEmployees = state.employees.filter(e => e.status === 'on_leave').length;
-            const totalSalary = state.employees.reduce((sum, e) => sum + (e.status === 'active' ? Number(e.salary) : 0), 0);
-
-            ui.hrDashboardStats.innerHTML = `
-                <div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 rtl:space-x-reverse">
-                    <div class="bg-violet-100 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
-                    <div><h3 class="text-slate-500">إجمالي الموظفين</h3><p class="text-2xl font-bold">${totalEmployees}</p></div>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 rtl:space-x-reverse">
-                    <div class="bg-green-100 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
-                    <div><h3 class="text-slate-500">على رأس العمل</h3><p class="text-2xl font-bold">${activeEmployees}</p></div>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 rtl:space-x-reverse">
-                    <div class="bg-amber-100 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-                    <div><h3 class="text-slate-500">في إجازة</h3><p class="text-2xl font-bold">${onLeaveEmployees}</p></div>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 rtl:space-x-reverse">
-                    <div class="bg-sky-100 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01" /></svg></div>
-                    <div><h3 class="text-slate-500">إجمالي الرواتب الشهرية</h3><p class="text-2xl font-bold">${totalSalary.toLocaleString('ar-SA')} ر.س</p></div>
-                </div>
-            `;
-        }
-
-        function renderEmployeesPage() {
-            if (state.employees.length === 0) {
-                ui.employeesTableBody.innerHTML = '<tr class="border-b"><td colspan="5" class="text-center p-4">لا يوجد موظفين مضافين.</td></tr>';
-                return;
-            }
-            ui.employeesTableBody.innerHTML = state.employees.sort((a, b) => a.name.localeCompare(b.name)).map(emp => {
-                const statusClasses = {
-                    active: 'bg-green-100 text-green-800',
-                    on_leave: 'bg-amber-100 text-amber-800',
-                    terminated: 'bg-red-100 text-red-800'
-                };
-                const statusText = {
-                    active: 'على رأس العمل',
-                    on_leave: 'في إجازة',
-                    terminated: 'منتهية خدماته'
-                };
-                return `<tr class="bg-white border-b hover:bg-slate-50">
-                    <td class="px-6 py-4 font-medium text-slate-900">${emp.name}</td>
-                    <td class="px-6 py-4">${emp.employeeId}</td>
-                    <td class="px-6 py-4">${emp.position}</td>
-                    <td class="px-6 py-4"><span class="px-2 py-1 text-xs font-medium rounded-full ${statusClasses[emp.status] || ''}">${statusText[emp.status] || emp.status}</span></td>
-                    <td class="px-6 py-4 text-center">
-                        <button onclick="openModal('salaryDetailsModal', '${emp.id}')" class="text-green-600 hover:text-green-800 font-semibold px-2">الراتب</button>
-                        <button onclick="openModal('addEmployeeModal', '${emp.id}')" class="text-blue-600 hover:text-blue-800 font-semibold px-2">تعديل</button>
-                        <button onclick="deleteEmployee('${emp.id}')" class="text-red-500 hover:text-red-700 font-semibold px-2">حذف</button>
-                    </td>
-                </tr>`;
-            }).join("");
-        }
-        
-        function renderOrUpdateDepartmentChart() {
-            const ctx = document.getElementById('department-chart').getContext('2d');
-            if (state.employees.length === 0) {
-                if (departmentChart) { departmentChart.destroy(); departmentChart = null; }
-                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-                ctx.font = "16px Cairo"; ctx.textAlign = "center"; ctx.fillStyle = "#9ca3af";
-                ctx.fillText("لا توجد بيانات كافية لعرض الرسم البياني", ctx.canvas.width / 2, ctx.canvas.height / 2);
-                return;
-            }
-            
-            const departmentCounts = state.employees.reduce((acc, emp) => {
-                acc[emp.department] = (acc[emp.department] || 0) + 1;
-                return acc;
-            }, {});
-
-            const chartData = {
-                labels: Object.keys(departmentCounts),
-                datasets: [{
-                    label: 'عدد الموظفين',
-                    data: Object.values(departmentCounts),
-                    backgroundColor: ['#a78bfa', '#7c3aed', '#c4b5fd', '#6d28d9', '#5b21b6'],
-                    hoverOffset: 4
-                }]
-            };
-
-            if (departmentChart) { 
-                departmentChart.data = chartData; 
-                departmentChart.update();
-            } else { 
-                departmentChart = new Chart(ctx, { 
-                    type: 'pie', 
-                    data: chartData, 
-                    options: { 
-                        responsive: true, 
-                        maintainAspectRatio: false, 
-                        plugins: { 
-                            legend: { position: 'top', labels: { font: { family: 'Cairo' } } },
-                            tooltip: { bodyFont: { family: 'Cairo' }, titleFont: { family: 'Cairo' } }
-                        } 
-                    } 
-                }); 
-            }
-        }
-
-        // --- Firebase Functions ---
-        async function initializeFirebase() {
-            try {
-                const firebaseConfig = { 
-                    apiKey: "AIzaSyDSlxf95W00Ow6LZba8waAKJINptIRPkU8", 
-                    authDomain: "sample-firebase-ai-app-960f4.firebaseapp.com", 
-                    projectId: "sample-firebase-ai-app-960f4", 
-                    storageBucket: "sample-firebase-ai-app-960f4.appspot.com", 
-                    messagingSenderId: "741880884079", 
-                    appId: "1:741880884079:web:8d2f6e233fb65e65e969a" 
-                };
-                
-                app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-
-                onAuthStateChanged(auth, user => {
-                    if (user) {
-                        userId = user.uid;
-                        ui.loginScreen.classList.remove('active');
-                        ui.mainMenuScreen.style.display = "block";
-                        ui.userDisplayName.textContent = user.displayName || `مستخدم: ${user.uid.substring(0,6)}…`;
-                        setupRealtimeListeners();
-                    } else {
-                        ui.loginScreen.classList.add('active');
-                        ui.mainMenuScreen.style.display = "none";
-                        clearDataAndListeners();
+            closeModal(modalId) {
+                const modal = document.getElementById(modalId);
+                modal.classList.add('opacity-0');
+                modal.querySelector('.modal-content').classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    if (modalId === 'salaryDetailsModal') {
+                        SalaryService.closeDetailsModal();
                     }
+                }, 300);
+            },
+
+            showAlert(title, message) {
+                document.getElementById('alertModalTitle').textContent = title;
+                document.getElementById('alertModalMessage').innerHTML = message;
+                document.getElementById('alertModalButtons').innerHTML = `<button type="button" onclick="UI.closeModal('alertModal')" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">حسنًا</button>`;
+                this.openModal('alertModal');
+            },
+
+            showConfirmation(title, message, onConfirm) {
+                document.getElementById('alertModalTitle').textContent = title;
+                document.getElementById('alertModalMessage').textContent = message;
+                this.confirmationCallback = onConfirm;
+                document.getElementById('alertModalButtons').innerHTML = `<button type="button" onclick="UI.closeModal('alertModal')" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-6 rounded-lg transition-colors">إلغاء</button><button type="button" id="confirm-action-button" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">تأكيد</button>`;
+                this.openModal('alertModal');
+                document.getElementById('confirm-action-button').onclick = () => {
+                    if (this.confirmationCallback) this.confirmationCallback();
+                    this.closeModal('alertModal');
+                    this.confirmationCallback = null;
+                };
+            },
+
+            showPage(pageId) {
+                document.querySelectorAll('#hr-module-container .page').forEach(e => e.classList.remove('active'));
+                document.getElementById(pageId).classList.add('active');
+                document.querySelectorAll('#sidebar-nav .sidebar-link').forEach(e => e.classList.remove('active'));
+                const activeLink = document.querySelector(`#sidebar-nav .sidebar-link[data-page="${pageId}"]`);
+                if (activeLink) activeLink.classList.add('active');
+            },
+
+            showScreen(screenId) {
+                ['login-screen', 'main-menu-screen', 'hr-module-container'].forEach(id => {
+                    document.getElementById(id).style.display = 'none';
                 });
-            } catch (e) {
-                console.error("Firebase initialization error:", e);
-                showAlert('خطأ فني', 'فشل في تهيئة التطبيق. يرجى تحديث الصفحة.');
-            }
-        }
+                const screen = document.getElementById(screenId);
+                screen.style.display = (screenId === 'hr-module-container') ? 'flex' : 'block';
+                if (screenId === 'login-screen') screen.classList.add('active');
+            },
 
-        window.signInWithGoogle = async () => { 
-            const provider = new GoogleAuthProvider();
-            try { 
-                await signInWithPopup(auth, provider); 
-            } catch (e) { 
-                showAlert("فشل تسجيل الدخول", "لم نتمكن من تسجيل دخولك باستخدام جوجل. يرجى المحاولة مرة أخرى."); 
-                console.error("Google Sign-In Error:", e);
-            }
-        };
+            renderAll() {
+                this.renderHrDashboard();
+                this.renderEmployeesPage();
+                this.renderOrUpdateDepartmentChart();
+                this.renderPayrollHistory();
+            },
 
-        window.signOutUser = async () => { 
-            try {
-                await signOut(auth);
-            } catch (e) { 
-                showAlert("خطأ", "فشلت عملية تسجيل الخروج."); 
-            } 
-        };
+            renderHrDashboard() {
+                const totalEmployees = state.employees.length;
+                const activeEmployees = state.employees.filter(e => e.status === 'active').length;
+                const onLeaveEmployees = state.employees.filter(e => e.status === 'on_leave').length;
+                this.elements.hrDashboardStats.innerHTML = `
+                    <div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 rtl:space-x-reverse">
+                        <div class="bg-violet-100 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
+                        <div><h3 class="text-slate-500">إجمالي الموظفين</h3><p class="text-2xl font-bold">${totalEmployees}</p></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 rtl:space-x-reverse">
+                        <div class="bg-green-100 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
+                        <div><h3 class="text-slate-500">على رأس العمل</h3><p class="text-2xl font-bold">${activeEmployees}</p></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 rtl:space-x-reverse">
+                        <div class="bg-amber-100 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                        <div><h3 class="text-slate-500">في إجازة</h3><p class="text-2xl font-bold">${onLeaveEmployees}</p></div>
+                    </div>
+                `;
+            },
 
-        function clearDataAndListeners() {
-            if (employeesUnsubscribe) employeesUnsubscribe();
-            if (payrollsUnsubscribe) payrollsUnsubscribe();
-            employeesUnsubscribe = null;
-            payrollsUnsubscribe = null;
-            state = { employees: [], payrolls: [], currentEmployee: { allowances: [], deductions: [] } };
-            renderAll();
-        }
-
-        function setupRealtimeListeners() {
-            clearDataAndListeners();
-            if (!userId) {
-                console.error("Cannot setup listeners: userId is missing.");
-                return;
-            };
-            const employeesRef = collection(db, "hr-data", userId, "employees");
-            employeesUnsubscribe = onSnapshot(employeesRef, snapshot => {
-                state.employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderAll();
-            }, error => {
-                console.error("Employees listener failed:", error);
-                showAlert('خطأ في الاتصال', 'فشل تحميل بيانات الموظفين.');
-            });
-
-            const payrollsRef = collection(db, "hr-data", userId, "payrolls");
-            payrollsUnsubscribe = onSnapshot(payrollsRef, snapshot => {
-                state.payrolls = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderPayrollHistory();
-            });
-        }
-
-        // --- HR Data Functions ---
-        const handleEmployeeFormSubmit = async (event) => {
-            event.preventDefault();
-            const form = event.target;
-            const employeeData = {
-                name: form.employeeName.value.trim(),
-                employeeId: form.employeeId.value.trim(),
-                position: form.employeePosition.value.trim(),
-                department: form.employeeDepartment.value.trim(),
-                startDate: form.employeeStartDate.value,
-                salary: Number(form.employeeSalary.value),
-                status: form.employeeStatus.value,
-            };
-
-            if (!employeeData.name || !employeeData.employeeId) {
-                showAlert("بيانات ناقصة", "يرجى إدخال اسم الموظف ورقمه الوظيفي على الأقل.");
-                return;
-            }
-            
-            try {
-                if (!db || !userId) {
-                    showAlert("خطأ في الاتصال", "لا يمكن الاتصال بقاعدة البيانات. يرجى تسجيل الدخول أولاً.");
+            renderEmployeesPage() {
+                if (state.employees.length === 0) {
+                    this.elements.employeesTableBody.innerHTML = '<tr class="border-b"><td colspan="5" class="text-center p-4">لا يوجد موظفين مضافين.</td></tr>';
                     return;
                 }
+                this.elements.employeesTableBody.innerHTML = state.employees.sort((a, b) => a.name.localeCompare(b.name)).map(emp => {
+                    const statusClasses = { active: 'bg-green-100 text-green-800', on_leave: 'bg-amber-100 text-amber-800', terminated: 'bg-red-100 text-red-800' };
+                    const statusText = { active: 'على رأس العمل', on_leave: 'في إجازة', terminated: 'منتهية خدماته' };
+                    return `<tr class="bg-white border-b hover:bg-slate-50">
+                        <td class="px-6 py-4 font-medium text-slate-900">${emp.name}</td>
+                        <td class="px-6 py-4">${emp.employeeId}</td>
+                        <td class="px-6 py-4">${emp.position}</td>
+                        <td class="px-6 py-4"><span class="px-2 py-1 text-xs font-medium rounded-full ${statusClasses[emp.status] || ''}">${statusText[emp.status] || emp.status}</span></td>
+                        <td class="px-6 py-4 text-center" data-employee-id="${emp.id}">
+                            <button class="salary-details-button text-green-600 hover:text-green-800 font-semibold px-2">الراتب</button>
+                            <button class="edit-employee-button text-blue-600 hover:text-blue-800 font-semibold px-2">تعديل</button>
+                            <button class="delete-employee-button text-red-500 hover:text-red-700 font-semibold px-2">حذف</button>
+                        </td>
+                    </tr>`;
+                }).join("");
+            },
 
-                const editId = ui.employeeEditIdInput.value;
-                const employeesCollectionRef = collection(db, "hr-data", userId, "employees");
-
-                if (editId) {
-                    // Update existing employee
-                    const employeeDocRef = doc(db, "hr-data", userId, "employees", editId);
-                    await updateDoc(employeeDocRef, employeeData);
-                    showAlert("نجاح", "تم تعديل بيانات الموظف بنجاح.");
-                } else {
-                    // Add new employee
-                    const q = query(employeesCollectionRef, where("employeeId", "==", employeeData.employeeId));
-                    const querySnapshot = await getDocs(q);
-                    
-                    if (!querySnapshot.empty) {
-                        showAlert("خطأ", "الرقم الوظيفي المدخل موجود بالفعل لموظف آخر.");
-                        return;
-                    }
-
-                    await addDoc(employeesCollectionRef, employeeData);
-                    showAlert("نجاح", "تمت إضافة الموظف بنجاح.");
+            renderOrUpdateDepartmentChart() {
+                const ctx = this.elements.departmentChartCanvas.getContext('2d');
+                if (state.employees.length === 0) {
+                    if (this.departmentChart) { this.departmentChart.destroy(); this.departmentChart = null; }
+                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    ctx.font = "16px Cairo"; ctx.textAlign = "center"; ctx.fillStyle = "#9ca3af";
+                    ctx.fillText("لا توجد بيانات كافية لعرض الرسم البياني", ctx.canvas.width / 2, ctx.canvas.height / 2);
+                    return;
                 }
                 
-                closeModal("addEmployeeModal");
+                const departmentCounts = state.employees.reduce((acc, emp) => {
+                    acc[emp.department] = (acc[emp.department] || 0) + 1;
+                    return acc;
+                }, {});
 
-            } catch (err) {
-                showAlert("خطأ فني", "حدث خطأ أثناء حفظ البيانات. يرجى المحاولة مرة أخرى.");
-                console.error("Error handling employee form:", err);
-            }
-        };
+                const chartData = {
+                    labels: Object.keys(departmentCounts),
+                    datasets: [{
+                        label: 'عدد الموظفين',
+                        data: Object.values(departmentCounts),
+                        backgroundColor: ['#a78bfa', '#7c3aed', '#c4b5fd', '#6d28d9', '#5b21b6'],
+                        hoverOffset: 4
+                    }]
+                };
 
-        window.deleteEmployee = (docId) => {
-            showConfirmation("تأكيد الحذف", "هل أنت متأكد من حذف هذا الموظف؟ لا يمكن التراجع عن هذا الإجراء.", async () => {
-                try {
-                    if (!db || !userId) {
-                       showAlert("خطأ في الاتصال", "لا يمكن الاتصال بقاعدة البيانات.");
-                       return;
-                    }
-                    await deleteDoc(doc(db, "hr-data", userId, "employees", docId));
-                    showAlert("نجاح", "تم حذف الموظف بنجاح.");
-                } catch (err) {
-                    showAlert("خطأ", "فشلت عملية حذف الموظف.");
-                    console.error("Error deleting employee:", err);
+                if (this.departmentChart) { 
+                    this.departmentChart.data = chartData; 
+                    this.departmentChart.update();
+                } else { 
+                    this.departmentChart = new Chart(ctx, { 
+                        type: 'pie', data: chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { font: { family: 'Cairo' } } }, tooltip: { bodyFont: { family: 'Cairo' }, titleFont: { family: 'Cairo' } } } } 
+                    }); 
                 }
-            });
-        };
-
-        // --- Salary Details Functions ---
-        const openSalaryDetailsModal = (employeeId) => {
-            const employee = state.employees.find(e => e.id === employeeId);
-            if (!employee) return;
-
-            document.getElementById('salary-details-employee-name').textContent = employee.name;
-            document.getElementById('salary-details-employee-id').value = employee.id;
-
-            const allowancesRef = collection(db, "hr-data", userId, "employees", employeeId, "allowances");
-            allowancesUnsubscribe = onSnapshot(allowancesRef, snapshot => {
-                state.currentEmployee.allowances = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderSalaryAdjustments('allowances');
-                updateNetSalary();
-            });
-
-            const deductionsRef = collection(db, "hr-data", userId, "employees", employeeId, "deductions");
-            deductionsUnsubscribe = onSnapshot(deductionsRef, snapshot => {
-                state.currentEmployee.deductions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderSalaryAdjustments('deductions');
-                updateNetSalary();
-            });
-        };
-
-        const renderSalaryAdjustments = (type) => {
-            const tableBody = document.getElementById(`${type}-table-body`);
-            const items = state.currentEmployee[type];
-            tableBody.innerHTML = items.map(item => `
-                <tr class="border-b">
-                    <td class="p-2">${item.name}</td>
-                    <td class="p-2">${item.amount.toLocaleString('ar-SA')} ر.س</td>
-                    <td class="p-2 text-left">
-                        <button onclick="deleteSalaryAdjustment('${type}', '${item.id}')" class="text-red-500 hover:text-red-700">حذف</button>
-                    </td>
-                </tr>
-            `).join('');
-        };
-
-        const addAdjustmentRow = (type) => {
-            const tableBody = document.getElementById(`${type}-table-body`);
-            const tr = document.createElement('tr');
-            tr.className = 'border-b';
-            tr.innerHTML = `
-                <td class="p-2"><input type="text" placeholder="البند" class="w-full p-1 border rounded"></td>
-                <td class="p-2"><input type="number" placeholder="المبلغ" class="w-full p-1 border rounded"></td>
-                <td class="p-2 text-left">
-                    <button class="text-green-500 hover:text-green-700">حفظ</button>
-                </td>
-            `;
-            const saveButton = tr.querySelector('button');
-            saveButton.onclick = () => saveSalaryAdjustment(type, tr);
-            tableBody.appendChild(tr);
-        };
-        window.addAllowanceRow = () => addAdjustmentRow('allowances');
-        window.addDeductionRow = () => addAdjustmentRow('deductions');
-
-        const saveSalaryAdjustment = async (type, tableRow) => {
-            const employeeId = document.getElementById('salary-details-employee-id').value;
-            const nameInput = tableRow.querySelector('input[type="text"]');
-            const amountInput = tableRow.querySelector('input[type="number"]');
-            const name = nameInput.value.trim();
-            const amount = parseFloat(amountInput.value);
-
-            if (!name || isNaN(amount) || amount <= 0) {
-                showAlert('بيانات ناقصة', 'يرجى إدخال اسم البند ومبلغ صحيح.');
-                return;
-            }
-
-            try {
-                const collectionRef = collection(db, "hr-data", userId, "employees", employeeId, type);
-                await addDoc(collectionRef, { name, amount });
-                // The onSnapshot listener will automatically re-render the table
-            } catch (e) {
-                console.error(`Error saving ${type}:`, e);
-                showAlert('خطأ', 'فشل حفظ البند.');
-            }
-        };
-        
-        window.deleteSalaryAdjustment = async (type, docId) => {
-            const employeeId = document.getElementById('salary-details-employee-id').value;
-            try {
-                await deleteDoc(doc(db, "hr-data", userId, "employees", employeeId, type, docId));
-            } catch(e) {
-                console.error(`Error deleting ${type}:`, e);
-                showAlert('خطأ', 'فشل حذف البند.');
-            }
-        };
-
-        const updateNetSalary = () => {
-            const employeeId = document.getElementById('salary-details-employee-id').value;
-            const employee = state.employees.find(e => e.id === employeeId);
-            if (!employee) return;
-
-            const baseSalary = Number(employee.salary) || 0;
-            const totalAllowances = state.currentEmployee.allowances.reduce((sum, item) => sum + Number(item.amount), 0);
-            const totalDeductions = state.currentEmployee.deductions.reduce((sum, item) => sum + Number(item.amount), 0);
-            const netSalary = baseSalary + totalAllowances - totalDeductions;
+            },
             
-            document.getElementById('net-salary-display').textContent = `${netSalary.toLocaleString('ar-SA')} ر.س`;
+            renderPayrollHistory() {
+                if (state.payrolls.length === 0) {
+                    this.elements.payrollHistoryContainer.innerHTML = `<p class="text-sm text-slate-500 text-center">لم يتم إصدار أي مسيرات رواتب.</p>`;
+                    return;
+                }
+                const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+                this.elements.payrollHistoryContainer.innerHTML = state.payrolls
+                    .sort((a,b) => b.createdAt.toMillis() - a.createdAt.toMillis())
+                    .map(p => `<div data-payroll-id="${p.id}" class="payroll-history-item p-3 rounded-lg cursor-pointer hover:bg-slate-100 border">
+                        <p class="font-semibold">مسير رواتب ${months[p.month]} ${p.year}</p>
+                        <p class="text-sm text-slate-600">صافي المبلغ: ${p.netPay.toLocaleString('ar-SA')} ر.س</p>
+                    </div>`).join('');
+            },
             
-            // Update the net salary in the main employee object for display purposes
-            const employeeInState = state.employees.find(e => e.id === employeeId);
-            if(employeeInState) employeeInState.netSalary = netSalary;
+            renderPayrollDetails(payroll, records) {
+                const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+                let tableHTML = records.map(r => `
+                    <tr class="border-b">
+                        <td class="p-2">${r.name}</td>
+                        <td class="p-2">${r.salary.toLocaleString('ar-SA')}</td>
+                        <td class="p-2">${r.allowances.reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
+                        <td class="p-2">${r.deductions.reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
+                        <td class="p-2 font-bold">${r.netPay.toLocaleString('ar-SA')}</td>
+                    </tr>
+                `).join('');
+
+                this.elements.payrollDetailsContainer.innerHTML = `
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <div class="flex justify-between items-center mb-4">
+                             <h3 class="font-bold text-lg">تفاصيل مسير رواتب ${months[payroll.month]} ${payroll.year}</h3>
+                             <button data-payroll-id="${payroll.id}" class="print-payroll-button text-sm bg-slate-200 px-3 py-1 rounded-md hover:bg-slate-300">طباعة</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-slate-50">
+                                    <tr>
+                                        <th class="p-2 text-right font-semibold">الموظف</th>
+                                        <th class="p-2 text-right font-semibold">الراتب الأساسي</th>
+                                        <th class="p-2 text-right font-semibold">إجمالي البدلات</th>
+                                        <th class="p-2 text-right font-semibold">إجمالي الخصومات</th>
+                                        <th class="p-2 text-right font-semibold">صافي الراتب (ر.س)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${tableHTML}</tbody>
+                                <tfoot class="font-bold bg-slate-100">
+                                    <tr>
+                                        <td class="p-2">الإجمالي</td>
+                                        <td class="p-2">${payroll.totalBaseSalary.toLocaleString('ar-SA')}</td>
+                                        <td class="p-2">${payroll.totalAllowances.toLocaleString('ar-SA')}</td>
+                                        <td class="p-2">${payroll.totalDeductions.toLocaleString('ar-SA')}</td>
+                                        <td class="p-2">${payroll.netPay.toLocaleString('ar-SA')}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                this.elements.payrollDetailsContainer.classList.remove('hidden');
+            }
         };
 
-        // --- Payroll Functions ---
-        const handlePayrollGeneration = async (event) => {
-            event.preventDefault();
-            const month = document.getElementById('payroll-month').value;
-            const year = document.getElementById('payroll-year').value;
-            const payrollId = `${year}-${String(parseInt(month) + 1).padStart(2, '0')}`;
+        // --- Firebase Service ---
+        const FirebaseService = {
+            initialize() {
+                try {
+                    const firebaseConfig = { 
+                        apiKey: "AIzaSyDSlxf95W00Ow6LZba8waAKJINptIRPkU8", 
+                        authDomain: "sample-firebase-ai-app-960f4.firebaseapp.com", 
+                        projectId: "sample-firebase-ai-app-960f4", 
+                        storageBucket: "sample-firebase-ai-app-960f4.appspot.com", 
+                        messagingSenderId: "741880884079", 
+                        appId: "1:741880884079:web:8d2f6e233fb65e65e969a" 
+                    };
+                    state.firebase.app = initializeApp(firebaseConfig);
+                    state.firebase.auth = getAuth(state.firebase.app);
+                    state.firebase.db = getFirestore(state.firebase.app);
+                    this.setupAuthListener();
+                } catch (e) {
+                    console.error("Firebase initialization error:", e);
+                    UI.showAlert('خطأ فني', 'فشل في تهيئة التطبيق. يرجى تحديث الصفحة.');
+                }
+            },
+            setupAuthListener() {
+                onAuthStateChanged(state.firebase.auth, user => {
+                    if (user) {
+                        state.firebase.userId = user.uid;
+                        UI.elements.loginScreen.classList.remove('active');
+                        UI.showScreen('main-menu-screen');
+                        UI.elements.userDisplayName.textContent = user.displayName || `مستخدم: ${user.uid.substring(0,6)}…`;
+                        this.setupRealtimeListeners();
+                    } else {
+                        UI.showScreen('login-screen');
+                        this.clearAllListeners();
+                    }
+                });
+            },
+            signInWithGoogle() { 
+                const provider = new GoogleAuthProvider();
+                signInWithPopup(state.firebase.auth, provider).catch(e => { 
+                    UI.showAlert("فشل تسجيل الدخول", "لم نتمكن من تسجيل دخولك باستخدام جوجل. يرجى المحاولة مرة أخرى."); 
+                    console.error("Google Sign-In Error:", e);
+                });
+            },
+            signOutUser() { 
+                signOut(state.firebase.auth).catch(e => UI.showAlert("خطأ", "فشلت عملية تسجيل الخروج.")); 
+            },
+            clearAllListeners() {
+                Object.values(state.listeners).forEach(unsubscribe => {
+                    if (unsubscribe) unsubscribe();
+                });
+                state.employees = [];
+                state.payrolls = [];
+                UI.renderAll();
+            },
+            setupRealtimeListeners() {
+                this.clearAllListeners();
+                const { userId } = state.firebase;
+                if (!userId) return;
 
-            if (state.payrolls.some(p => p.id === payrollId)) {
-                showAlert('موجود مسبقاً', 'تم إصدار مسير رواتب لهذا الشهر بالفعل.');
-                return;
+                const employeesRef = collection(state.firebase.db, "hr-data", userId, "employees");
+                state.listeners.employees = onSnapshot(employeesRef, snapshot => {
+                    state.employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    UI.renderAll();
+                }, error => console.error("Employees listener failed:", error));
+
+                const payrollsRef = collection(state.firebase.db, "hr-data", userId, "payrolls");
+                state.listeners.payrolls = onSnapshot(payrollsRef, snapshot => {
+                    state.payrolls = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    UI.renderPayrollHistory();
+                }, error => console.error("Payrolls listener failed:", error));
             }
+        };
 
-            const activeEmployees = state.employees.filter(e => e.status === 'active');
-            if (activeEmployees.length === 0) {
-                showAlert('لا يوجد موظفين', 'لا يوجد موظفين نشطين لإصدار مسير رواتب لهم.');
-                return;
+        // --- Employee Service ---
+        const EmployeeService = {
+            async handleFormSubmit(event) {
+                event.preventDefault();
+                const form = event.target;
+                const employeeData = {
+                    name: form.employeeName.value.trim(),
+                    employeeId: form.employeeId.value.trim(),
+                    position: form.employeePosition.value.trim(),
+                    department: form.employeeDepartment.value.trim(),
+                    startDate: form.employeeStartDate.value,
+                    salary: Number(form.employeeSalary.value),
+                    status: form.employeeStatus.value,
+                };
+
+                if (!employeeData.name || !employeeData.employeeId) {
+                    return UI.showAlert("بيانات ناقصة", "يرجى إدخال اسم الموظف ورقمه الوظيفي على الأقل.");
+                }
+                
+                const { db, userId } = state.firebase;
+                if (!db || !userId) {
+                    return UI.showAlert("خطأ في الاتصال", "لا يمكن الاتصال بقاعدة البيانات. يرجى تسجيل الدخول أولاً.");
+                }
+
+                const editId = UI.elements.employeeEditIdInput.value;
+                const employeesCollectionRef = collection(db, "hr-data", userId, "employees");
+
+                try {
+                    if (editId) {
+                        await updateDoc(doc(employeesCollectionRef, editId), employeeData);
+                        UI.showAlert("نجاح", "تم تعديل بيانات الموظف بنجاح.");
+                    } else {
+                        const q = query(employeesCollectionRef, where("employeeId", "==", employeeData.employeeId));
+                        const querySnapshot = await getDocs(q);
+                        if (!querySnapshot.empty) {
+                            return UI.showAlert("خطأ", "الرقم الوظيفي المدخل موجود بالفعل لموظف آخر.");
+                        }
+                        await addDoc(employeesCollectionRef, employeeData);
+                        UI.showAlert("نجاح", "تمت إضافة الموظف بنجاح.");
+                    }
+                    UI.closeModal("addEmployeeModal");
+                } catch (err) {
+                    UI.showAlert("خطأ فني", "حدث خطأ أثناء حفظ البيانات.");
+                    console.error("Error handling employee form:", err);
+                }
+            },
+
+            delete(docId) {
+                UI.showConfirmation("تأكيد الحذف", "هل أنت متأكد من حذف هذا الموظف؟", async () => {
+                    const { db, userId } = state.firebase;
+                    if (!db || !userId) return UI.showAlert("خطأ في الاتصال", "لا يمكن الاتصال بقاعدة البيانات.");
+                    try {
+                        await deleteDoc(doc(db, "hr-data", userId, "employees", docId));
+                        UI.showAlert("نجاح", "تم حذف الموظف بنجاح.");
+                    } catch (err) {
+                        UI.showAlert("خطأ", "فشلت عملية حذف الموظف.");
+                        console.error("Error deleting employee:", err);
+                    }
+                });
             }
+        };
 
-            const batch = writeBatch(db);
-            let totalBaseSalary = 0, totalAllowances = 0, totalDeductions = 0, netPay = 0;
-            
-            for (const emp of activeEmployees) {
-                const allowancesSnapshot = await getDocs(collection(db, "hr-data", userId, "employees", emp.id, "allowances"));
-                const deductionsSnapshot = await getDocs(collection(db, "hr-data", userId, "employees", emp.id, "deductions"));
+        // --- Salary Service ---
+        const SalaryService = {
+            openDetailsModal(employeeId) {
+                const employee = state.employees.find(e => e.id === employeeId);
+                if (!employee) return;
+                
+                state.currentEmployee = { id: employee.id, data: employee, allowances: [], deductions: [] };
+                document.getElementById('salary-details-employee-name').textContent = employee.name;
+                document.getElementById('salary-details-employee-id').value = employee.id;
 
-                const allowances = allowancesSnapshot.docs.map(d => d.data());
-                const deductions = deductionsSnapshot.docs.map(d => d.data());
-
-                const empTotalAllowances = allowances.reduce((s, i) => s + i.amount, 0);
-                const empTotalDeductions = deductions.reduce((s, i) => s + i.amount, 0);
-                const empNet = emp.salary + empTotalAllowances - empTotalDeductions;
-
-                const payrollRecordRef = doc(db, "hr-data", userId, "payrolls", payrollId, "records", emp.id);
-                batch.set(payrollRecordRef, {
-                    ...emp,
-                    allowances,
-                    deductions,
-                    netPay: empNet
+                const { db, userId } = state.firebase;
+                const allowancesRef = collection(db, "hr-data", userId, "employees", employeeId, "allowances");
+                state.listeners.allowances = onSnapshot(allowancesRef, snapshot => {
+                    state.currentEmployee.allowances = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    this.renderAdjustments('allowances');
+                    this.updateNetSalary();
                 });
 
-                totalBaseSalary += emp.salary;
-                totalAllowances += empTotalAllowances;
-                totalDeductions += empTotalDeductions;
-                netPay += empNet;
-            }
+                const deductionsRef = collection(db, "hr-data", userId, "employees", employeeId, "deductions");
+                state.listeners.deductions = onSnapshot(deductionsRef, snapshot => {
+                    state.currentEmployee.deductions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    this.renderAdjustments('deductions');
+                    this.updateNetSalary();
+                });
+            },
 
-            const payrollDocRef = doc(db, "hr-data", userId, "payrolls", payrollId);
-            batch.set(payrollDocRef, {
-                createdAt: new Date(),
-                month: parseInt(month),
-                year: parseInt(year),
-                totalBaseSalary,
-                totalAllowances,
-                totalDeductions,
-                netPay,
-                employeeCount: activeEmployees.length
-            });
+            closeDetailsModal() {
+                if (state.listeners.allowances) state.listeners.allowances();
+                if (state.listeners.deductions) state.listeners.deductions();
+                state.listeners.allowances = null;
+                state.listeners.deductions = null;
+            },
 
-            try {
-                await batch.commit();
-                showAlert('نجاح', `تم إصدار مسير رواتب شهر ${parseInt(month) + 1} / ${year} بنجاح.`);
-                closeModal('generatePayrollModal');
-            } catch (e) {
-                console.error("Error generating payroll:", e);
-                showAlert('خطأ', 'فشل إصدار مسير الرواتب.');
-            }
-        };
+            renderAdjustments(type) {
+                const tableBody = document.getElementById(`${type}-table-body`);
+                const items = state.currentEmployee[type];
+                tableBody.innerHTML = items.map(item => `
+                    <tr class="border-b" data-id="${item.id}">
+                        <td class="p-2">${item.name}</td>
+                        <td class="p-2">${item.amount.toLocaleString('ar-SA')} ر.س</td>
+                        <td class="p-2 text-left">
+                            <button class="delete-adjustment-button text-red-500 hover:text-red-700">حذف</button>
+                        </td>
+                    </tr>
+                `).join('');
+            },
 
-        const renderPayrollHistory = () => {
-            if (state.payrolls.length === 0) {
-                ui.payrollHistoryContainer.innerHTML = `<p class="text-sm text-slate-500 text-center">لم يتم إصدار أي مسيرات رواتب.</p>`;
-                return;
-            }
-            const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-            ui.payrollHistoryContainer.innerHTML = state.payrolls
-                .sort((a,b) => b.createdAt.toMillis() - a.createdAt.toMillis())
-                .map(p => `<div onclick="displayPayrollDetails('${p.id}')" class="p-3 rounded-lg cursor-pointer hover:bg-slate-100 border">
-                    <p class="font-semibold">مسير رواتب ${months[p.month]} ${p.year}</p>
-                    <p class="text-sm text-slate-600">صافي المبلغ: ${p.netPay.toLocaleString('ar-SA')} ر.س</p>
-                </div>`).join('');
-        };
+            addAdjustmentRow(type) {
+                const tableBody = document.getElementById(`${type}-table-body`);
+                const tr = document.createElement('tr');
+                tr.className = 'border-b';
+                tr.innerHTML = `
+                    <td class="p-2"><input type="text" placeholder="البند" class="w-full p-1 border rounded"></td>
+                    <td class="p-2"><input type="number" placeholder="المبلغ" class="w-full p-1 border rounded"></td>
+                    <td class="p-2 text-left"><button class="save-adjustment-button text-green-500 hover:text-green-700">حفظ</button></td>
+                `;
+                tableBody.appendChild(tr);
+            },
 
-        window.displayPayrollDetails = async (payrollId) => {
-            const payroll = state.payrolls.find(p => p.id === payrollId);
-            if (!payroll) return;
+            async saveAdjustment(type, tableRow) {
+                const { db, userId } = state.firebase;
+                const employeeId = state.currentEmployee.id;
+                const name = tableRow.querySelector('input[type="text"]').value.trim();
+                const amount = parseFloat(tableRow.querySelector('input[type="number"]').value);
 
-            const recordsSnapshot = await getDocs(collection(db, "hr-data", userId, "payrolls", payrollId, "records"));
-            const records = recordsSnapshot.docs.map(d => d.data());
+                if (!name || isNaN(amount) || amount <= 0) return UI.showAlert('بيانات ناقصة', 'يرجى إدخال اسم البند ومبلغ صحيح.');
 
-            const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+                try {
+                    const collectionRef = collection(db, "hr-data", userId, "employees", employeeId, type);
+                    await addDoc(collectionRef, { name, amount });
+                } catch (e) {
+                    console.error(`Error saving ${type}:`, e);
+                    UI.showAlert('خطأ', 'فشل حفظ البند.');
+                }
+            },
             
-            let tableHTML = records.map(r => `
-                <tr class="border-b">
-                    <td class="p-2">${r.name}</td>
-                    <td class="p-2">${r.salary.toLocaleString('ar-SA')}</td>
-                    <td class="p-2">${r.allowances.reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
-                    <td class="p-2">${r.deductions.reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
-                    <td class="p-2 font-bold">${r.netPay.toLocaleString('ar-SA')}</td>
-                </tr>
-            `).join('');
+            async deleteAdjustment(type, docId) {
+                const { db, userId } = state.firebase;
+                const employeeId = state.currentEmployee.id;
+                try {
+                    await deleteDoc(doc(db, "hr-data", userId, "employees", employeeId, type, docId));
+                } catch(e) {
+                    console.error(`Error deleting ${type}:`, e);
+                    UI.showAlert('خطأ', 'فشل حذف البند.');
+                }
+            },
 
-            ui.payrollDetailsContainer.innerHTML = `
-                <div class="bg-white p-6 rounded-xl shadow-lg">
-                    <div class="flex justify-between items-center mb-4">
-                         <h3 class="font-bold text-lg">تفاصيل مسير رواتب ${months[payroll.month]} ${payroll.year}</h3>
-                         <button onclick="printPayroll('${payrollId}')" class="text-sm bg-slate-200 px-3 py-1 rounded-md hover:bg-slate-300">طباعة</button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead class="bg-slate-50">
+            updateNetSalary() {
+                const { data, allowances, deductions } = state.currentEmployee;
+                if (!data) return;
+                const baseSalary = Number(data.salary) || 0;
+                const totalAllowances = allowances.reduce((sum, item) => sum + Number(item.amount), 0);
+                const totalDeductions = deductions.reduce((sum, item) => sum + Number(item.amount), 0);
+                const netSalary = baseSalary + totalAllowances - totalDeductions;
+                document.getElementById('net-salary-display').textContent = `${netSalary.toLocaleString('ar-SA')} ر.س`;
+            },
+            
+            async generatePayroll(event) {
+                event.preventDefault();
+                const { db, userId } = state.firebase;
+                const month = document.getElementById('payroll-month').value;
+                const year = document.getElementById('payroll-year').value;
+                const payrollId = `${year}-${String(parseInt(month) + 1).padStart(2, '0')}`;
+
+                if (state.payrolls.some(p => p.id === payrollId)) return UI.showAlert('موجود مسبقاً', 'تم إصدار مسير رواتب لهذا الشهر بالفعل.');
+                const activeEmployees = state.employees.filter(e => e.status === 'active');
+                if (activeEmployees.length === 0) return UI.showAlert('لا يوجد موظفين', 'لا يوجد موظفين نشطين لإصدار مسير رواتب لهم.');
+
+                const batch = writeBatch(db);
+                let totalBaseSalary = 0, totalAllowances = 0, totalDeductions = 0, netPay = 0;
+                
+                for (const emp of activeEmployees) {
+                    const allowancesSnap = await getDocs(collection(db, "hr-data", userId, "employees", emp.id, "allowances"));
+                    const deductionsSnap = await getDocs(collection(db, "hr-data", userId, "employees", emp.id, "deductions"));
+                    const allowances = allowancesSnap.docs.map(d => d.data());
+                    const deductions = deductionsSnap.docs.map(d => d.data());
+                    const empTotalAllowances = allowances.reduce((s, i) => s + i.amount, 0);
+                    const empTotalDeductions = deductions.reduce((s, i) => s + i.amount, 0);
+                    const empNet = emp.salary + empTotalAllowances - empTotalDeductions;
+
+                    batch.set(doc(db, "hr-data", userId, "payrolls", payrollId, "records", emp.id), { ...emp, allowances, deductions, netPay: empNet });
+                    totalBaseSalary += emp.salary;
+                    totalAllowances += empTotalAllowances;
+                    totalDeductions += empTotalDeductions;
+                    netPay += empNet;
+                }
+
+                batch.set(doc(db, "hr-data", userId, "payrolls", payrollId), { createdAt: new Date(), month: parseInt(month), year: parseInt(year), totalBaseSalary, totalAllowances, totalDeductions, netPay, employeeCount: activeEmployees.length });
+
+                try {
+                    await batch.commit();
+                    UI.showAlert('نجاح', `تم إصدار مسير رواتب شهر ${parseInt(month) + 1} / ${year} بنجاح.`);
+                    UI.closeModal('generatePayrollModal');
+                } catch (e) {
+                    console.error("Error generating payroll:", e);
+                    UI.showAlert('خطأ', 'فشل إصدار مسير الرواتب.');
+                }
+            },
+
+            async printPayroll(payrollId) {
+                const { db, userId } = state.firebase;
+                const payroll = state.payrolls.find(p => p.id === payrollId);
+                if (!payroll) return;
+
+                const recordsSnapshot = await getDocs(collection(db, "hr-data", userId, "payrolls", payrollId, "records"));
+                const records = recordsSnapshot.docs.map(d => d.data());
+                const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+                const printableDiv = document.getElementById('printable-payroll');
+                printableDiv.innerHTML = `
+                    <div class="p-8">
+                        <h1 class="text-2xl font-bold text-center mb-2">مسير رواتب شهر ${months[payroll.month]} ${payroll.year}</h1>
+                        <p class="text-center text-sm mb-6">تاريخ الطباعة: ${new Date().toLocaleDateString('ar-SA')}</p>
+                        <table class="w-full text-sm border-collapse border border-slate-400">
+                            <thead class="bg-slate-200">
                                 <tr>
-                                    <th class="p-2 text-right font-semibold">الموظف</th>
-                                    <th class="p-2 text-right font-semibold">الراتب الأساسي</th>
-                                    <th class="p-2 text-right font-semibold">إجمالي البدلات</th>
-                                    <th class="p-2 text-right font-semibold">إجمالي الخصومات</th>
-                                    <th class="p-2 text-right font-semibold">صافي الراتب (ر.س)</th>
+                                    <th class="p-2 border border-slate-300">الموظف</th><th class="p-2 border border-slate-300">الراتب الأساسي</th>
+                                    <th class="p-2 border border-slate-300">إجمالي البدلات</th><th class="p-2 border border-slate-300">إجمالي الخصومات</th>
+                                    <th class="p-2 border border-slate-300">صافي الراتب</th>
                                 </tr>
                             </thead>
-                            <tbody>${tableHTML}</tbody>
-                            <tfoot class="font-bold bg-slate-100">
+                            <tbody>
+                                ${records.map(r => `
+                                    <tr class="border-b">
+                                        <td class="p-2 border border-slate-300">${r.name}</td>
+                                        <td class="p-2 border border-slate-300">${r.salary.toLocaleString('ar-SA')}</td>
+                                        <td class="p-2 border border-slate-300">${r.allowances.reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
+                                        <td class="p-2 border border-slate-300">${r.deductions.reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
+                                        <td class="p-2 border border-slate-300 font-bold">${r.netPay.toLocaleString('ar-SA')}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                            <tfoot class="font-bold bg-slate-200">
                                 <tr>
-                                    <td class="p-2">الإجمالي</td>
-                                    <td class="p-2">${payroll.totalBaseSalary.toLocaleString('ar-SA')}</td>
-                                    <td class="p-2">${payroll.totalAllowances.toLocaleString('ar-SA')}</td>
-                                    <td class="p-2">${payroll.totalDeductions.toLocaleString('ar-SA')}</td>
-                                    <td class="p-2">${payroll.netPay.toLocaleString('ar-SA')}</td>
+                                    <td class="p-2 border border-slate-300">الإجمالي (ر.س)</td><td class="p-2 border border-slate-300">${payroll.totalBaseSalary.toLocaleString('ar-SA')}</td>
+                                    <td class="p-2 border border-slate-300">${payroll.totalAllowances.toLocaleString('ar-SA')}</td>
+                                    <td class="p-2 border border-slate-300">${payroll.totalDeductions.toLocaleString('ar-SA')}</td>
+                                    <td class="p-2 border border-slate-300">${payroll.netPay.toLocaleString('ar-SA')}</td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
-                </div>
-            `;
-            ui.payrollDetailsContainer.classList.remove('hidden');
+                `;
+                window.print();
+            }
         };
 
-        window.printPayroll = async (payrollId) => {
-            const payroll = state.payrolls.find(p => p.id === payrollId);
-            if (!payroll) return;
+        // --- Event Listeners Setup ---
+        function setupEventListeners() {
+            document.getElementById('login-button').addEventListener('click', FirebaseService.signInWithGoogle);
+            document.getElementById('sign-out-button').addEventListener('click', FirebaseService.signOutUser);
+            document.getElementById('hr-module-card').addEventListener('click', () => UI.showScreen('hr-module-container'));
+            document.getElementById('back-to-main-menu').addEventListener('click', () => UI.showScreen('main-menu-screen'));
+            document.getElementById('add-employee-button').addEventListener('click', () => UI.openModal('addEmployeeModal'));
+            document.getElementById('generate-payroll-button').addEventListener('click', () => UI.openModal('generatePayrollModal'));
+            
+            document.getElementById('sidebar-nav').addEventListener('click', (e) => {
+                const link = e.target.closest('.sidebar-link');
+                if (link) {
+                    e.preventDefault();
+                    UI.showPage(link.dataset.page);
+                }
+            });
 
-            const recordsSnapshot = await getDocs(collection(db, "hr-data", userId, "payrolls", payrollId, "records"));
-            const records = recordsSnapshot.docs.map(d => d.data());
-            const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+            document.querySelectorAll('.modal-cancel-button').forEach(btn => {
+                btn.addEventListener('click', () => UI.closeModal(btn.closest('.modal').id));
+            });
 
-            const printableDiv = document.getElementById('printable-payroll');
-            printableDiv.innerHTML = `
-                <div class="p-8">
-                    <h1 class="text-2xl font-bold text-center mb-2">مسير رواتب شهر ${months[payroll.month]} ${payroll.year}</h1>
-                    <p class="text-center text-sm mb-6">تاريخ الطباعة: ${new Date().toLocaleDateString('ar-SA')}</p>
-                    <table class="w-full text-sm border-collapse border border-slate-400">
-                        <thead class="bg-slate-200">
-                            <tr>
-                                <th class="p-2 border border-slate-300">الموظف</th>
-                                <th class="p-2 border border-slate-300">الراتب الأساسي</th>
-                                <th class="p-2 border border-slate-300">إجمالي البدلات</th>
-                                <th class="p-2 border border-slate-300">إجمالي الخصومات</th>
-                                <th class="p-2 border border-slate-300">صافي الراتب</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${records.map(r => `
-                                <tr class="border-b">
-                                    <td class="p-2 border border-slate-300">${r.name}</td>
-                                    <td class="p-2 border border-slate-300">${r.salary.toLocaleString('ar-SA')}</td>
-                                    <td class="p-2 border border-slate-300">${r.allowances.reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
-                                    <td class="p-2 border border-slate-300">${r.deductions.reduce((s, i) => s + i.amount, 0).toLocaleString('ar-SA')}</td>
-                                    <td class="p-2 border border-slate-300 font-bold">${r.netPay.toLocaleString('ar-SA')}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                        <tfoot class="font-bold bg-slate-200">
-                            <tr>
-                                <td class="p-2 border border-slate-300">الإجمالي (ر.س)</td>
-                                <td class="p-2 border border-slate-300">${payroll.totalBaseSalary.toLocaleString('ar-SA')}</td>
-                                <td class="p-2 border border-slate-300">${payroll.totalAllowances.toLocaleString('ar-SA')}</td>
-                                <td class="p-2 border border-slate-300">${payroll.totalDeductions.toLocaleString('ar-SA')}</td>
-                                <td class="p-2 border border-slate-300">${payroll.netPay.toLocaleString('ar-SA')}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            `;
-            window.print();
-        };
+            ui.elements.addEmployeeForm.addEventListener('submit', EmployeeService.handleFormSubmit);
+            ui.elements.generatePayrollForm.addEventListener('submit', (e) => SalaryService.generatePayroll(e));
 
+            document.getElementById('employees-table-body').addEventListener('click', (e) => {
+                const target = e.target;
+                const employeeId = target.closest('td').dataset.employeeId;
+                if (target.classList.contains('edit-employee-button')) UI.openModal('addEmployeeModal', employeeId);
+                if (target.classList.contains('delete-employee-button')) EmployeeService.delete(employeeId);
+                if (target.classList.contains('salary-details-button')) UI.openModal('salaryDetailsModal', employeeId);
+            });
+            
+            document.getElementById('add-allowance-row-button').addEventListener('click', () => SalaryService.addAdjustmentRow('allowances'));
+            document.getElementById('add-deduction-row-button').addEventListener('click', () => SalaryService.addAdjustmentRow('deductions'));
+
+            document.getElementById('allowances-table-body').addEventListener('click', (e) => {
+                if (e.target.classList.contains('save-adjustment-button')) SalaryService.saveAdjustment('allowances', e.target.closest('tr'));
+                if (e.target.classList.contains('delete-adjustment-button')) SalaryService.deleteAdjustment('allowances', e.target.closest('tr').dataset.id);
+            });
+            
+            document.getElementById('deductions-table-body').addEventListener('click', (e) => {
+                if (e.target.classList.contains('save-adjustment-button')) SalaryService.saveAdjustment('deductions', e.target.closest('tr'));
+                if (e.target.classList.contains('delete-adjustment-button')) SalaryService.deleteAdjustment('deductions', e.target.closest('tr').dataset.id);
+            });
+
+            ui.elements.payrollHistoryContainer.addEventListener('click', (e) => {
+                const item = e.target.closest('.payroll-history-item');
+                if (item) PayrollService.displayPayrollDetails(item.dataset.payrollId);
+            });
+
+            ui.elements.payrollDetailsContainer.addEventListener('click', (e) => {
+                const button = e.target.closest('.print-payroll-button');
+                if (button) PayrollService.printPayroll(button.dataset.payrollId);
+            });
+        }
 
         // --- Initial Application Load ---
-        ui.addEmployeeForm.addEventListener('submit', handleEmployeeFormSubmit);
-        ui.generatePayrollForm.addEventListener('submit', handlePayrollGeneration);
-        initializeFirebase();
+        setupEventListeners();
+        FirebaseService.initialize();
 
     </script>
 </body>
