@@ -338,6 +338,15 @@
             return new Date(year, month + 1, 0).getDate();
         }
 
+        function formatGregorianDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         // --- Modal & Alert Functions ---
         window.openModal = async (modalId, context = null) => {
             const modal = document.getElementById(modalId);
@@ -1020,7 +1029,7 @@
             printableDiv.innerHTML = `
                 <div class="p-8">
                     <h1 class="text-2xl font-bold text-center mb-2">مسير رواتب شهر ${months[payroll.month]} ${payroll.year}</h1>
-                    <p class="text-center text-sm mb-6">تاريخ الطباعة: ${new Date().toLocaleDateString('ar-SA')}</p>
+                    <p class="text-center text-sm mb-6">تاريخ الطباعة: ${formatGregorianDate(new Date())}</p>
                     <table class="w-full text-sm border-collapse border border-slate-400">
                         <thead class="bg-slate-200">
                             <tr>
