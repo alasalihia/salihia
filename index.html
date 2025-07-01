@@ -429,22 +429,26 @@
                 showAlert("بيانات ناقصة", "يرجى إدخال اسم الموظف ورقمه الوظيفي على الأقل.");
                 return;
             }
-
-            // Check for duplicate employee ID
-            const q = query(collection(db, "hr-data", userId, "employees"), where("employeeId", "==", newEmployee.employeeId));
-            const querySnapshot = await getDocs(q);
-            if (!querySnapshot.empty) {
-                showAlert("خطأ", "الرقم الوظيفي المدخل موجود بالفعل لموظف آخر.");
-                return;
-            }
-
+            
             try {
+                if (!db || !userId) {
+                    showAlert("خطأ في الاتصال", "لا يمكن الاتصال بقاعدة البيانات. يرجى تسجيل الدخول مرة أخرى.");
+                    return;
+                }
+
+                const q = query(collection(db, "hr-data", userId, "employees"), where("employeeId", "==", newEmployee.employeeId));
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    showAlert("خطأ", "الرقم الوظيفي المدخل موجود بالفعل لموظف آخر.");
+                    return;
+                }
+
                 await addDoc(collection(db, "hr-data", userId, "employees"), newEmployee);
                 closeModal("addEmployeeModal");
                 showAlert("نجاح", "تمت إضافة الموظف بنجاح.");
             } catch (err) {
-                showAlert("خطأ", "لم نتمكن من إضافة الموظف.");
-                console.error(err);
+                showAlert("خطأ فني", "حدث خطأ أثناء حفظ البيانات. يرجى المحاولة مرة أخرى.");
+                console.error("Error adding employee:", err);
             }
         };
 
@@ -455,6 +459,7 @@
                     showAlert("نجاح", "تم حذف الموظف بنجاح.");
                 } catch (err) {
                     showAlert("خطأ", "فشلت عملية حذف الموظف.");
+                    console.error("Error deleting employee:", err);
                 }
             });
         };
