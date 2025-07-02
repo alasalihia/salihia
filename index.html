@@ -27,6 +27,10 @@
         .toggle-checkbox:checked { right: 0; border-color: #8b5cf6; }
         .toggle-checkbox:checked + .toggle-label { background-color: #8b5cf6; }
         @media print {
+            @page {
+                size: A4 landscape;
+                margin: 0;
+            }
             body * { visibility: hidden; }
             #printable-payroll, #printable-payroll * { visibility: visible; }
             #printable-payroll { position: absolute; left: 0; top: 0; width: 100%; font-family: 'Cairo', sans-serif; }
@@ -1176,7 +1180,7 @@
             return result.trim() + ' فقط لا غير.';
         }
 
-        // --- NEW CORPORATE PAYSLIP FUNCTION ---
+        // --- NEW CORPORATE PAYSLIP FUNCTION (LANDSCAPE A4) ---
         function generateCorporatePayslipHTML(record, payroll) {
             const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
             
@@ -1198,109 +1202,95 @@
 
             const totalEarnings = earnings.reduce((sum, item) => sum + item.amount, 0);
             const totalDeductions = deductions.reduce((sum, item) => sum + item.amount, 0);
+            const netPay = record.netPay;
 
             const payPeriodEnd = new Date(payroll.year, payroll.month + 1, 0);
 
             return `
-            <div class="payslip-page bg-white text-gray-900" style="width: 21cm; min-height: 29.7cm; margin: auto; display: flex; flex-direction: column; border: 1px solid #e5e7eb; padding: 1.5cm; font-size: 9.5pt;">
+            <div class="payslip-page bg-white text-gray-900" style="width: 29.7cm; height: 21cm; margin: auto; display: flex; flex-direction: column; border: 1px solid #e5e7eb; padding: 1cm; font-size: 9pt;">
                 
-                <header class="flex justify-between items-start pb-3 border-b border-gray-200">
-                    <div class="flex items-center gap-4">
-                        <img src="${state.settings.logoUrl || 'https://placehold.co/200x80/f0f0f0/333?text=Logo'}" alt="شعار الشركة" class="h-14 object-contain">
-                        <div>
-                            <h2 class="text-lg font-bold text-gray-900">${state.settings.name || 'اسم الشركة'}</h2>
-                            <p class="text-xs text-gray-600">${state.settings.address || 'عنوان الشركة'}</p>
-                            <p class="text-xs text-gray-600">س.ت: ${state.settings.crNumber || 'غير محدد'}</p>
-                        </div>
+                <!-- 1. Header -->
+                <header class="flex justify-between items-center pb-2 border-b border-gray-300">
+                    <div>
+                        <h1 class="text-2xl font-bold">${state.settings.name || 'اسم الشركة'}</h1>
+                        <p class="text-sm">قسيمة الراتب الشهرية - Monthly Pay Slip</p>
+                        <p class="text-sm">الفترة: ${months[payroll.month]} ${payroll.year}</p>
                     </div>
                     <div class="text-right">
-                        <h1 class="text-xl font-bold">بيان صافي الراتب</h1>
-                        <p class="text-sm text-gray-600">Salary Statement</p>
+                        <img src="${state.settings.logoUrl || 'https://placehold.co/120x60/f0f0f0/333?text=Logo'}" alt="شعار الشركة" class="h-12 object-contain">
                     </div>
                 </header>
 
-                <section class="grid grid-cols-2 gap-x-6 my-3 text-sm">
-                     <div>
-                        <h3 class="font-bold text-base mb-2 pb-1 border-b">بيانات الموظف</h3>
-                        <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                            <span class="text-gray-600">اسم الموظف:</span> <span class="font-semibold">${record.name || ''}</span>
-                            <span class="text-gray-600">الرقم الوظيفي:</span> <span class="font-semibold">${record.employeeId || ''}</span>
-                            <span class="text-gray-600">المنصب:</span> <span class="font-semibold">${record.position || ''}</span>
-                            <span class="text-gray-600">الجنسية:</span> <span class="font-semibold">${record.nationality || ''}</span>
-                            <span class="text-gray-600">تاريخ الالتحاق:</span> <span class="font-semibold">${record.startDate || ''}</span>
-                        </div>
-                    </div>
-                    <div class="text-left">
-                        <h3 class="font-bold text-base mb-2 pb-1 border-b">بيانات الراتب</h3>
-                        <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                            <span class="text-gray-600">فترة الراتب:</span> <span class="font-semibold">${months[payroll.month]} ${payroll.year}</span>
-                            <span class="text-gray-600">تاريخ الدفع:</span> <span class="font-semibold">${formatGregorianDate(payPeriodEnd)}</span>
-                            <span class="text-gray-600">طريقة الدفع:</span> <span class="font-semibold">تحويل بنكي</span>
-                            <span class="text-gray-600">IBAN:</span> <span class="font-semibold">${record.iban || ''}</span>
-                        </div>
-                    </div>
+                <!-- 2. Employee & Job Information -->
+                <section class="grid grid-cols-4 gap-x-4 py-3 border-b border-gray-200 text-xs">
+                    <div><strong class="text-gray-600 block">اسم الموظف:</strong> ${record.name || ''}</div>
+                    <div><strong class="text-gray-600 block">الرقم الوظيفي:</strong> ${record.employeeId || ''}</div>
+                    <div><strong class="text-gray-600 block">المنصب:</strong> ${record.position || ''}</div>
+                    <div><strong class="text-gray-600 block">القسم:</strong> ${record.department || ''}</div>
+                    <div><strong class="text-gray-600 block">تاريخ الالتحاق:</strong> ${record.startDate || ''}</div>
+                    <div><strong class="text-gray-600 block">تاريخ الدفع:</strong> ${formatGregorianDate(payPeriodEnd)}</div>
                 </section>
 
-                <section class="flex-grow">
-                    <table class="w-full border-collapse text-xs">
-                        <thead>
-                            <tr class="bg-gray-100 font-bold">
-                                <th class="p-2 border text-right" colspan="2">الاستحقاقات (Earnings)</th>
-                                <th class="p-2 border text-right" colspan="2">الاستقطاعات (Deductions)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${Array.from({ length: Math.max(earnings.length, deductions.length) }).map((_, i) => `
+                <!-- 3. & 4. Earnings & Deductions -->
+                <section class="flex-grow grid grid-cols-2 gap-x-6 py-3">
+                    <!-- Earnings -->
+                    <div class="bg-gray-50 p-2 rounded">
+                        <h3 class="font-bold text-center text-base mb-2 pb-1 border-b">الاستحقاقات / Earnings</h3>
+                        <table class="w-full text-xs">
+                           ${earnings.map(e => `
                             <tr>
-                                <td class="p-1.5 border-r border-l">${earnings[i] ? earnings[i].name : '&nbsp;'}</td>
-                                <td class="p-1.5 border-r text-left font-mono">${earnings[i] ? formatNumber(earnings[i].amount) : ''}</td>
-                                <td class="p-1.5 border-r">${deductions[i] ? deductions[i].name : ''}</td>
-                                <td class="p-1.5 border-r text-left font-mono">${deductions[i] ? formatNumber(deductions[i].amount) : ''}</td>
-                            </tr>
-                            `).join('')}
-                        </tbody>
-                        <tfoot>
-                            <tr class="bg-gray-100 font-bold">
-                                <td class="p-2 border text-right">إجمالي الاستحقاقات</td>
-                                <td class="p-2 border text-left font-mono">${formatNumber(totalEarnings)}</td>
-                                <td class="p-2 border text-right">إجمالي الاستقطاعات</td>
-                                <td class="p-2 border text-left font-mono">${formatNumber(totalDeductions)}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </section>
-                
-                <section class="mt-3">
-                    <div class="bg-gray-200 p-2 rounded-md font-bold text-center">
-                        <span>صافي الراتب المستحق (Net Payable): ${formatNumber(record.netPay)} ر.س</span>
+                                <td class="py-1 pr-1">${e.name}</td>
+                                <td class="py-1 pl-1 text-left font-mono">${formatNumber(e.amount)}</td>
+                            </tr>`).join('')}
+                        </table>
                     </div>
-                    <div class="bg-gray-50 p-2 mt-1 rounded-md text-sm text-center">
-                        ${tafqeet(record.netPay)}
+                    <!-- Deductions -->
+                    <div class="bg-gray-50 p-2 rounded">
+                        <h3 class="font-bold text-center text-base mb-2 pb-1 border-b">الاستقطاعات / Deductions</h3>
+                        <table class="w-full text-xs">
+                           ${deductions.map(d => `
+                            <tr>
+                                <td class="py-1 pr-1">${d.name}</td>
+                                <td class="py-1 pl-1 text-left font-mono">${formatNumber(d.amount)}</td>
+                            </tr>`).join('')}
+                        </table>
                     </div>
                 </section>
 
-                <section class="mt-3 text-xs">
-                    <h3 class="font-bold mb-1">ملخص الإجازات (Leave Summary)</h3>
-                    <div class="grid grid-cols-4 gap-2 text-center">
-                        <div class="bg-gray-100 p-1 rounded-md"><span class="font-semibold">الرصيد الافتتاحي</span><br>0.0</div>
-                        <div class="bg-gray-100 p-1 rounded-md"><span class="font-semibold">المكتسبة</span><br>2.5</div>
-                        <div class="bg-gray-100 p-1 rounded-md"><span class="font-semibold">المستخدمة</span><br>0.0</div>
-                        <div class="bg-gray-100 p-1 rounded-md"><span class="font-semibold">الرصيد الختامي</span><br>2.5</div>
+                <!-- 5. Summary -->
+                <section class="grid grid-cols-2 gap-x-6 py-2 bg-gray-100 rounded">
+                    <div class="space-y-1 text-sm">
+                        <div class="flex justify-between">
+                            <strong>إجمالي الاستحقاقات:</strong>
+                            <span class="font-mono">${formatNumber(totalEarnings)} ر.س</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <strong>إجمالي الاستقطاعات:</strong>
+                            <span class="font-mono">${formatNumber(totalDeductions)} ر.س</span>
+                        </div>
+                         <div class="flex justify-between font-bold text-base border-t pt-1 mt-1">
+                            <strong>صافي الراتب المستحق:</strong>
+                            <span class="font-mono">${formatNumber(netPay)} ر.س</span>
+                        </div>
+                    </div>
+                    <div class="text-sm text-center self-center">
+                        <strong>طريقة الدفع:</strong> تحويل بنكي
                     </div>
                 </section>
 
+                <!-- 6. Footer -->
                 <footer class="mt-auto pt-4 text-xs">
                     <div class="grid grid-cols-2 gap-8 text-center">
                         <div>
                             <p class="h-10"></p>
-                            <p class="border-t border-gray-400 pt-1 font-semibold">توقيع الموظف</p>
+                            <p class="border-t border-gray-400 pt-1 font-semibold">توقيع الموارد البشرية</p>
                         </div>
                         <div>
                             <p class="h-10"></p>
-                            <p class="border-t border-gray-400 pt-1 font-semibold">الختم والتوقيع المعتمد</p>
+                            <p class="border-t border-gray-400 pt-1 font-semibold">توقيع الموظف</p>
                         </div>
                     </div>
-                    <p class="text-center text-gray-500 mt-3">هذا المستند تم إنشاؤه بواسطة الحاسب الآلي وهو سري وخاص بالموظف المذكور أعلاه.</p>
+                    <p class="text-center text-gray-500 mt-2">هذا المستند تم إنشاؤه بواسطة الحاسب الآلي ولا يتطلب ختماً.</p>
                 </footer>
             </div>
             `;
