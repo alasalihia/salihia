@@ -399,7 +399,8 @@
         }
 
         function formatNumber(value, fractionDigits = 2) {
-            return Number(value).toLocaleString('ar-SA', {
+            // Use 'en-US' locale to ensure standard Western Arabic numerals (1, 2, 3)
+            return Number(value).toLocaleString('en-US', {
                 minimumFractionDigits: fractionDigits,
                 maximumFractionDigits: fractionDigits,
                 useGrouping: true
@@ -1198,31 +1199,30 @@
             const totalEarnings = earnings.reduce((sum, item) => sum + item.amount, 0);
             const totalDeductions = deductions.reduce((sum, item) => sum + item.amount, 0);
 
-            const payPeriodStart = new Date(payroll.year, payroll.month, 1);
             const payPeriodEnd = new Date(payroll.year, payroll.month + 1, 0);
 
             return `
-            <div class="payslip-page bg-white text-gray-900" style="width: 210mm; min-height: 297mm; margin: auto; display: flex; flex-direction: column; border: 1px solid #e5e7eb; padding: 2rem; font-size: 10pt;">
+            <div class="payslip-page bg-white text-gray-900" style="width: 21cm; min-height: 29.7cm; margin: auto; display: flex; flex-direction: column; border: 1px solid #e5e7eb; padding: 1.5cm; font-size: 9.5pt;">
                 
-                <header class="flex justify-between items-start pb-4 border-b border-gray-200">
+                <header class="flex justify-between items-start pb-3 border-b border-gray-200">
                     <div class="flex items-center gap-4">
-                        <img src="${state.settings.logoUrl || 'https://placehold.co/200x80/f0f0f0/333?text=Logo'}" alt="شعار الشركة" class="h-16 object-contain">
+                        <img src="${state.settings.logoUrl || 'https://placehold.co/200x80/f0f0f0/333?text=Logo'}" alt="شعار الشركة" class="h-14 object-contain">
                         <div>
-                            <h2 class="text-xl font-bold text-gray-900">${state.settings.name || 'اسم الشركة'}</h2>
+                            <h2 class="text-lg font-bold text-gray-900">${state.settings.name || 'اسم الشركة'}</h2>
                             <p class="text-xs text-gray-600">${state.settings.address || 'عنوان الشركة'}</p>
                             <p class="text-xs text-gray-600">س.ت: ${state.settings.crNumber || 'غير محدد'}</p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <h1 class="text-2xl font-bold">بيان صافي الراتب</h1>
+                        <h1 class="text-xl font-bold">بيان صافي الراتب</h1>
                         <p class="text-sm text-gray-600">Salary Statement</p>
                     </div>
                 </header>
 
-                <section class="grid grid-cols-2 gap-x-8 my-4 text-sm">
+                <section class="grid grid-cols-2 gap-x-6 my-3 text-sm">
                      <div>
                         <h3 class="font-bold text-base mb-2 pb-1 border-b">بيانات الموظف</h3>
-                        <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                             <span class="text-gray-600">اسم الموظف:</span> <span class="font-semibold">${record.name || ''}</span>
                             <span class="text-gray-600">الرقم الوظيفي:</span> <span class="font-semibold">${record.employeeId || ''}</span>
                             <span class="text-gray-600">المنصب:</span> <span class="font-semibold">${record.position || ''}</span>
@@ -1232,7 +1232,7 @@
                     </div>
                     <div class="text-left">
                         <h3 class="font-bold text-base mb-2 pb-1 border-b">بيانات الراتب</h3>
-                        <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                             <span class="text-gray-600">فترة الراتب:</span> <span class="font-semibold">${months[payroll.month]} ${payroll.year}</span>
                             <span class="text-gray-600">تاريخ الدفع:</span> <span class="font-semibold">${formatGregorianDate(payPeriodEnd)}</span>
                             <span class="text-gray-600">طريقة الدفع:</span> <span class="font-semibold">تحويل بنكي</span>
@@ -1242,7 +1242,7 @@
                 </section>
 
                 <section class="flex-grow">
-                    <table class="w-full border-collapse">
+                    <table class="w-full border-collapse text-xs">
                         <thead>
                             <tr class="bg-gray-100 font-bold">
                                 <th class="p-2 border text-right" colspan="2">الاستحقاقات (Earnings)</th>
@@ -1252,25 +1252,25 @@
                         <tbody>
                             ${Array.from({ length: Math.max(earnings.length, deductions.length) }).map((_, i) => `
                             <tr>
-                                <td class="p-2 border-r border-l">${earnings[i] ? earnings[i].name : '&nbsp;'}</td>
-                                <td class="p-2 border-r text-left">${earnings[i] ? formatNumber(earnings[i].amount) : ''}</td>
-                                <td class="p-2 border-r">${deductions[i] ? deductions[i].name : ''}</td>
-                                <td class="p-2 border-r text-left">${deductions[i] ? formatNumber(deductions[i].amount) : ''}</td>
+                                <td class="p-1.5 border-r border-l">${earnings[i] ? earnings[i].name : '&nbsp;'}</td>
+                                <td class="p-1.5 border-r text-left font-mono">${earnings[i] ? formatNumber(earnings[i].amount) : ''}</td>
+                                <td class="p-1.5 border-r">${deductions[i] ? deductions[i].name : ''}</td>
+                                <td class="p-1.5 border-r text-left font-mono">${deductions[i] ? formatNumber(deductions[i].amount) : ''}</td>
                             </tr>
                             `).join('')}
                         </tbody>
                         <tfoot>
                             <tr class="bg-gray-100 font-bold">
                                 <td class="p-2 border text-right">إجمالي الاستحقاقات</td>
-                                <td class="p-2 border text-left">${formatNumber(totalEarnings)}</td>
+                                <td class="p-2 border text-left font-mono">${formatNumber(totalEarnings)}</td>
                                 <td class="p-2 border text-right">إجمالي الاستقطاعات</td>
-                                <td class="p-2 border text-left">${formatNumber(totalDeductions)}</td>
+                                <td class="p-2 border text-left font-mono">${formatNumber(totalDeductions)}</td>
                             </tr>
                         </tfoot>
                     </table>
                 </section>
                 
-                <section class="mt-4">
+                <section class="mt-3">
                     <div class="bg-gray-200 p-2 rounded-md font-bold text-center">
                         <span>صافي الراتب المستحق (Net Payable): ${formatNumber(record.netPay)} ر.س</span>
                     </div>
@@ -1279,28 +1279,28 @@
                     </div>
                 </section>
 
-                <section class="mt-4 text-xs">
+                <section class="mt-3 text-xs">
                     <h3 class="font-bold mb-1">ملخص الإجازات (Leave Summary)</h3>
                     <div class="grid grid-cols-4 gap-2 text-center">
-                        <div class="bg-gray-100 p-1 rounded-md"><span class="font-semibold">الرصيد الافتتاحي</span><br>0</div>
+                        <div class="bg-gray-100 p-1 rounded-md"><span class="font-semibold">الرصيد الافتتاحي</span><br>0.0</div>
                         <div class="bg-gray-100 p-1 rounded-md"><span class="font-semibold">المكتسبة</span><br>2.5</div>
-                        <div class="bg-gray-100 p-1 rounded-md"><span class="font-semibold">المستخدمة</span><br>0</div>
+                        <div class="bg-gray-100 p-1 rounded-md"><span class="font-semibold">المستخدمة</span><br>0.0</div>
                         <div class="bg-gray-100 p-1 rounded-md"><span class="font-semibold">الرصيد الختامي</span><br>2.5</div>
                     </div>
                 </section>
 
-                <footer class="mt-auto pt-6 text-xs">
+                <footer class="mt-auto pt-4 text-xs">
                     <div class="grid grid-cols-2 gap-8 text-center">
                         <div>
-                            <p class="h-12"></p>
+                            <p class="h-10"></p>
                             <p class="border-t border-gray-400 pt-1 font-semibold">توقيع الموظف</p>
                         </div>
                         <div>
-                            <p class="h-12"></p>
+                            <p class="h-10"></p>
                             <p class="border-t border-gray-400 pt-1 font-semibold">الختم والتوقيع المعتمد</p>
                         </div>
                     </div>
-                    <p class="text-center text-gray-500 mt-4">هذا المستند تم إنشاؤه بواسطة الحاسب الآلي وهو سري وخاص بالموظف المذكور أعلاه.</p>
+                    <p class="text-center text-gray-500 mt-3">هذا المستند تم إنشاؤه بواسطة الحاسب الآلي وهو سري وخاص بالموظف المذكور أعلاه.</p>
                 </footer>
             </div>
             `;
