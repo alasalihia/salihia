@@ -1465,16 +1465,16 @@
             const logoFile = document.getElementById('logo-upload-input').files[0];
             let logoUrl = state.settings.logoUrl;
 
-            if (!db || !userId) {
-                showAlert('خطأ', 'غير قادر على حفظ الإعدادات. يرجى تسجيل الدخول.');
+            if (!db || !storage || !userId) {
+                showAlert('خطأ في الاتصال', 'فقد الاتصال بالخدمة. يرجى تسجيل الدخول مرة أخرى.');
                 submitButton.disabled = false;
                 submitButton.innerHTML = originalButtonText;
                 return;
             }
-
+            
             try {
                 if (logoFile) {
-                    const storageRef = ref(storage, `logos/${userId}/company_logo`);
+                    const storageRef = ref(storage, `logos/${userId}/${logoFile.name}`);
                     await uploadBytes(storageRef, logoFile);
                     logoUrl = await getDownloadURL(storageRef);
                 }
@@ -1491,7 +1491,23 @@
                 showAlert('نجاح', 'تم حفظ الإعدادات بنجاح.');
             } catch (e) {
                 console.error("Error saving settings: ", e);
-                showAlert('خطأ', 'فشل حفظ الإعدادات. يرجى مراجعة صلاحيات التخزين في Firebase.');
+                let errorMessage = 'فشل حفظ الإعدادات.';
+                if (e.code) {
+                    switch (e.code) {
+                        case 'storage/unauthorized':
+                            errorMessage = 'فشل رفع الشعار: ليس لديك الصلاحية للكتابة في هذا المسار. يرجى مراجعة قواعد الأمان (Security Rules) في Firebase Storage.';
+                            break;
+                        case 'storage/object-not-found':
+                             errorMessage = 'فشل الحصول على رابط الشعار بعد رفعه. يرجى المحاولة مرة أخرى.';
+                            break;
+                        case 'permission-denied':
+                             errorMessage = 'فشل حفظ الإعدادات: ليس لديك الصلاحية للكتابة في قاعدة البيانات. يرجى مراجعة قواعد الأمان (Security Rules) في Firestore.';
+                             break;
+                        default:
+                            errorMessage = `حدث خطأ غير متوقع: ${e.message}`;
+                    }
+                }
+                showAlert('خطأ', errorMessage);
             } finally {
                 submitButton.disabled = false;
                 submitButton.innerHTML = originalButtonText;
