@@ -45,28 +45,15 @@
 </head>
 <body class="bg-slate-100 text-slate-800">
 
-    <!-- شاشة تسجيل الدخول وإعداد Firebase -->
+    <!-- شاشة تسجيل الدخول -->
     <div id="login-screen" class="flex flex-col items-center justify-center p-8 min-h-screen">
-        <div class="text-center bg-white p-12 rounded-2xl shadow-xl max-w-2xl w-full">
+        <div class="text-center bg-white p-12 rounded-2xl shadow-xl max-w-lg w-full">
             <h1 class="text-3xl md:text-4xl font-bold text-violet-700 mb-4">منصة إدارة شؤون الموظفين</h1>
-            
-            <!-- قسم إعداد Firebase -->
-            <div id="firebase-config-section">
-                <p class="text-slate-600 mb-4">للبدء، يرجى إدخال بيانات إعداد مشروع Firebase الخاص بك.</p>
-                <p class="text-xs text-slate-500 mb-4">يمكنك الحصول عليها من: Project settings > Your apps > Firebase SDK snippet > Config</p>
-                <textarea id="firebase-config-input" class="w-full h-40 p-2 border rounded-lg text-left font-mono text-sm" placeholder='const firebaseConfig = {\n  apiKey: "...",\n  authDomain: "...",\n  ...\n};'></textarea>
-                <button id="save-config-button" onclick="saveFirebaseConfig()" class="mt-4 w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm">حفظ الإعدادات والبدء</button>
-                <p id="config-error" class="text-red-500 text-sm mt-2 hidden"></p>
-            </div>
-
-            <!-- قسم تسجيل الدخول بجوجل -->
-            <div id="google-login-section" class="hidden">
-                 <p class="text-slate-600 mb-8">تم حفظ الإعدادات بنجاح. يرجى تسجيل الدخول للوصول إلى النظام.</p>
-                <button id="login-button" onclick="signInWithGoogle()" class="flex items-center justify-center w-full bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm">
-                    <svg class="w-6 h-6 ml-3" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path><path fill="none" d="M0 0h48v48H0z"></path></svg>
-                    تسجيل الدخول باستخدام جوجل
-                </button>
-            </div>
+            <p class="text-slate-600 mb-8">يرجى تسجيل الدخول للوصول إلى النظام.</p>
+            <button id="login-button" onclick="signInWithGoogle()" class="flex items-center justify-center w-full bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm">
+                <svg class="w-6 h-6 ml-3" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path><path fill="none" d="M0 0h48v48H0z"></path></svg>
+                تسجيل الدخول باستخدام جوجل
+            </button>
         </div>
     </div>
 
@@ -361,7 +348,7 @@
     <div id="printable-payroll"></div>
 
     <script type="module">
-        import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, addDoc, onSnapshot, deleteDoc, query, where, getDocs, updateDoc, writeBatch, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
@@ -390,9 +377,6 @@
         // --- UI Elements ---
         const ui = {
             loginScreen: document.getElementById('login-screen'),
-            firebaseConfigSection: document.getElementById('firebase-config-section'),
-            googleLoginSection: document.getElementById('google-login-section'),
-            configError: document.getElementById('config-error'),
             mainMenuScreen: document.getElementById('main-menu-screen'),
             userDisplayName: document.getElementById('main-menu-user-display-name'),
             addEmployeeForm: document.getElementById('addEmployeeForm'),
@@ -658,62 +642,31 @@
 
         // --- Firebase Functions ---
         
-        window.saveFirebaseConfig = () => {
-            const configInput = document.getElementById('firebase-config-input').value;
-            ui.configError.classList.add('hidden');
-            let config;
-
-            try {
-                // Attempt to parse the input as a JSON object
-                // This handles cases where the user pastes the object directly
-                config = JSON.parse(configInput);
-            } catch (e) {
-                try {
-                    // If JSON.parse fails, it might be the full snippet.
-                    // Extract the object from the snippet.
-                    const jsonString = configInput.substring(configInput.indexOf('{'), configInput.lastIndexOf('}') + 1);
-                    config = JSON.parse(jsonString);
-                } catch (error) {
-                    ui.configError.textContent = 'صيغة الإعدادات غير صحيحة. يرجى نسخ كائن الإعدادات بالكامل من Firebase Console.';
-                    ui.configError.classList.remove('hidden');
-                    return;
-                }
-            }
-
-            // Basic validation
-            const requiredKeys = ['apiKey', 'authDomain', 'projectId', 'storageBucket'];
-            const missingKeys = requiredKeys.filter(key => !config[key]);
-
-            if (missingKeys.length > 0) {
-                ui.configError.textContent = `الإعدادات ناقصة. يرجى التأكد من وجود المفاتيح التالية: ${missingKeys.join(', ')}`;
-                ui.configError.classList.remove('hidden');
-                return;
-            }
-
-            localStorage.setItem('firebaseConfig', JSON.stringify(config));
-            initializeFirebase();
-        }
-
         async function initializeFirebase() {
-            const savedConfig = localStorage.getItem('firebaseConfig');
-
-            if (!savedConfig) {
-                ui.loginScreen.classList.add('active');
-                ui.firebaseConfigSection.classList.remove('hidden');
-                ui.googleLoginSection.classList.add('hidden');
-                return;
-            }
-
-            ui.firebaseConfigSection.classList.add('hidden');
-            ui.googleLoginSection.classList.remove('hidden');
-
             try {
-                if (app) {
-                    await deleteApp(app);
-                }
-                
-                const firebaseConfig = JSON.parse(savedConfig);
-                
+                // =======================================================================
+                // ===================  !!! هام جداً - IMPORTANT !!! =====================
+                //
+                //  لحل مشكلة رفع الشعار، يجب استبدال الكائن التالي بالكامل
+                //  بالكائن الذي نسخته من إعدادات مشروعك في Firebase Console.
+                //
+                // To fix the logo upload issue, you MUST replace the entire object
+                // below with the one you copied from your Firebase Console project settings.
+                //
+                // Project settings > Your apps > Firebase SDK snippet > Config
+                //
+                // =======================================================================
+                const firebaseConfig = { 
+                    apiKey: "AIzaSyDSlxf95W00Ow6LZba8waAKJINptIRPkU8", 
+                    authDomain: "sample-firebase-ai-app-960f4.firebaseapp.com", 
+                    projectId: "sample-firebase-ai-app-960f4", 
+                    storageBucket: "sample-firebase-ai-app-960f4.appspot.com", 
+                    messagingSenderId: "741880884079", 
+                    appId: "1:741880884079:web:8d2f6e233fb65e65e969a" 
+                };
+                // =======================================================================
+                // =======================================================================
+
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
@@ -735,8 +688,6 @@
             } catch (e) {
                 console.error("Firebase initialization error:", e);
                 showAlert('خطأ فني', 'فشل في تهيئة التطبيق. تأكد من صحة بيانات الإعدادات.');
-                localStorage.removeItem('firebaseConfig'); // Clear bad config
-                initializeFirebase(); // Re-show the config input
             }
         }
 
@@ -757,7 +708,6 @@
         window.signOutUser = async () => { 
             try {
                 await signOut(auth);
-                // No need to clear config, just sign out
             } catch (e) { 
                 showAlert("خطأ", "فشلت عملية تسجيل الخروج."); 
             } 
