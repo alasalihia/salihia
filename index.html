@@ -30,7 +30,11 @@
             body * { visibility: hidden; }
             #printable-payroll, #printable-payroll * { visibility: visible; }
             #printable-payroll { position: absolute; left: 0; top: 0; width: 100%; font-family: 'Cairo', sans-serif; }
-            .payslip-page { page-break-after: always; }
+            .payslip-page {
+                page-break-after: always;
+                box-shadow: none !important;
+                border: none !important;
+            }
             .payslip-page:last-of-type { page-break-after: auto; }
         }
     </style>
@@ -92,7 +96,7 @@
                     <span>الحضور والانصراف</span>
                 </a>
                 <a href="#" onclick="showPage('page-hr-settings')" class="sidebar-link">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0 3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                     <span>الإعدادات</span>
                 </a>
             </nav>
@@ -102,7 +106,7 @@
             <main id="page-hr-dashboard" class="page active">
                 <h2 class="text-3xl font-bold text-slate-800 mb-6">لوحة تحكم الموظفين</h2>
                 <div id="hr-dashboard-stats" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                     <!-- Stats will be rendered here by JS -->
+                    <!-- Stats will be rendered here by JS -->
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-lg">
                     <h3 class="text-xl font-bold text-violet-700 mb-4">توزيع الموظفين على الأقسام</h3>
@@ -188,13 +192,21 @@
                                 <label for="company-name-input" class="block mb-2 text-sm font-medium text-gray-900">اسم الشركة</label>
                                 <input type="text" id="company-name-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="أدخل اسم شركتك هنا">
                             </div>
+                             <div>
+                                <label for="company-address-input" class="block mb-2 text-sm font-medium text-gray-900">عنوان الشركة</label>
+                                <input type="text" id="company-address-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="مثال: الرياض، المملكة العربية السعودية">
+                            </div>
+                             <div>
+                                <label for="company-cr-input" class="block mb-2 text-sm font-medium text-gray-900">رقم السجل التجاري</label>
+                                <input type="text" id="company-cr-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="1234567890">
+                            </div>
                             <div>
                                 <label for="logo-upload-input" class="block mb-2 text-sm font-medium text-gray-900">شعار الشركة</label>
                                 <input type="file" id="logo-upload-input" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
-                                <p class="mt-1 text-sm text-gray-500">ارفع صورة الشعار (يفضل أن تكون مربعة)</p>
+                                <p class="mt-1 text-sm text-gray-500">ارفع صورة الشعار (يفضل أن تكون مستطيلة)</p>
                                 <div class="mt-4">
                                     <p class="text-sm font-medium">الشعار الحالي:</p>
-                                    <img id="logo-preview" src="https://placehold.co/150x150/e9d5ff/4c1d95?text=Logo" alt="Company Logo Preview" class="mt-2 h-24 w-24 object-contain rounded-md bg-slate-100 border p-1">
+                                    <img id="logo-preview" src="https://placehold.co/150x50/e9d5ff/4c1d95?text=Logo" alt="Company Logo Preview" class="mt-2 h-16 object-contain rounded-md bg-slate-100 border p-1">
                                 </div>
                             </div>
                         </div>
@@ -209,7 +221,7 @@
 
     <!-- Modals -->
     <div id="addEmployeeModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
-        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-lg p-6 transform scale-95">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 transform scale-95">
             <h3 id="employeeModalTitle" class="text-xl font-bold mb-4">إضافة موظف جديد</h3>
             <form id="addEmployeeForm">
                 <input type="hidden" id="employee-edit-id">
@@ -220,6 +232,8 @@
                     <div><label for="employeeDepartment" class="block mb-2 text-sm font-medium">القسم</label><input type="text" id="employeeDepartment" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
                     <div><label for="employeeStartDate" class="block mb-2 text-sm font-medium">تاريخ بدء العمل</label><input type="date" id="employeeStartDate" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
                     <div><label for="employeeSalary" class="block mb-2 text-sm font-medium">الراتب الأساسي (ر.س)</label><input type="number" id="employeeSalary" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
+                    <div><label for="employeeNationality" class="block mb-2 text-sm font-medium">الجنسية</label><input type="text" id="employeeNationality" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" placeholder="مثال: سعودي"></div>
+                    <div><label for="employeeIBAN" class="block mb-2 text-sm font-medium">رقم الآيبان (IBAN)</label><input type="text" id="employeeIBAN" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" placeholder="SAXXXXXXXXXXXXXXXXXXXXXX"></div>
                     <div class="md:col-span-2"><label for="employeeStatus" class="block mb-2 text-sm font-medium">حالة الموظف</label><select id="employeeStatus" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required><option value="active">على رأس العمل</option><option value="on_leave">في إجازة</option><option value="terminated">منتهية خدماته</option></select></div>
                 </div>
                 <div class="mt-6 flex justify-end space-x-2 rtl:space-x-reverse">
@@ -326,6 +340,7 @@
         </div>
     </div>
 
+    <!-- This div will hold the content for printing -->
     <div id="printable-payroll"></div>
 
     <script type="module">
@@ -341,7 +356,12 @@
         let state = { 
             employees: [], 
             payrolls: [],
-            settings: { name: 'شركتك', logoUrl: 'https://placehold.co/150x150/e9d5ff/4c1d95?text=Logo' },
+            settings: { 
+                name: 'شركتك', 
+                logoUrl: 'https://placehold.co/150x50/e9d5ff/4c1d95?text=Logo',
+                address: '',
+                crNumber: ''
+            },
             currentEmployee: {
                 allowances: [],
                 deductions: []
@@ -368,6 +388,8 @@
             attendanceForm: document.getElementById('attendanceForm'),
             settingsForm: document.getElementById('settings-form'),
             companyNameInput: document.getElementById('company-name-input'),
+            companyAddressInput: document.getElementById('company-address-input'),
+            companyCRInput: document.getElementById('company-cr-input'),
             logoPreview: document.getElementById('logo-preview'),
         };
 
@@ -377,10 +399,10 @@
         }
 
         function formatNumber(value, fractionDigits = 2) {
-            return Number(value).toLocaleString('en-US', {
+            return Number(value).toLocaleString('ar-SA', {
                 minimumFractionDigits: fractionDigits,
                 maximumFractionDigits: fractionDigits,
-                useGrouping: false
+                useGrouping: true
             });
         }
 
@@ -418,6 +440,8 @@
                         document.getElementById('employeeStartDate').value = employee.startDate;
                         document.getElementById('employeeSalary').value = employee.salary;
                         document.getElementById('employeeStatus').value = employee.status;
+                        document.getElementById('employeeNationality').value = employee.nationality || '';
+                        document.getElementById('employeeIBAN').value = employee.iban || '';
                     }
                 } else { // This is an add operation
                     ui.employeeModalTitle.textContent = 'إضافة موظف جديد';
@@ -481,7 +505,7 @@
         const showAlert = (title, message) => {
             document.getElementById('alertModalTitle').textContent = title;
             document.getElementById('alertModalMessage').innerHTML = message;
-            document.getElementById('alertModalButtons').innerHTML = `<button type="button" onclick="closeModal('alertModal')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">حسنًا</button>`;
+            document.getElementById('alertModalButtons').innerHTML = `<button type="button" onclick="closeModal('alertModal')" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">حسنًا</button>`;
             openModal('alertModal');
         };
 
@@ -534,7 +558,7 @@
             
             ui.hrDashboardStats.innerHTML = `
                 <div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 rtl:space-x-reverse">
-                    <div class="bg-emerald-100 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
+                    <div class="bg-violet-100 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
                     <div><h3 class="text-slate-500">إجمالي الموظفين</h3><p class="text-2xl font-bold">${formatInteger(totalEmployees)}</p></div>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 rtl:space-x-reverse">
@@ -590,7 +614,7 @@
                 datasets: [{
                     label: 'عدد الموظفين',
                     data: Object.values(departmentCounts),
-                    backgroundColor: ['#34d399', '#60a5fa', '#f59e0b', '#a78bfa', '#fb7185'],
+                    backgroundColor: ['#8b5cf6', '#34d399', '#60a5fa', '#f59e0b', '#fb7185', '#14b8a6'],
                     hoverOffset: 4
                 }]
             };
@@ -607,7 +631,9 @@
         
         function renderSettingsPage() {
             ui.companyNameInput.value = state.settings.name || '';
-            ui.logoPreview.src = state.settings.logoUrl || 'https://placehold.co/150x150/e9d5ff/4c1d95?text=Logo';
+            ui.companyAddressInput.value = state.settings.address || '';
+            ui.companyCRInput.value = state.settings.crNumber || '';
+            ui.logoPreview.src = state.settings.logoUrl || 'https://placehold.co/150x50/e9d5ff/4c1d95?text=Logo';
         }
 
         // --- Firebase Functions ---
@@ -671,7 +697,7 @@
             employeesUnsubscribe = null;
             payrollsUnsubscribe = null;
             settingsUnsubscribe = null;
-            state = { employees: [], payrolls: [], settings: { name: 'شركتك', logoUrl: 'https://placehold.co/150x150/e9d5ff/4c1d95?text=Logo' }, currentEmployee: { allowances: [], deductions: [] } };
+            state = { employees: [], payrolls: [], settings: { name: 'شركتك', logoUrl: 'https://placehold.co/150x50/e9d5ff/4c1d95?text=Logo', address: '', crNumber: '' }, currentEmployee: { allowances: [], deductions: [] } };
             renderAll();
         }
 
@@ -700,6 +726,9 @@
             settingsUnsubscribe = onSnapshot(settingsRef, (doc) => {
                 if (doc.exists()) {
                     state.settings = doc.data();
+                } else {
+                    // Set default settings if none exist
+                    state.settings = { name: 'شركتك', logoUrl: 'https://placehold.co/150x50/e9d5ff/4c1d95?text=Logo', address: '', crNumber: '' };
                 }
                 renderSettingsPage();
             });
@@ -717,6 +746,8 @@
                 startDate: form.employeeStartDate.value,
                 salary: Number(form.employeeSalary.value),
                 status: form.employeeStatus.value,
+                nationality: form.employeeNationality.value.trim(),
+                iban: form.employeeIBAN.value.trim(),
             };
 
             if (!employeeData.name || !employeeData.employeeId) {
@@ -764,8 +795,8 @@
             showConfirmation("تأكيد الحذف", "هل أنت متأكد من حذف هذا الموظف؟", async () => {
                 try {
                     if (!db || !userId) {
-                       showAlert("خطأ في الاتصال", "لا يمكن الاتصال بقاعدة البيانات.");
-                       return;
+                        showAlert("خطأ في الاتصال", "لا يمكن الاتصال بقاعدة البيانات.");
+                        return;
                     }
                     await deleteDoc(doc(db, "hr-data", userId, "employees", docId));
                     showAlert("نجاح", "تم حذف الموظف بنجاح.");
@@ -914,14 +945,32 @@
             }
 
             const batch = writeBatch(db);
-            let totalBaseSalary = 0, totalAllowances = 0, totalFixedDeductions = 0, totalAbsenceDeduction = 0, totalLateDeduction = 0, totalOvertimePay = 0, netPay = 0;
+            let totalBaseSalary = 0, totalAllowances = 0, totalDeductions = 0, totalAbsenceDeduction = 0, totalLateDeduction = 0, totalOvertimePay = 0, netPay = 0;
             
             for (const emp of activeEmployees) {
                 // 1. Get salary components
                 const allowancesSnapshot = await getDocs(collection(db, "hr-data", userId, "employees", emp.id, "allowances"));
                 const deductionsSnapshot = await getDocs(collection(db, "hr-data", userId, "employees", emp.id, "deductions"));
                 const allowances = allowancesSnapshot.docs.map(d => ({id: d.id, ...d.data()}));
-                const fixedDeductions = deductionsSnapshot.docs.map(d => ({id: d.id, ...d.data()}));
+                let fixedDeductions = deductionsSnapshot.docs.map(d => ({id: d.id, ...d.data()}));
+
+                // GOSI Calculation (for Saudi nationals)
+                if (emp.nationality && emp.nationality.toLowerCase().includes('سعودي')) {
+                    const housingAllowance = allowances.find(a => a.name.includes('سكن'))?.amount || 0;
+                    const gosiBase = emp.salary + housingAllowance;
+                    const gosiDeductionAmount = gosiBase * 0.10; // Employee share 10%
+
+                    // Add GOSI to the deductions list for this payroll record
+                    // Avoid duplicating if it was added manually
+                    if (!fixedDeductions.some(d => d.name.includes('التأمينات الاجتماعية'))) {
+                        fixedDeductions.push({
+                            name: 'خصم التأمينات الاجتماعية (GOSI)',
+                            amount: gosiDeductionAmount,
+                            includedInPayroll: true,
+                            isAuto: true // flag for auto-calculated deductions
+                        });
+                    }
+                }
 
                 const empTotalAllowances = allowances.filter(a => a.includedInPayroll).reduce((s, i) => s + i.amount, 0);
                 const empTotalFixedDeductions = fixedDeductions.filter(d => d.includedInPayroll).reduce((s, i) => s + i.amount, 0);
@@ -940,28 +989,18 @@
                     const dailyRate = grossSalary / daysInMonth; 
                     const hourlyRate = dailyRate / 8; // Assuming 8-hour workday
 
-                    // Absence Deduction
                     const absentDays = attendanceData.totalDaysInMonth - attendanceData.attendedDays;
-                    if (absentDays > 0) {
-                        absenceDeduction = dailyRate * absentDays;
-                    }
+                    if (absentDays > 0) absenceDeduction = dailyRate * absentDays;
 
-                    // Late Deduction
                     const totalLateMinutes = (attendanceData.lateHours * 60) + attendanceData.lateMinutes;
-                    if (totalLateMinutes > 0) {
-                        lateDeduction = (hourlyRate / 60) * totalLateMinutes;
-                    }
+                    if (totalLateMinutes > 0) lateDeduction = (hourlyRate / 60) * totalLateMinutes;
 
-                    // Overtime Pay
                     const totalOvertimeMinutes = (attendanceData.overtimeHours * 60) + attendanceData.overtimeMinutes;
-                    if (totalOvertimeMinutes > 0) {
-                        const overtimeRate = hourlyRate * 1.5; // Standard overtime rate
-                        overtimePay = (overtimeRate / 60) * totalOvertimeMinutes;
-                    }
+                    if (totalOvertimeMinutes > 0) overtimePay = (hourlyRate * 1.5 / 60) * totalOvertimeMinutes;
                 }
                 
                 // 3. Calculate Final Net Pay
-                const empNet = (grossSalary - absenceDeduction - lateDeduction + overtimePay) - empTotalFixedDeductions;
+                const empNet = (grossSalary + overtimePay) - (empTotalFixedDeductions + absenceDeduction + lateDeduction);
 
                 // 4. Prepare data for batch write
                 const payrollRecordRef = doc(db, "hr-data", userId, "payrolls", payrollId, "records", emp.id);
@@ -979,7 +1018,7 @@
                 // 5. Aggregate totals
                 totalBaseSalary += emp.salary;
                 totalAllowances += empTotalAllowances;
-                totalFixedDeductions += empTotalFixedDeductions;
+                totalDeductions += empTotalFixedDeductions;
                 totalAbsenceDeduction += absenceDeduction;
                 totalLateDeduction += lateDeduction;
                 totalOvertimePay += overtimePay;
@@ -993,7 +1032,7 @@
                 year: parseInt(year),
                 totalBaseSalary,
                 totalAllowances,
-                totalFixedDeductions,
+                totalDeductions,
                 totalAbsenceDeduction,
                 totalLateDeduction,
                 totalOvertimePay,
@@ -1053,7 +1092,7 @@
                     <div class="flex justify-between items-center mb-4">
                          <h3 class="font-bold text-lg">تفاصيل مسير رواتب ${months[payroll.month]} ${payroll.year}</h3>
                          <div>
-                            <button onclick="printAllPayslips('${payrollId}')" class="text-sm bg-green-100 text-green-800 px-3 py-1 rounded-md hover:bg-green-200 ml-2">طباعة كل القسائم</button>
+                            <button onclick="printAllPayslips('${payrollId}')" class="text-sm bg-violet-100 text-violet-800 px-3 py-1 rounded-md hover:bg-violet-200 ml-2">طباعة كل القسائم</button>
                             <button onclick="printPayrollSummary('${payrollId}')" class="text-sm bg-slate-200 px-3 py-1 rounded-md hover:bg-slate-300">طباعة الملخص</button>
                          </div>
                     </div>
@@ -1081,7 +1120,7 @@
                                     <td class="p-2 text-red-600">-${formatNumber(payroll.totalAbsenceDeduction || 0)}</td>
                                     <td class="p-2 text-red-600">-${formatNumber(payroll.totalLateDeduction || 0)}</td>
                                     <td class="p-2 text-green-600">+${formatNumber(payroll.totalOvertimePay || 0)}</td>
-                                    <td class="p-2 text-red-600">-${formatNumber(payroll.totalFixedDeductions)}</td>
+                                    <td class="p-2 text-red-600">-${formatNumber(payroll.totalDeductions)}</td>
                                     <td class="p-2">${formatNumber(payroll.netPay)}</td>
                                     <td></td>
                                 </tr>
@@ -1093,76 +1132,177 @@
             ui.payrollDetailsContainer.classList.remove('hidden');
         };
 
-        function generatePayslipHTML(record, payroll) {
+        // --- Tafqeet Function (Number to Arabic Words) ---
+        function tafqeet(number) {
+            const integer = Math.floor(number);
+            const fraction = Math.round((number - integer) * 100);
+            const ones = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة', 'عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
+            const tens = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
+            const hundreds = ['', 'مائة', 'مئتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة'];
+            const thousands = ['', 'ألف', 'ألفان', 'آلاف'];
+            const millions = ['', 'مليون', 'مليونان', 'ملايين'];
+
+            function convert(num) {
+                if (num === 0) return '';
+                if (num < 20) return ones[num];
+                if (num < 100) return ones[num % 10] + (num % 10 !== 0 ? ' و' : '') + tens[Math.floor(num / 10)];
+                if (num < 1000) return hundreds[Math.floor(num / 100)] + (num % 100 !== 0 ? ' و' : '') + convert(num % 100);
+                if (num < 1000000) {
+                    const t = Math.floor(num / 1000);
+                    const remainder = num % 1000;
+                    let thousandWord = '';
+                    if (t === 1) thousandWord = thousands[1];
+                    else if (t === 2) thousandWord = thousands[2];
+                    else if (t >= 3 && t <= 10) thousandWord = convert(t) + ' ' + thousands[3];
+                    else thousandWord = convert(t) + ' ' + thousands[1];
+                    return thousandWord + (remainder > 0 ? ' و' + convert(remainder) : '');
+                }
+                const m = Math.floor(num / 1000000);
+                const remainder = num % 1000000;
+                let millionWord = '';
+                if (m === 1) millionWord = millions[1];
+                else if (m === 2) millionWord = millions[2];
+                else if (m >= 3 && m <= 10) millionWord = convert(m) + ' ' + millions[3];
+                else millionWord = convert(m) + ' ' + millions[1];
+                return millionWord + (remainder > 0 ? ' و' + convert(remainder) : '');
+            }
+            let integerWords = convert(integer);
+            if (integerWords === '') integerWords = 'صفر';
+            let result = integerWords + ' ريال سعودي';
+            if (fraction > 0) {
+                result += ' و' + convert(fraction) + ' هللة';
+            }
+            return result.trim() + ' فقط لا غير.';
+        }
+
+        // --- NEW CORPORATE PAYSLIP FUNCTION ---
+        function generateCorporatePayslipHTML(record, payroll) {
             const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+            
+            const earnings = [
+                { name: 'الراتب الأساسي', amount: record.salary },
+                ...record.allowances.filter(a => a.includedInPayroll).map(a => ({ name: a.name, amount: a.amount })),
+            ];
+            if (record.overtimePay > 0) {
+                earnings.push({ name: 'أجر العمل الإضافي', amount: record.overtimePay });
+            }
+
+            const deductions = [ ...record.deductions.filter(d => d.includedInPayroll).map(d => ({ name: d.name, amount: d.amount }))];
+            if (record.absenceDeduction > 0) {
+                deductions.push({ name: 'خصم الغياب', amount: record.absenceDeduction });
+            }
+            if (record.lateDeduction > 0) {
+                deductions.push({ name: 'خصم التأخير', amount: record.lateDeduction });
+            }
+
+            const totalEarnings = earnings.reduce((sum, item) => sum + item.amount, 0);
+            const totalDeductions = deductions.reduce((sum, item) => sum + item.amount, 0);
+
+            const payPeriodStart = new Date(payroll.year, payroll.month, 1);
+            const payPeriodEnd = new Date(payroll.year, payroll.month + 1, 0);
+
             return `
-                <div class="payslip-page bg-white text-black p-8" style="width: 210mm; height: 290mm; margin: auto; display: flex; flex-direction: column; border: 1px solid #e2e8f0;">
-                    <header class="flex justify-between items-start pb-4 border-b border-slate-200 mb-4">
-                        <div class="text-right">
-                            <h2 class="text-3xl font-bold text-emerald-600">${state.settings.name || 'اسم الشركة'}</h2>
-                        </div>
-                    </header>
-                    <h1 class="text-2xl font-bold text-center text-slate-800 mb-4">بيان راتب - ${months[payroll.month]} ${payroll.year}</h1>
-                    <div class="grid grid-cols-2 gap-4 mb-4 border-b pb-4 text-sm">
+            <div class="payslip-page bg-white text-gray-900" style="width: 210mm; min-height: 297mm; margin: auto; display: flex; flex-direction: column; border: 1px solid #e5e7eb; padding: 2rem; font-size: 10pt;">
+                
+                <header class="flex justify-between items-start pb-4 border-b border-gray-200">
+                    <div class="flex items-center gap-4">
+                        <img src="${state.settings.logoUrl || 'https://placehold.co/200x80/f0f0f0/333?text=Logo'}" alt="شعار الشركة" class="h-16 object-contain">
                         <div>
-                            <p class="text-slate-500">اسم الموظف</p>
-                            <p class="font-semibold text-slate-800">${record.name}</p>
-                        </div>
-                        <div>
-                            <p class="text-slate-500">الرقم الوظيفي</p>
-                            <p class="font-semibold text-slate-800">${record.employeeId}</p>
-                        </div>
-                        <div>
-                            <p class="text-slate-500">المنصب</p>
-                            <p class="font-semibold text-slate-800">${record.position}</p>
-                        </div>
-                        <div>
-                            <p class="text-slate-500">تاريخ الطباعة</p>
-                            <p class="font-semibold text-slate-800">${formatGregorianDate(new Date())}</p>
+                            <h2 class="text-xl font-bold text-gray-900">${state.settings.name || 'اسم الشركة'}</h2>
+                            <p class="text-xs text-gray-600">${state.settings.address || 'عنوان الشركة'}</p>
+                            <p class="text-xs text-gray-600">س.ت: ${state.settings.crNumber || 'غير محدد'}</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-6 flex-grow">
-                        <div>
-                            <h3 class="text-lg font-bold mb-2 pb-1 border-b text-green-600">الاستحقاقات</h3>
-                            <table class="w-full text-sm">
-                                <tbody>
-                                    <tr><td class="py-1.5">الراتب الأساسي</td><td class="py-1.5 text-left font-semibold">${formatNumber(record.salary)}</td></tr>
-                                    ${record.allowances.filter(a => a.includedInPayroll).map(a => `<tr><td class="py-1.5">${a.name}</td><td class="py-1.5 text-left">${formatNumber(a.amount)}</td></tr>`).join('')}
-                                    <tr><td class="py-1.5">أجر العمل الإضافي</td><td class="py-1.5 text-left text-green-600">${formatNumber(record.overtimePay || 0)}</td></tr>
-                                </tbody>
-                                <tfoot class="font-bold border-t-2">
-                                    <tr><td class="py-2">إجمالي الاستحقاقات</td><td class="py-2 text-left">${formatNumber(record.grossSalary + (record.overtimePay || 0))}</td></tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold mb-2 pb-1 border-b text-red-600">الاستقطاعات</h3>
-                            <table class="w-full text-sm">
-                                <tbody>
-                                    <tr><td class="py-1.5">خصم الغياب</td><td class="py-1.5 text-left">${formatNumber(record.absenceDeduction || 0)}</td></tr>
-                                    <tr><td class="py-1.5">خصم التأخير</td><td class="py-1.5 text-left">${formatNumber(record.lateDeduction || 0)}</td></tr>
-                                    ${record.deductions.filter(d => d.includedInPayroll).map(d => `<tr><td class="py-1.5">${d.name}</td><td class="py-1.5 text-left">${formatNumber(d.amount)}</td></tr>`).join('')}
-                                </tbody>
-                                <tfoot class="font-bold border-t-2">
-                                    <tr><td class="py-2">إجمالي الاستقطاعات</td><td class="py-2 text-left">${formatNumber(record.absenceDeduction + record.lateDeduction + record.deductions.filter(d=>d.includedInPayroll).reduce((s, i) => s + i.amount, 0))}</td></tr>
-                                </tfoot>
-                            </table>
+                    <div class="text-right">
+                        <h1 class="text-2xl font-bold">بيان صافي الراتب</h1>
+                        <p class="text-sm text-gray-600">Salary Statement</p>
+                    </div>
+                </header>
+
+                <section class="grid grid-cols-2 gap-x-8 my-4 text-sm">
+                     <div>
+                        <h3 class="font-bold text-base mb-2 pb-1 border-b">بيانات الموظف</h3>
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+                            <span class="text-gray-600">اسم الموظف:</span> <span class="font-semibold">${record.name || ''}</span>
+                            <span class="text-gray-600">الرقم الوظيفي:</span> <span class="font-semibold">${record.employeeId || ''}</span>
+                            <span class="text-gray-600">المنصب:</span> <span class="font-semibold">${record.position || ''}</span>
+                            <span class="text-gray-600">الجنسية:</span> <span class="font-semibold">${record.nationality || ''}</span>
+                            <span class="text-gray-600">تاريخ الالتحاق:</span> <span class="font-semibold">${record.startDate || ''}</span>
                         </div>
                     </div>
-                    <div class="mt-4 bg-emerald-600 text-white rounded-lg p-3 text-center">
-                        <p class="text-lg font-bold">صافي الراتب المستحق: ${formatNumber(record.netPay)} ر.س</p>
-                    </div>
-                    <div class="mt-auto pt-4 flex justify-between text-sm">
-                        <div>
-                            <p class="mb-6">توقيع الموظف</p>
-                            <p>..............................</p>
-                        </div>
-                        <div>
-                            <p class="mb-6">توقيع المدير</p>
-                            <p>..............................</p>
+                    <div class="text-left">
+                        <h3 class="font-bold text-base mb-2 pb-1 border-b">بيانات الراتب</h3>
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+                            <span class="text-gray-600">فترة الراتب:</span> <span class="font-semibold">${months[payroll.month]} ${payroll.year}</span>
+                            <span class="text-gray-600">تاريخ الدفع:</span> <span class="font-semibold">${formatGregorianDate(payPeriodEnd)}</span>
+                            <span class="text-gray-600">طريقة الدفع:</span> <span class="font-semibold">تحويل بنكي</span>
+                            <span class="text-gray-600">IBAN:</span> <span class="font-semibold">${record.iban || ''}</span>
                         </div>
                     </div>
-                </div>
+                </section>
+
+                <section class="flex-grow">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 font-bold">
+                                <th class="p-2 border text-right" colspan="2">الاستحقاقات (Earnings)</th>
+                                <th class="p-2 border text-right" colspan="2">الاستقطاعات (Deductions)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Array.from({ length: Math.max(earnings.length, deductions.length) }).map((_, i) => `
+                            <tr>
+                                <td class="p-2 border-r border-l">${earnings[i] ? earnings[i].name : '&nbsp;'}</td>
+                                <td class="p-2 border-r text-left">${earnings[i] ? formatNumber(earnings[i].amount) : ''}</td>
+                                <td class="p-2 border-r">${deductions[i] ? deductions[i].name : ''}</td>
+                                <td class="p-2 border-r text-left">${deductions[i] ? formatNumber(deductions[i].amount) : ''}</td>
+                            </tr>
+                            `).join('')}
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-gray-100 font-bold">
+                                <td class="p-2 border text-right">إجمالي الاستحقاقات</td>
+                                <td class="p-2 border text-left">${formatNumber(totalEarnings)}</td>
+                                <td class="p-2 border text-right">إجمالي الاستقطاعات</td>
+                                <td class="p-2 border text-left">${formatNumber(totalDeductions)}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </section>
+                
+                <section class="mt-4">
+                    <div class="bg-gray-200 p-2 rounded-md font-bold text-center">
+                        <span>صافي الراتب المستحق (Net Payable): ${formatNumber(record.netPay)} ر.س</span>
+                    </div>
+                    <div class="bg-gray-50 p-2 mt-1 rounded-md text-sm text-center">
+                        ${tafqeet(record.netPay)}
+                    </div>
+                </section>
+
+                <section class="mt-4 text-xs">
+                    <h3 class="font-bold mb-1">ملخص الإجازات (Leave Summary)</h3>
+                    <div class="grid grid-cols-4 gap-2 text-center">
+                        <div class="bg-gray-100 p-1 rounded-md"><span class="font-semibold">الرصيد الافتتاحي</span><br>0</div>
+                        <div class="bg-gray-100 p-1 rounded-md"><span class="font-semibold">المكتسبة</span><br>2.5</div>
+                        <div class="bg-gray-100 p-1 rounded-md"><span class="font-semibold">المستخدمة</span><br>0</div>
+                        <div class="bg-gray-100 p-1 rounded-md"><span class="font-semibold">الرصيد الختامي</span><br>2.5</div>
+                    </div>
+                </section>
+
+                <footer class="mt-auto pt-6 text-xs">
+                    <div class="grid grid-cols-2 gap-8 text-center">
+                        <div>
+                            <p class="h-12"></p>
+                            <p class="border-t border-gray-400 pt-1 font-semibold">توقيع الموظف</p>
+                        </div>
+                        <div>
+                            <p class="h-12"></p>
+                            <p class="border-t border-gray-400 pt-1 font-semibold">الختم والتوقيع المعتمد</p>
+                        </div>
+                    </div>
+                    <p class="text-center text-gray-500 mt-4">هذا المستند تم إنشاؤه بواسطة الحاسب الآلي وهو سري وخاص بالموظف المذكور أعلاه.</p>
+                </footer>
+            </div>
             `;
         }
 
@@ -1174,7 +1314,7 @@
             if (records.length === 0) return showAlert('لا توجد بيانات', 'لا يوجد موظفين في هذا المسير.');
 
             const printableDiv = document.getElementById('printable-payroll');
-            printableDiv.innerHTML = records.map(record => generatePayslipHTML(record, payroll)).join('');
+            printableDiv.innerHTML = records.map(record => generateCorporatePayslipHTML(record, payroll)).join('');
             window.print();
             printableDiv.innerHTML = '';
         };
@@ -1228,7 +1368,7 @@
                                 <td class="p-2 border border-slate-300">-${formatNumber(payroll.totalAbsenceDeduction || 0)}</td>
                                 <td class="p-2 border border-slate-300">-${formatNumber(payroll.totalLateDeduction || 0)}</td>
                                 <td class="p-2 border border-slate-300">+${formatNumber(payroll.totalOvertimePay || 0)}</td>
-                                <td class="p-2 border border-slate-300">-${formatNumber(payroll.totalFixedDeductions)}</td>
+                                <td class="p-2 border border-slate-300">-${formatNumber(payroll.totalDeductions)}</td>
                                 <td class="p-2 border border-slate-300">${formatNumber(payroll.netPay)}</td>
                             </tr>
                         </tfoot>
@@ -1249,7 +1389,7 @@
             const payroll = state.payrolls.find(p => p.id === payrollId);
             
             const printableDiv = document.getElementById('printable-payroll');
-            printableDiv.innerHTML = generatePayslipHTML(record, payroll);
+            printableDiv.innerHTML = generateCorporatePayslipHTML(record, payroll);
             window.print();
             printableDiv.innerHTML = '';
         };
@@ -1300,7 +1440,7 @@
                     <td class="px-6 py-4 font-medium text-slate-900">${emp.name}</td>
                     <td class="px-6 py-4">${emp.position}</td>
                     <td class="px-6 py-4 text-center">
-                        <button onclick="openModal('attendanceModal', '${emp.id}')" class="bg-green-100 text-green-800 font-semibold px-4 py-1 rounded-full hover:bg-green-200">تسجيل الحضور</button>
+                        <button onclick="openModal('attendanceModal', '${emp.id}')" class="bg-violet-100 text-violet-800 font-semibold px-4 py-1 rounded-full hover:bg-violet-200">تسجيل الحضور</button>
                     </td>
                 </tr>`;
             }).join("");
@@ -1319,6 +1459,8 @@
         const handleSettingsSubmit = async (event) => {
             event.preventDefault();
             const companyName = ui.companyNameInput.value.trim();
+            const companyAddress = ui.companyAddressInput.value.trim();
+            const companyCR = ui.companyCRInput.value.trim();
             const logoFile = document.getElementById('logo-upload-input').files[0];
             let logoUrl = state.settings.logoUrl;
 
@@ -1336,11 +1478,13 @@
 
                 const settingsData = {
                     name: companyName,
+                    address: companyAddress,
+                    crNumber: companyCR,
                     logoUrl: logoUrl
                 };
 
                 const settingsRef = doc(db, "hr-data", userId, "settings", "companyProfile");
-                await setDoc(settingsRef, settingsData);
+                await setDoc(settingsRef, settingsData, { merge: true });
                 showAlert('نجاح', 'تم حفظ الإعدادات بنجاح.');
             } catch (e) {
                 console.error("Error saving settings: ", e);
