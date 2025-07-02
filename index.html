@@ -1096,15 +1096,15 @@
         function generatePayslipHTML(record, payroll) {
             const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
             return `
-                <div class="payslip-page bg-white text-black p-6" style="width: 210mm; height: 290mm; margin: auto; display: flex; flex-direction: column; border: 1px solid #e2e8f0;">
-                    <header class="flex justify-between items-start pb-3 border-b border-slate-200 mb-3">
+                <div class="payslip-page bg-white text-black p-8" style="width: 210mm; height: 290mm; margin: auto; display: flex; flex-direction: column; border: 1px solid #e2e8f0;">
+                    <header class="flex justify-between items-start pb-4 border-b border-slate-200 mb-4">
                         <div class="text-right">
-                            <h2 class="text-2xl font-bold text-violet-700">${state.settings.name || 'اسم الشركة'}</h2>
+                            <h2 class="text-3xl font-bold text-violet-700">${state.settings.name || 'اسم الشركة'}</h2>
                         </div>
-                        <img src="${state.settings.logoUrl || 'https://placehold.co/150x150/e9d5ff/4c1d95?text=Logo'}" alt="Company Logo" class="h-20 w-20 object-contain">
+                        <img src="${state.settings.logoUrl || 'https://placehold.co/150x150/e9d5ff/4c1d95?text=Logo'}" alt="Company Logo" class="h-24 w-24 object-contain">
                     </header>
-                    <h1 class="text-xl font-bold text-center text-slate-800 mb-3">بيان راتب - ${months[payroll.month]} ${payroll.year}</h1>
-                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 mb-3 border-b pb-3 text-sm">
+                    <h1 class="text-2xl font-bold text-center text-slate-800 mb-4">بيان راتب - ${months[payroll.month]} ${payroll.year}</h1>
+                    <div class="grid grid-cols-2 gap-4 mb-4 border-b pb-4 text-sm">
                         <div>
                             <p class="text-slate-500">اسم الموظف</p>
                             <p class="font-semibold text-slate-800">${record.name}</p>
@@ -1124,8 +1124,8 @@
                     </div>
                     <div class="grid grid-cols-2 gap-6 flex-grow">
                         <div>
-                            <h3 class="text-base font-bold mb-2 pb-1 border-b text-green-600">الاستحقاقات</h3>
-                            <table class="w-full text-xs">
+                            <h3 class="text-lg font-bold mb-2 pb-1 border-b text-green-600">الاستحقاقات</h3>
+                            <table class="w-full text-sm">
                                 <tbody>
                                     <tr><td class="py-1">الراتب الأساسي</td><td class="py-1 text-left font-semibold">${formatNumber(record.salary)}</td></tr>
                                     ${record.allowances.filter(a => a.includedInPayroll).map(a => `<tr><td class="py-1">${a.name}</td><td class="py-1 text-left">${formatNumber(a.amount)}</td></tr>`).join('')}
@@ -1137,7 +1137,7 @@
                             </table>
                         </div>
                         <div>
-                            <h3 class="text-base font-bold mb-2 pb-1 border-b text-red-600">الاستقطاعات</h3>
+                            <h3 class="text-lg font-bold mb-2 pb-1 border-b text-red-600">الاستقطاعات</h3>
                             <table class="w-full text-sm">
                                 <tbody>
                                     <tr><td class="py-1">خصم الغياب</td><td class="py-1 text-left">${formatNumber(record.absenceDeduction || 0)}</td></tr>
