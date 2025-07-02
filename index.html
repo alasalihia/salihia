@@ -656,13 +656,13 @@
                 // Project settings > Your apps > Firebase SDK snippet > Config
                 //
                 // =======================================================================
-                const firebaseConfig = { 
-                    apiKey: "AIzaSyDSlxf95W00Ow6LZba8waAKJINptIRPkU8", 
-                    authDomain: "sample-firebase-ai-app-960f4.firebaseapp.com", 
-                    projectId: "sample-firebase-ai-app-960f4", 
-                    storageBucket: "sample-firebase-ai-app-960f4.appspot.com", 
-                    messagingSenderId: "741880884079", 
-                    appId: "1:741880884079:web:8d2f6e233fb65e65e969a" 
+                const firebaseConfig = {
+                    apiKey: "AIzaSyDSlxf95W00Ow6LZba8waAKJINptIRPkU8",
+                    authDomain: "sample-firebase-ai-app-960f4.firebaseapp.com",
+                    projectId: "sample-firebase-ai-app-960f4",
+                    storageBucket: "sample-firebase-ai-app-960f4.appspot.com",
+                    messagingSenderId: "741880884079",
+                    appId: "1:741880884079:web:8d62f6e233fb65e65e969a"
                 };
                 // =======================================================================
                 // =======================================================================
@@ -1489,6 +1489,9 @@
                         case 'storage/object-not-found':
                              errorMessage = 'فشل الحصول على رابط الشعار بعد رفعه. يرجى المحاولة مرة أخرى.';
                             break;
+                        case 'storage/retry-limit-exceeded':
+                             errorMessage = 'فشل الاتصال بخدمة التخزين. يرجى التأكد من صحة قيمة "storageBucket" في إعدادات Firebase داخل الكود.';
+                             break;
                         case 'permission-denied':
                              errorMessage = 'فشل حفظ الإعدادات: ليس لديك الصلاحية للكتابة في قاعدة البيانات. يرجى مراجعة قواعد الأمان (Security Rules) في Firestore.';
                              break;
