@@ -1241,7 +1241,7 @@
             });
         };
 
-        // --- Payroll Functions (No changes needed here for leaves) ---
+        // --- Payroll Functions ---
         const handlePayrollGeneration = async (event) => {
             event.preventDefault();
             const month = document.getElementById('payroll-month').value;
@@ -1253,7 +1253,7 @@
                 return;
             }
 
-            const activeEmployees = state.employees.filter(e => e.status === 'active');
+            const activeEmployees = state.employees.filter(e => e.status === 'active' || e.status === 'on_leave');
             
             const payrollYear = parseInt(year);
             const payrollMonth = parseInt(month); 
@@ -1306,6 +1306,33 @@
                 const attendanceSnap = await getDoc(attendanceDocRef);
                 
                 let absenceDeduction = 0, lateDeduction = 0, overtimePay = 0;
+                let paidLeaveDaysInMonth = 0;
+
+                // ** MODIFICATION START: Calculate paid leave days to avoid double deduction **
+                const payrollMonthStartDate = new Date(payrollYear, payrollMonth, 1);
+                const payrollMonthEndDate = new Date(payrollYear, payrollMonth + 1, 0);
+
+                const approvedPaidLeavesInMonth = state.leaves.filter(l =>
+                    l.employeeId === emp.id &&
+                    l.status === 'approved' &&
+                    (l.leaveType === 'annual' || l.leaveType === 'sick') && // Consider both annual and sick as paid
+                    new Date(l.startDate) <= payrollMonthEndDate &&
+                    new Date(l.endDate) >= payrollMonthStartDate
+                );
+                
+                approvedPaidLeavesInMonth.forEach(leave => {
+                    const leaveStart = new Date(leave.startDate);
+                    const leaveEnd = new Date(leave.endDate);
+
+                    let currentDate = new Date(Math.max(leaveStart, payrollMonthStartDate));
+                    const finalDate = new Date(Math.min(leaveEnd, payrollMonthEndDate));
+                    
+                    while (currentDate <= finalDate) {
+                        paidLeaveDaysInMonth += 1; // Count all days within the range, assuming calculateWorkingDays handles weekends.
+                        currentDate.setDate(currentDate.getDate() + 1);
+                    }
+                });
+                // ** MODIFICATION END **
                 
                 if (attendanceSnap.exists()) {
                     const attendanceData = attendanceSnap.data();
@@ -1313,8 +1340,12 @@
                     const dailyRate = grossSalary / daysInMonth; 
                     const hourlyRate = dailyRate / 8;
 
-                    const absentDays = attendanceData.totalDaysInMonth - attendanceData.attendedDays;
-                    if (absentDays > 0) absenceDeduction = dailyRate * absentDays;
+                    const totalDaysNotPresent = daysInMonth - attendanceData.attendedDays;
+                    const unpaidAbsentDays = Math.max(0, totalDaysNotPresent - paidLeaveDaysInMonth); // Deduct only for unpaid absence
+
+                    if (unpaidAbsentDays > 0) {
+                        absenceDeduction = dailyRate * unpaidAbsentDays;
+                    }
 
                     const totalLateMinutes = (attendanceData.lateHours * 60) + attendanceData.lateMinutes;
                     if (totalLateMinutes > 0) lateDeduction = (hourlyRate / 60) * totalLateMinutes;
