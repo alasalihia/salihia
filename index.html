@@ -204,15 +204,7 @@
                                 <label for="company-cr-input" class="block mb-2 text-sm font-medium text-gray-900">رقم السجل التجاري</label>
                                 <input type="text" id="company-cr-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="1234567890">
                             </div>
-                            <div>
-                                <label for="logo-upload-input" class="block mb-2 text-sm font-medium text-gray-900">شعار الشركة</label>
-                                <input type="file" id="logo-upload-input" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
-                                <p class="mt-1 text-sm text-gray-500">ارفع صورة الشعار (يفضل أن تكون مستطيلة)</p>
-                                <div class="mt-4">
-                                    <p class="text-sm font-medium">الشعار الحالي:</p>
-                                    <img id="logo-preview" src="https://placehold.co/150x50/e9d5ff/4c1d95?text=Logo" alt="Company Logo Preview" class="mt-2 h-16 object-contain rounded-md bg-slate-100 border p-1">
-                                </div>
-                            </div>
+                            <!-- Logo Section Removed -->
                         </div>
                         <div class="mt-8 pt-4 border-t">
                             <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">حفظ الإعدادات</button>
@@ -337,7 +329,7 @@
     </div>
 
     <div id="alertModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
-        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-sm p-6 transform scale-95 text-center">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center">
             <h3 id="alertModalTitle" class="text-xl font-bold mb-4"></h3>
             <p id="alertModalMessage" class="mb-6"></p>
             <div id="alertModalButtons" class="flex justify-center space-x-2 rtl:space-x-reverse"></div>
@@ -351,10 +343,10 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, addDoc, onSnapshot, deleteDoc, query, where, getDocs, updateDoc, writeBatch, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        // Firebase Storage import removed
         
         // --- Global Variables ---
-        let app, auth, db, storage, userId;
+        let app, auth, db, userId; // storage removed
         let employeesUnsubscribe, payrollsUnsubscribe, settingsUnsubscribe;
         let allowancesUnsubscribe, deductionsUnsubscribe;
         let state = { 
@@ -362,7 +354,7 @@
             payrolls: [],
             settings: { 
                 name: 'شركتك', 
-                logoUrl: 'https://placehold.co/150x50/e9d5ff/4c1d95?text=Logo',
+                // logoUrl removed
                 address: '',
                 crNumber: ''
             },
@@ -394,7 +386,7 @@
             companyNameInput: document.getElementById('company-name-input'),
             companyAddressInput: document.getElementById('company-address-input'),
             companyCRInput: document.getElementById('company-cr-input'),
-            logoPreview: document.getElementById('logo-preview'),
+            // logoPreview removed
         };
 
         // --- Utility Functions ---
@@ -637,7 +629,7 @@
             ui.companyNameInput.value = state.settings.name || '';
             ui.companyAddressInput.value = state.settings.address || '';
             ui.companyCRInput.value = state.settings.crNumber || '';
-            ui.logoPreview.src = state.settings.logoUrl || 'https://placehold.co/150x50/e9d5ff/4c1d95?text=Logo';
+            // logo preview line removed
         }
 
         // --- Firebase Functions ---
@@ -647,22 +639,22 @@
                 // =======================================================================
                 // ===================  !!! هام جداً - IMPORTANT !!! =====================
                 //
-                //  لحل مشكلة رفع الشعار، يجب استبدال الكائن التالي بالكامل
+                //  يجب استبدال الكائن التالي بالكامل
                 //  بالكائن الذي نسخته من إعدادات مشروعك في Firebase Console.
                 //
-                // To fix the logo upload issue, you MUST replace the entire object
+                // You MUST replace the entire object
                 // below with the one you copied from your Firebase Console project settings.
                 //
                 // Project settings > Your apps > Firebase SDK snippet > Config
                 //
                 // =======================================================================
                 const firebaseConfig = {
-                    apiKey: "AIzaSyDSlxf95W00Ow6LZba8waAKJINptIRPkU8",
-                    authDomain: "sample-firebase-ai-app-960f4.firebaseapp.com",
-                    projectId: "sample-firebase-ai-app-960f4",
-                    storageBucket: "sample-firebase-ai-app-960f4.appspot.com",
-                    messagingSenderId: "741880884079",
-                    appId: "1:741880884079:web:8d62f6e233fb65e65e969a"
+                    apiKey: "YOUR_API_KEY",
+                    authDomain: "YOUR_AUTH_DOMAIN",
+                    projectId: "YOUR_PROJECT_ID",
+                    storageBucket: "YOUR_STORAGE_BUCKET",
+                    messagingSenderId: "YOUR_SENDER_ID",
+                    appId: "YOUR_APP_ID"
                 };
                 // =======================================================================
                 // =======================================================================
@@ -670,7 +662,7 @@
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
-                storage = getStorage(app);
+                // storage initialization removed
 
                 onAuthStateChanged(auth, user => {
                     if (user) {
@@ -720,7 +712,7 @@
             employeesUnsubscribe = null;
             payrollsUnsubscribe = null;
             settingsUnsubscribe = null;
-            state = { employees: [], payrolls: [], settings: { name: 'شركتك', logoUrl: 'https://placehold.co/150x50/e9d5ff/4c1d95?text=Logo', address: '', crNumber: '' }, currentEmployee: { allowances: [], deductions: [] } };
+            state = { employees: [], payrolls: [], settings: { name: 'شركتك', address: '', crNumber: '' }, currentEmployee: { allowances: [], deductions: [] } }; // logoUrl removed
             renderAll();
         }
 
@@ -750,7 +742,7 @@
                 if (doc.exists()) {
                     state.settings = doc.data();
                 } else {
-                    state.settings = { name: 'شركتك', logoUrl: 'https://placehold.co/150x50/e9d5ff/4c1d95?text=Logo', address: '', crNumber: '' };
+                    state.settings = { name: 'شركتك', address: '', crNumber: '' }; // logoUrl removed
                 }
                 renderSettingsPage();
             });
@@ -1086,8 +1078,8 @@
                     <div class="flex justify-between items-center mb-4">
                          <h3 class="font-bold text-lg">تفاصيل مسير رواتب ${months[payroll.month]} ${payroll.year}</h3>
                          <div>
-                            <button onclick="printAllPayslips('${payrollId}')" class="text-sm bg-violet-100 text-violet-800 px-3 py-1 rounded-md hover:bg-violet-200 ml-2">طباعة كل القسائم</button>
-                            <button onclick="printPayrollSummary('${payrollId}')" class="text-sm bg-slate-200 px-3 py-1 rounded-md hover:bg-slate-300">طباعة الملخص</button>
+                             <button onclick="printAllPayslips('${payrollId}')" class="text-sm bg-violet-100 text-violet-800 px-3 py-1 rounded-md hover:bg-violet-200 ml-2">طباعة كل القسائم</button>
+                             <button onclick="printPayrollSummary('${payrollId}')" class="text-sm bg-slate-200 px-3 py-1 rounded-md hover:bg-slate-300">طباعة الملخص</button>
                          </div>
                     </div>
                     <div class="overflow-x-auto">
@@ -1199,15 +1191,13 @@
             <div class="payslip-page bg-white text-gray-900" style="width: 29.7cm; height: 21cm; margin: auto; display: flex; flex-direction: column; border: 1px solid #e5e7eb; padding: 1cm; font-size: 9pt;">
                 
                 <!-- 1. Header -->
-                <header class="flex justify-between items-center pb-2 border-b border-gray-300">
-                    <div>
+                <header class="flex justify-center items-center pb-2 border-b border-gray-300">
+                    <div class="text-center">
                         <h1 class="text-2xl font-bold">${state.settings.name || 'اسم الشركة'}</h1>
                         <p class="text-sm">قسيمة الراتب الشهرية - Monthly Pay Slip</p>
                         <p class="text-sm">الفترة: ${months[payroll.month]} ${payroll.year}</p>
                     </div>
-                    <div class="text-right">
-                        <img src="${state.settings.logoUrl || 'https://placehold.co/120x60/f0f0f0/333?text=Logo'}" alt="شعار الشركة" class="h-12 object-contain">
-                    </div>
+                    <!-- Logo Removed -->
                 </header>
 
                 <!-- 2. Employee & Job Information -->
@@ -1309,8 +1299,8 @@
             const printableDiv = document.getElementById('printable-payroll');
             printableDiv.innerHTML = `
                 <div class="p-8">
-                    <header class="flex justify-between items-center mb-6">
-                        <img src="${state.settings.logoUrl || ''}" alt="Logo" class="h-20 object-contain">
+                    <header class="flex justify-center items-center mb-6">
+                        <!-- Logo removed -->
                         <h1 class="text-3xl font-bold">${state.settings.name || 'ملخص الرواتب'}</h1>
                     </header>
                     <h2 class="text-2xl font-bold text-center mb-2">مسير رواتب شهر ${months[payroll.month]} ${payroll.year}</h2>
@@ -1451,10 +1441,9 @@
             const companyName = ui.companyNameInput.value.trim();
             const companyAddress = ui.companyAddressInput.value.trim();
             const companyCR = ui.companyCRInput.value.trim();
-            const logoFile = document.getElementById('logo-upload-input').files[0];
-            let logoUrl = state.settings.logoUrl;
+            // logoFile and logoUrl removed
 
-            if (!db || !storage || !userId) {
+            if (!db || !userId) { // storage check removed
                 showAlert('خطأ في الاتصال', 'فقد الاتصال بالخدمة. يرجى تسجيل الدخول مرة أخرى.');
                 submitButton.disabled = false;
                 submitButton.innerHTML = originalButtonText;
@@ -1462,17 +1451,13 @@
             }
             
             try {
-                if (logoFile) {
-                    const storageRef = ref(storage, `logos/${userId}/${logoFile.name}`);
-                    await uploadBytes(storageRef, logoFile);
-                    logoUrl = await getDownloadURL(storageRef);
-                }
+                // Logo upload logic removed
 
                 const settingsData = {
                     name: companyName,
                     address: companyAddress,
                     crNumber: companyCR,
-                    logoUrl: logoUrl
+                    // logoUrl property removed
                 };
 
                 const settingsRef = doc(db, "hr-data", userId, "settings", "companyProfile");
@@ -1483,15 +1468,7 @@
                 let errorMessage = 'فشل حفظ الإعدادات.';
                 if (e.code) {
                     switch (e.code) {
-                        case 'storage/unauthorized':
-                            errorMessage = 'فشل رفع الشعار: ليس لديك الصلاحية للكتابة في هذا المسار. يرجى مراجعة قواعد الأمان (Security Rules) في Firebase Storage.';
-                            break;
-                        case 'storage/object-not-found':
-                             errorMessage = 'فشل الحصول على رابط الشعار بعد رفعه. يرجى المحاولة مرة أخرى.';
-                            break;
-                        case 'storage/retry-limit-exceeded':
-                             errorMessage = 'فشل الاتصال بخدمة التخزين. يرجى التأكد من صحة قيمة "storageBucket" في إعدادات Firebase داخل الكود.';
-                             break;
+                        // Storage-related error cases removed
                         case 'permission-denied':
                              errorMessage = 'فشل حفظ الإعدادات: ليس لديك الصلاحية للكتابة في قاعدة البيانات. يرجى مراجعة قواعد الأمان (Security Rules) في Firestore.';
                              break;
@@ -1514,12 +1491,7 @@
         ui.settingsForm.addEventListener('submit', handleSettingsSubmit);
         document.getElementById('attendance-month').addEventListener('change', updateMonthDaysDisplay);
         document.getElementById('attendance-year').addEventListener('change', updateMonthDaysDisplay);
-        document.getElementById('logo-upload-input').addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                ui.logoPreview.src = URL.createObjectURL(file);
-            }
-        });
+        // Event listener for logo upload input removed
 
         initializeFirebase();
 
