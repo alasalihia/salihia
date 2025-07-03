@@ -360,6 +360,43 @@
         </div>
     </div>
 
+    <!-- MODIFICATION: Added Leave Request Modal -->
+    <div id="leaveRequestModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-lg p-6 transform scale-95">
+            <h3 class="text-xl font-bold mb-4">طلب إجازة جديد</h3>
+            <form id="leaveRequestForm">
+                <div class="space-y-4">
+                    <div>
+                        <label for="leave-employee-select" class="block mb-2 text-sm font-medium">الموظف</label>
+                        <select id="leave-employee-select" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></select>
+                    </div>
+                    <div>
+                        <label for="leave-type-select" class="block mb-2 text-sm font-medium">نوع الإجازة</label>
+                        <select id="leave-type-select" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="leave-start-date" class="block mb-2 text-sm font-medium">من تاريخ</label>
+                            <input type="date" id="leave-start-date" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required>
+                        </div>
+                        <div>
+                            <label for="leave-end-date" class="block mb-2 text-sm font-medium">إلى تاريخ</label>
+                            <input type="date" id="leave-end-date" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required>
+                        </div>
+                    </div>
+                     <div>
+                        <label for="leave-reason" class="block mb-2 text-sm font-medium">السبب (اختياري)</label>
+                        <textarea id="leave-reason" rows="3" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></textarea>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end space-x-2 rtl:space-x-reverse">
+                    <button type="button" onclick="closeModal('leaveRequestModal')" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">إلغاء</button>
+                    <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">تقديم الطلب</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="alertModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
         <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center">
             <h3 id="alertModalTitle" class="text-xl font-bold mb-4"></h3>
@@ -378,11 +415,12 @@
         
         // --- Global Variables ---
         let app, auth, db, userId;
-        let employeesUnsubscribe, payrollsUnsubscribe, settingsUnsubscribe;
+        let employeesUnsubscribe, payrollsUnsubscribe, settingsUnsubscribe, leavesUnsubscribe;
         let allowancesUnsubscribe, deductionsUnsubscribe;
         let state = { 
             employees: [], 
             payrolls: [],
+            leaves: [],
             settings: { 
                 name: 'شركتك', 
                 address: '',
@@ -404,6 +442,7 @@
             addEmployeeForm: document.getElementById('addEmployeeForm'),
             employeesTableBody: document.getElementById('employees-table-body'),
             attendanceTableBody: document.getElementById('attendance-table-body'),
+            leavesTableBody: document.getElementById('leaves-table-body'),
             hrDashboardStats: document.getElementById('hr-dashboard-stats'),
             employeeModalTitle: document.getElementById('employeeModalTitle'),
             employeeModalSubmitButton: document.getElementById('employeeModalSubmitButton'),
@@ -412,6 +451,7 @@
             payrollDetailsContainer: document.getElementById('payroll-details-container'),
             generatePayrollForm: document.getElementById('generatePayrollForm'),
             attendanceForm: document.getElementById('attendanceForm'),
+            leaveRequestForm: document.getElementById('leaveRequestForm'),
             settingsForm: document.getElementById('settings-form'),
             companyNameInput: document.getElementById('company-name-input'),
             companyAddressInput: document.getElementById('company-address-input'),
@@ -478,6 +518,8 @@
                 }
             } else if (modalId === 'salaryDetailsModal') {
                 openSalaryDetailsModal(context);
+            } else if (modalId === 'leaveRequestModal') {
+                openLeaveRequestModal();
             } else if (modalId === 'generatePayrollModal' || modalId === 'attendanceModal') {
                 const monthSelectId = modalId === 'generatePayrollModal' ? 'payroll-month' : 'attendance-month';
                 const yearInputId = modalId === 'generatePayrollModal' ? 'payroll-year' : 'attendance-year';
@@ -574,6 +616,7 @@
             renderHrDashboard();
             renderEmployeesPage();
             renderAttendancePage();
+            renderLeavesPage();
             renderOrUpdateDepartmentChart();
             renderPayrollHistory();
             renderSettingsPage();
@@ -725,10 +768,12 @@
             if (employeesUnsubscribe) employeesUnsubscribe();
             if (payrollsUnsubscribe) payrollsUnsubscribe();
             if (settingsUnsubscribe) settingsUnsubscribe();
+            if (leavesUnsubscribe) leavesUnsubscribe();
             employeesUnsubscribe = null;
             payrollsUnsubscribe = null;
             settingsUnsubscribe = null;
-            state = { employees: [], payrolls: [], settings: { name: 'شركتك', address: '', crNumber: '' }, currentEmployee: { allowances: [], deductions: [] } };
+            leavesUnsubscribe = null;
+            state = { employees: [], payrolls: [], leaves: [], settings: { name: 'شركتك', address: '', crNumber: '' }, currentEmployee: { allowances: [], deductions: [] } };
             renderAll();
         }
 
@@ -753,6 +798,12 @@
                 renderPayrollHistory();
             });
             
+            const leavesRef = collection(db, "hr-data", userId, "leaves");
+            leavesUnsubscribe = onSnapshot(leavesRef, snapshot => {
+                state.leaves = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderLeavesPage();
+            });
+
             const settingsRef = doc(db, "hr-data", userId, "settings", "companyProfile");
             settingsUnsubscribe = onSnapshot(settingsRef, (doc) => {
                 if (doc.exists()) {
@@ -1020,15 +1071,31 @@
                 const attendanceSnap = await getDoc(attendanceDocRef);
                 
                 let absenceDeduction = 0, lateDeduction = 0, overtimePay = 0;
-                
+                let paidLeaveDays = 0; 
+                let employeeMonthLeaves = []; 
+
+                const employeeLeaves = state.leaves.filter(l => l.employeeId === emp.id && l.status === 'approved' && l.isPaid);
+                employeeLeaves.forEach(leave => {
+                    const leaveDaysInMonth = getLeaveDaysInMonth(leave, payrollYear, payrollMonth);
+                    if(leaveDaysInMonth > 0) {
+                        paidLeaveDays += leaveDaysInMonth;
+                        employeeMonthLeaves.push({ type: leave.type, days: leaveDaysInMonth });
+                    }
+                });
+
                 if (attendanceSnap.exists()) {
                     const attendanceData = attendanceSnap.data();
                     const daysInMonth = attendanceData.totalDaysInMonth;
                     const dailyRate = grossSalary / daysInMonth; 
                     const hourlyRate = dailyRate / 8;
 
-                    const absentDays = attendanceData.totalDaysInMonth - attendanceData.attendedDays;
-                    if (absentDays > 0) absenceDeduction = dailyRate * absentDays;
+                    const totalAbsenceDays = daysInMonth - attendanceData.attendedDays;
+                    const justifiedAbsenceDays = Math.min(totalAbsenceDays, paidLeaveDays);
+                    const unjustifiedAbsenceDays = totalAbsenceDays - justifiedAbsenceDays;
+
+                    if (unjustifiedAbsenceDays > 0) {
+                        absenceDeduction = dailyRate * unjustifiedAbsenceDays;
+                    }
 
                     const totalLateMinutes = (attendanceData.lateHours * 60) + attendanceData.lateMinutes;
                     if (totalLateMinutes > 0) lateDeduction = (hourlyRate / 60) * totalLateMinutes;
@@ -1040,7 +1107,18 @@
                 const empNet = (grossSalary + overtimePay) - (empTotalFixedDeductions + absenceDeduction + lateDeduction);
 
                 const payrollRecordRef = doc(db, "hr-data", userId, "payrolls", payrollId, "records", emp.id);
-                batch.set(payrollRecordRef, { ...emp, allowances, deductions: fixedDeductions, grossSalary, absenceDeduction, lateDeduction, overtimePay, netPay: empNet });
+                batch.set(payrollRecordRef, { 
+                    ...emp, 
+                    allowances, 
+                    deductions: fixedDeductions, 
+                    grossSalary, 
+                    absenceDeduction, 
+                    lateDeduction, 
+                    overtimePay, 
+                    netPay: empNet,
+                    paidLeaveDays: paidLeaveDays,
+                    leaves: employeeMonthLeaves
+                });
 
                 totalBaseSalary += emp.salary;
                 totalAllowances += empTotalAllowances;
@@ -1257,6 +1335,19 @@
 
             const payPeriodEnd = new Date(payroll.year, payroll.month + 1, 0);
 
+            // --- MODIFICATION: Added Leave Details Section ---
+            let leaveDetailsHTML = '';
+            if (record.leaves && record.leaves.length > 0) {
+                leaveDetailsHTML = `
+                <div class="mt-2">
+                    <h4 class="font-bold text-xs">تفاصيل الإجازات المدفوعة:</h4>
+                    <ul class="list-disc pr-4 text-xs">
+                        ${record.leaves.map(l => `<li>${l.type}: ${l.days} يوم</li>`).join('')}
+                    </ul>
+                </div>
+                `;
+            }
+
             return `
             <div class="payslip-page bg-white text-gray-900" style="width: 100%; height: 100%; margin: auto; display: flex; flex-direction: column; border: 1px solid #e5e7eb; padding: 0.8cm; font-size: 9pt;">
                 
@@ -1302,6 +1393,7 @@
                                 <td class="py-1 pl-1 text-left font-mono">${formatNumber(d.amount)}</td>
                             </tr>`).join('')}
                         </table>
+                        ${leaveDetailsHTML}
                     </div>
                 </section>
 
