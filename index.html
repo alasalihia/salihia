@@ -636,28 +636,15 @@
         
         async function initializeFirebase() {
             try {
-                // =======================================================================
-                // ===================  !!! هام جداً - IMPORTANT !!! =====================
-                //
-                //  يجب استبدال الكائن التالي بالكامل
-                //  بالكائن الذي نسخته من إعدادات مشروعك في Firebase Console.
-                //
-                // You MUST replace the entire object
-                // below with the one you copied from your Firebase Console project settings.
-                //
-                // Project settings > Your apps > Firebase SDK snippet > Config
-                //
-                // =======================================================================
+                // --- Firebase Config Restored ---
                 const firebaseConfig = {
-                    apiKey: "YOUR_API_KEY",
-                    authDomain: "YOUR_AUTH_DOMAIN",
-                    projectId: "YOUR_PROJECT_ID",
-                    storageBucket: "YOUR_STORAGE_BUCKET",
-                    messagingSenderId: "YOUR_SENDER_ID",
-                    appId: "YOUR_APP_ID"
+                    apiKey: "AIzaSyDSlxf95W00Ow6LZba8waAKJINptIRPkU8",
+                    authDomain: "sample-firebase-ai-app-960f4.firebaseapp.com",
+                    projectId: "sample-firebase-ai-app-960f4",
+                    storageBucket: "sample-firebase-ai-app-960f4.appspot.com",
+                    messagingSenderId: "741880884079",
+                    appId: "1:741880884079:web:8d62f6e233fb65e65e969a"
                 };
-                // =======================================================================
-                // =======================================================================
 
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
