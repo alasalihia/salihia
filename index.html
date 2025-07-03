@@ -204,7 +204,7 @@
                                 <label for="company-cr-input" class="block mb-2 text-sm font-medium text-gray-900">رقم السجل التجاري</label>
                                 <input type="text" id="company-cr-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="1234567890">
                             </div>
-                            </div>
+                        </div>
                         <div class="mt-8 pt-4 border-t">
                             <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">حفظ الإعدادات</button>
                         </div>
@@ -215,26 +215,56 @@
     </div>
 
     <div id="addEmployeeModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
-        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 transform scale-95"> <h3 id="employeeModalTitle" class="text-xl font-bold mb-4">إضافة موظف جديد</h3>
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-4xl p-6 transform scale-95">
+            <h3 id="employeeModalTitle" class="text-xl font-bold mb-4">إضافة موظف جديد</h3>
             <form id="addEmployeeForm">
                 <input type="hidden" id="employee-edit-id">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div><label for="employeeName" class="block mb-2 text-sm font-medium">الاسم الكامل</label><input type="text" id="employeeName" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
-                    <div><label for="employeeId" class="block mb-2 text-sm font-medium">الرقم الوظيفي</label><input type="text" id="employeeId" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
-                    <div><label for="employeeNationalId" class="block mb-2 text-sm font-medium">رقم الهوية/الإقامة</label><input type="text" id="employeeNationalId" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
-                    <div><label for="employeePosition" class="block mb-2 text-sm font-medium">المنصب الوظيفي</label><input type="text" id="employeePosition" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
-                    <div><label for="employeeDepartment" class="block mb-2 text-sm font-medium">القسم</label><input type="text" id="employeeDepartment" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
-                    <div><label for="employeeStartDate" class="block mb-2 text-sm font-medium">تاريخ بدء العمل</label><input type="date" id="employeeStartDate" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
-                    <div><label for="employeeSalary" class="block mb-2 text-sm font-medium">الراتب الأساسي (ر.س)</label><input type="number" id="employeeSalary" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
-                    <div><label for="employeeNationality" class="block mb-2 text-sm font-medium">الجنسية</label><input type="text" id="employeeNationality" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" placeholder="مثال: سعودي"></div>
-                    <div><label for="employeeIBAN" class="block mb-2 text-sm font-medium">رقم الآيبان (IBAN)</label><input type="text" id="employeeIBAN" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" placeholder="SAXXXXXXXXXXXXXXXXXXXXXX"></div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="col-span-1 md:col-span-2 lg:col-span-3">
+                        <h4 class="font-semibold text-lg text-violet-700 border-b pb-2 mb-4">المعلومات الأساسية</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div><label for="employeeName" class="block mb-2 text-sm font-medium">الاسم الكامل</label><input type="text" id="employeeName" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
+                            <div><label for="employeeId" class="block mb-2 text-sm font-medium">الرقم الوظيفي</label><input type="text" id="employeeId" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
+                            <div><label for="employeeNationalId" class="block mb-2 text-sm font-medium">رقم الهوية/الإقامة</label><input type="text" id="employeeNationalId" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
+                            <div><label for="employeePosition" class="block mb-2 text-sm font-medium">المنصب الوظيفي</label><input type="text" id="employeePosition" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
+                            <div><label for="employeeDepartment" class="block mb-2 text-sm font-medium">القسم</label><input type="text" id="employeeDepartment" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
+                            <div><label for="employeeStartDate" class="block mb-2 text-sm font-medium">تاريخ بدء العمل</label><input type="date" id="employeeStartDate" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
+                            <div><label for="employeeSalary" class="block mb-2 text-sm font-medium">الراتب الأساسي (ر.س)</label><input type="number" id="employeeSalary" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
+                            <div><label for="employeeNationality" class="block mb-2 text-sm font-medium">الجنسية</label><input type="text" id="employeeNationality" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" placeholder="مثال: سعودي"></div>
+                            <div><label for="employeeIBAN" class="block mb-2 text-sm font-medium">رقم الآيبان (IBAN)</label><input type="text" id="employeeIBAN" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" placeholder="SA..."></div>
+                             <div><label for="employeeStatus" class="block mb-2 text-sm font-medium">حالة الموظف</label><select id="employeeStatus" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required><option value="active">على رأس العمل</option><option value="on_leave">في إجازة</option><option value="terminated">منتهية خدماته</option></select></div>
+                        </div>
+                    </div>
                     
-                    <div><label for="annualLeaveBalance" class="block mb-2 text-sm font-medium">رصيد الإجازة السنوية</label><input type="number" id="annualLeaveBalance" value="21" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
-                    <div><label for="sickLeaveBalance" class="block mb-2 text-sm font-medium">رصيد الإجازة المرضية</label><input type="number" id="sickLeaveBalance" value="14" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
-                    
-                    <div><label for="employeeStatus" class="block mb-2 text-sm font-medium">حالة الموظف</label><select id="employeeStatus" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required><option value="active">على رأس العمل</option><option value="on_leave">في إجازة</option><option value="terminated">منتهية خدماته</option></select></div>
+                    <div class="col-span-1 md:col-span-2 lg:col-span-3 mt-4">
+                        <h4 class="font-semibold text-lg text-violet-700 border-b pb-2 mb-4">إعدادات الإجازات والراحة</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-1">
+                                <label for="annualLeaveEntitlement" class="block mb-2 text-sm font-medium">الاستحقاق السنوي للإجازة (يوم)</label>
+                                <input type="number" id="annualLeaveEntitlement" value="21" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
+                            </div>
+                            <div class="md:col-span-1">
+                                <label for="annualLeaveBalance" class="block mb-2 text-sm font-medium">الرصيد المتبقي حالياً (يوم)</label>
+                                <input type="number" id="annualLeaveBalance" value="21" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
+                            </div>
+                             <div class="md:col-span-3">
+                                <label class="block mb-2 text-sm font-medium">أيام الراحة الأسبوعية</label>
+                                <div id="weeklyRestDaysContainer" class="flex flex-wrap gap-x-4 gap-y-2 p-3 bg-slate-50 rounded-lg border">
+                                    <label class="flex items-center space-x-2 rtl:space-x-reverse cursor-pointer"><input type="checkbox" name="restDay" value="6" class="form-checkbox h-4 w-4 text-violet-600"> <span>السبت</span></label>
+                                    <label class="flex items-center space-x-2 rtl:space-x-reverse cursor-pointer"><input type="checkbox" name="restDay" value="0" class="form-checkbox h-4 w-4 text-violet-600"> <span>الأحد</span></label>
+                                    <label class="flex items-center space-x-2 rtl:space-x-reverse cursor-pointer"><input type="checkbox" name="restDay" value="1" class="form-checkbox h-4 w-4 text-violet-600"> <span>الإثنين</span></label>
+                                    <label class="flex items-center space-x-2 rtl:space-x-reverse cursor-pointer"><input type="checkbox" name="restDay" value="2" class="form-checkbox h-4 w-4 text-violet-600"> <span>الثلاثاء</span></label>
+                                    <label class="flex items-center space-x-2 rtl:space-x-reverse cursor-pointer"><input type="checkbox" name="restDay" value="3" class="form-checkbox h-4 w-4 text-violet-600"> <span>الأربعاء</span></label>
+                                    <label class="flex items-center space-x-2 rtl:space-x-reverse cursor-pointer"><input type="checkbox" name="restDay" value="4" class="form-checkbox h-4 w-4 text-violet-600"> <span>الخميس</span></label>
+                                    <label class="flex items-center space-x-2 rtl:space-x-reverse cursor-pointer"><input type="checkbox" name="restDay" value="5" class="form-checkbox h-4 w-4 text-violet-600" checked> <span>الجمعة</span></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="mt-6 flex justify-end space-x-2 rtl:space-x-reverse">
+
+                <div class="mt-8 flex justify-end space-x-2 rtl:space-x-reverse border-t pt-4">
                     <button type="button" onclick="closeModal('addEmployeeModal')" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">إلغاء</button>
                     <button id="employeeModalSubmitButton" type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">حفظ الموظف</button>
                 </div>
@@ -419,18 +449,26 @@
             if (modalId === 'addEmployeeModal') {
                 ui.addEmployeeForm.reset();
                 ui.employeeEditIdInput.value = '';
+                
+                // Reset checkboxes to default (Friday only)
+                document.querySelectorAll('#weeklyRestDaysContainer input[name="restDay"]').forEach(cb => {
+                    cb.checked = cb.value === '5'; 
+                });
+                
                 // Set default values for new fields
+                document.getElementById('annualLeaveEntitlement').value = 21;
                 document.getElementById('annualLeaveBalance').value = 21;
-                document.getElementById('sickLeaveBalance').value = 14;
 
 
-                if (context) { // This is an edit operation
+                if (context) { // This is an EDIT operation
                     const employeeId = context;
                     const employee = state.employees.find(emp => emp.id === employeeId);
                     if (employee) {
                         ui.employeeModalTitle.textContent = 'تعديل بيانات الموظف';
                         ui.employeeModalSubmitButton.textContent = 'حفظ التعديلات';
                         ui.employeeEditIdInput.value = employee.id;
+                        
+                        // Populate basic info
                         document.getElementById('employeeName').value = employee.name;
                         document.getElementById('employeeId').value = employee.employeeId;
                         document.getElementById('employeeNationalId').value = employee.nationalId || '';
@@ -441,11 +479,18 @@
                         document.getElementById('employeeStatus').value = employee.status;
                         document.getElementById('employeeNationality').value = employee.nationality || '';
                         document.getElementById('employeeIBAN').value = employee.iban || '';
-                        // ✨ POPULATE LEAVE FIELDS ON EDIT
-                        document.getElementById('annualLeaveBalance').value = employee.annualLeaveBalance ?? 21;
-                        document.getElementById('sickLeaveBalance').value = employee.sickLeaveBalance ?? 14;
+                        
+                        // Populate Leave & Rest Day Settings on Edit
+                        document.getElementById('annualLeaveEntitlement').value = employee.annualLeaveEntitlement ?? 21;
+                        document.getElementById('annualLeaveBalance').value = employee.annualLeaveBalance ?? (employee.annualLeaveEntitlement ?? 21);
+                        
+                        // Set checked states for rest days
+                        const savedRestDays = employee.weeklyRestDays || [5]; // Default to Friday if not set
+                        document.querySelectorAll('#weeklyRestDaysContainer input[name="restDay"]').forEach(cb => {
+                            cb.checked = savedRestDays.includes(parseInt(cb.value));
+                        });
                     }
-                } else { // This is an add operation
+                } else { // This is an ADD operation
                     ui.employeeModalTitle.textContent = 'إضافة موظف جديد';
                     ui.employeeModalSubmitButton.textContent = 'حفظ الموظف';
                     document.getElementById('employeeStartDate').valueAsDate = new Date();
@@ -638,10 +683,8 @@
         }
 
         // --- Firebase Functions ---
-        
         async function initializeFirebase() {
             try {
-                // --- Firebase Config Restored ---
                 const firebaseConfig = {
                     apiKey: "AIzaSyDSlxf95W00Ow6LZba8waAKJINptIRPkU8",
                     authDomain: "sample-firebase-ai-app-960f4.firebaseapp.com",
@@ -662,7 +705,6 @@
                         ui.mainMenuScreen.style.display = "block";
                         document.getElementById('main-menu-user-display-name').textContent = user.displayName || `مستخدم: ${user.uid.substring(0,6)}…`;
                         document.getElementById('main-menu-user-info').classList.remove('hidden');
-
                         setupRealtimeListeners();
                     } else {
                         ui.loginScreen.classList.add('active');
@@ -747,6 +789,12 @@
         const handleEmployeeFormSubmit = async (event) => {
             event.preventDefault();
             const form = event.target;
+            
+            const selectedRestDays = [];
+            document.querySelectorAll('#weeklyRestDaysContainer input[name="restDay"]:checked').forEach(cb => {
+                selectedRestDays.push(parseInt(cb.value));
+            });
+
             const employeeData = {
                 name: form.employeeName.value.trim(),
                 employeeId: form.employeeId.value.trim(),
@@ -758,9 +806,10 @@
                 status: form.employeeStatus.value,
                 nationality: form.employeeNationality.value.trim(),
                 iban: form.employeeIBAN.value.trim(),
-                // ✨ SAVE NEW LEAVE FIELDS
+                
+                annualLeaveEntitlement: Number(form.annualLeaveEntitlement.value),
                 annualLeaveBalance: Number(form.annualLeaveBalance.value),
-                sickLeaveBalance: Number(form.sickLeaveBalance.value),
+                weeklyRestDays: selectedRestDays,
             };
 
             if (!employeeData.name || !employeeData.employeeId || !employeeData.nationalId) {
@@ -818,7 +867,7 @@
             });
         };
 
-        // --- Salary Details Functions (No changes here) ---
+        // --- Salary Details Functions ---
         const openSalaryDetailsModal = (employeeId) => {
             const employee = state.employees.find(e => e.id === employeeId);
             if (!employee) return;
@@ -840,6 +889,7 @@
                 updateNetSalary();
             });
         };
+
         const renderSalaryAdjustments = (type) => {
             const tableBody = document.getElementById(`${type}-table-body`);
             const items = state.currentEmployee[type];
@@ -858,6 +908,7 @@
                 </tr>
             `).join('');
         };
+
         const addAdjustmentRow = (type) => {
             const tableBody = document.getElementById(`${type}-table-body`);
             const tr = document.createElement('tr');
@@ -875,6 +926,7 @@
         };
         window.addAllowanceRow = () => addAdjustmentRow('allowances');
         window.addDeductionRow = () => addAdjustmentRow('deductions');
+
         const saveSalaryAdjustment = async (type, tableRow) => {
             const employeeId = document.getElementById('salary-details-employee-id').value;
             const nameInput = tableRow.querySelector('input[type="text"]');
@@ -889,12 +941,13 @@
 
             try {
                 const collectionRef = collection(db, "hr-data", userId, "employees", employeeId, type);
-                await addDoc(collectionRef, { name, amount, includedInPayroll: true }); // Default to true
+                await addDoc(collectionRef, { name, amount, includedInPayroll: true });
             } catch (e) {
                 console.error(`Error saving ${type}:`, e);
                 showAlert('خطأ', 'فشل حفظ البند.');
             }
         };
+        
         window.deleteSalaryAdjustment = async (type, docId) => {
             const employeeId = document.getElementById('salary-details-employee-id').value;
             try {
@@ -904,6 +957,7 @@
                 showAlert('خطأ', 'فشل حذف البند.');
             }
         };
+        
         window.toggleInclusion = async (type, docId, isIncluded) => {
             const employeeId = document.getElementById('salary-details-employee-id').value;
              try {
@@ -914,6 +968,7 @@
                 showAlert('خطأ', 'فشل تحديث حالة البند.');
             }
         };
+
         const updateNetSalary = () => {
             const employeeId = document.getElementById('salary-details-employee-id').value;
             const employee = state.employees.find(e => e.id === employeeId);
@@ -931,9 +986,7 @@
             document.getElementById('net-salary-display').textContent = `${formatNumber(netSalary)} ر.س`;
         };
 
-        // --- Payroll, Printing, Attendance, Settings Functions (No changes here) ---
-        // These sections are left unchanged as they are not affected by this first step.
-        // ... (All functions from handlePayrollGeneration to the end remain the same) ...
+        // --- Payroll Functions ---
         const handlePayrollGeneration = async (event) => {
             event.preventDefault();
             const month = document.getElementById('payroll-month').value;
@@ -1566,7 +1619,6 @@
                 submitButton.innerHTML = originalButtonText;
             }
         };
-
 
         // --- Initial Application Load ---
         ui.addEmployeeForm.addEventListener('submit', handleEmployeeFormSubmit);
