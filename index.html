@@ -224,6 +224,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div><label for="employeeName" class="block mb-2 text-sm font-medium">الاسم الكامل</label><input type="text" id="employeeName" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
                     <div><label for="employeeId" class="block mb-2 text-sm font-medium">الرقم الوظيفي</label><input type="text" id="employeeId" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
+                    <!-- MODIFICATION: Added National ID field -->
+                    <div><label for="employeeNationalId" class="block mb-2 text-sm font-medium">رقم الهوية/الإقامة</label><input type="text" id="employeeNationalId" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
                     <div><label for="employeePosition" class="block mb-2 text-sm font-medium">المنصب الوظيفي</label><input type="text" id="employeePosition" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
                     <div><label for="employeeDepartment" class="block mb-2 text-sm font-medium">القسم</label><input type="text" id="employeeDepartment" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
                     <div><label for="employeeStartDate" class="block mb-2 text-sm font-medium">تاريخ بدء العمل</label><input type="date" id="employeeStartDate" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
@@ -431,6 +433,7 @@
                         ui.employeeEditIdInput.value = employee.id;
                         document.getElementById('employeeName').value = employee.name;
                         document.getElementById('employeeId').value = employee.employeeId;
+                        document.getElementById('employeeNationalId').value = employee.nationalId || '';
                         document.getElementById('employeePosition').value = employee.position;
                         document.getElementById('employeeDepartment').value = employee.department;
                         document.getElementById('employeeStartDate').value = employee.startDate;
@@ -742,6 +745,7 @@
             const employeeData = {
                 name: form.employeeName.value.trim(),
                 employeeId: form.employeeId.value.trim(),
+                nationalId: form.employeeNationalId.value.trim(), // MODIFICATION: Save National ID
                 position: form.employeePosition.value.trim(),
                 department: form.employeeDepartment.value.trim(),
                 startDate: form.employeeStartDate.value,
@@ -751,8 +755,8 @@
                 iban: form.employeeIBAN.value.trim(),
             };
 
-            if (!employeeData.name || !employeeData.employeeId) {
-                showAlert("بيانات ناقصة", "يرجى إدخال اسم الموظف ورقمه الوظيفي على الأقل.");
+            if (!employeeData.name || !employeeData.employeeId || !employeeData.nationalId) {
+                showAlert("بيانات ناقصة", "يرجى إدخال اسم الموظف، ورقمه الوظيفي، ورقم الهوية/الإقامة.");
                 return;
             }
             
@@ -1034,7 +1038,7 @@
                 totalOvertimePay, 
                 netPay, 
                 employeeCount: eligibleEmployees.length,
-                isApproved: false // --- MODIFICATION: Set isApproved to false on creation
+                isApproved: false 
             });
 
             try {
@@ -1056,7 +1060,6 @@
             ui.payrollHistoryContainer.innerHTML = state.payrolls
                 .sort((a,b) => b.createdAt.toMillis() - a.createdAt.toMillis())
                 .map(p => {
-                    // --- MODIFICATION: Add visual indicator for approved payrolls ---
                     const approvedBadge = p.isApproved 
                         ? `<span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">معتمد</span>`
                         : `<span class="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-1 rounded-full">غير معتمد</span>`;
@@ -1080,13 +1083,16 @@
 
             const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
             
-            // --- MODIFICATION: Add Approve and Delete buttons based on isApproved status ---
             let actionButtons = '';
             if (payroll.isApproved) {
-                actionButtons = `<p class="text-sm text-green-600 font-semibold bg-green-100 p-2 rounded-md text-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block ml-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                    هذا المسير معتمد ولا يمكن تعديله أو حذفه.
-                </p>`;
+                actionButtons = `
+                <div class="flex justify-between items-center">
+                    <p class="text-sm text-green-600 font-semibold bg-green-100 p-2 rounded-md text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block ml-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                        هذا المسير معتمد
+                    </p>
+                    <button onclick="generateWPSFile('${payroll.id}')" class="text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors">تصدير ملف حماية الأجور (WPS)</button>
+                </div>`;
             } else {
                 actionButtons = `
                     <button onclick="approvePayroll('${payroll.id}')" class="text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors">اعتماد المسير</button>
