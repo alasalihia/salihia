@@ -360,7 +360,6 @@
         </div>
     </div>
 
-    <!-- MODIFICATION: Added Leave Request Modal -->
     <div id="leaveRequestModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
         <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-lg p-6 transform scale-95">
             <h3 class="text-xl font-bold mb-4">طلب إجازة جديد</h3>
@@ -1071,31 +1070,15 @@
                 const attendanceSnap = await getDoc(attendanceDocRef);
                 
                 let absenceDeduction = 0, lateDeduction = 0, overtimePay = 0;
-                let paidLeaveDays = 0; 
-                let employeeMonthLeaves = []; 
-
-                const employeeLeaves = state.leaves.filter(l => l.employeeId === emp.id && l.status === 'approved' && l.isPaid);
-                employeeLeaves.forEach(leave => {
-                    const leaveDaysInMonth = getLeaveDaysInMonth(leave, payrollYear, payrollMonth);
-                    if(leaveDaysInMonth > 0) {
-                        paidLeaveDays += leaveDaysInMonth;
-                        employeeMonthLeaves.push({ type: leave.type, days: leaveDaysInMonth });
-                    }
-                });
-
+                
                 if (attendanceSnap.exists()) {
                     const attendanceData = attendanceSnap.data();
                     const daysInMonth = attendanceData.totalDaysInMonth;
                     const dailyRate = grossSalary / daysInMonth; 
                     const hourlyRate = dailyRate / 8;
 
-                    const totalAbsenceDays = daysInMonth - attendanceData.attendedDays;
-                    const justifiedAbsenceDays = Math.min(totalAbsenceDays, paidLeaveDays);
-                    const unjustifiedAbsenceDays = totalAbsenceDays - justifiedAbsenceDays;
-
-                    if (unjustifiedAbsenceDays > 0) {
-                        absenceDeduction = dailyRate * unjustifiedAbsenceDays;
-                    }
+                    const absentDays = attendanceData.totalDaysInMonth - attendanceData.attendedDays;
+                    if (absentDays > 0) absenceDeduction = dailyRate * absentDays;
 
                     const totalLateMinutes = (attendanceData.lateHours * 60) + attendanceData.lateMinutes;
                     if (totalLateMinutes > 0) lateDeduction = (hourlyRate / 60) * totalLateMinutes;
@@ -1107,18 +1090,7 @@
                 const empNet = (grossSalary + overtimePay) - (empTotalFixedDeductions + absenceDeduction + lateDeduction);
 
                 const payrollRecordRef = doc(db, "hr-data", userId, "payrolls", payrollId, "records", emp.id);
-                batch.set(payrollRecordRef, { 
-                    ...emp, 
-                    allowances, 
-                    deductions: fixedDeductions, 
-                    grossSalary, 
-                    absenceDeduction, 
-                    lateDeduction, 
-                    overtimePay, 
-                    netPay: empNet,
-                    paidLeaveDays: paidLeaveDays,
-                    leaves: employeeMonthLeaves
-                });
+                batch.set(payrollRecordRef, { ...emp, allowances, deductions: fixedDeductions, grossSalary, absenceDeduction, lateDeduction, overtimePay, netPay: empNet });
 
                 totalBaseSalary += emp.salary;
                 totalAllowances += empTotalAllowances;
@@ -1335,19 +1307,6 @@
 
             const payPeriodEnd = new Date(payroll.year, payroll.month + 1, 0);
 
-            // --- MODIFICATION: Added Leave Details Section ---
-            let leaveDetailsHTML = '';
-            if (record.leaves && record.leaves.length > 0) {
-                leaveDetailsHTML = `
-                <div class="mt-2">
-                    <h4 class="font-bold text-xs">تفاصيل الإجازات المدفوعة:</h4>
-                    <ul class="list-disc pr-4 text-xs">
-                        ${record.leaves.map(l => `<li>${l.type}: ${l.days} يوم</li>`).join('')}
-                    </ul>
-                </div>
-                `;
-            }
-
             return `
             <div class="payslip-page bg-white text-gray-900" style="width: 100%; height: 100%; margin: auto; display: flex; flex-direction: column; border: 1px solid #e5e7eb; padding: 0.8cm; font-size: 9pt;">
                 
@@ -1393,7 +1352,6 @@
                                 <td class="py-1 pl-1 text-left font-mono">${formatNumber(d.amount)}</td>
                             </tr>`).join('')}
                         </table>
-                        ${leaveDetailsHTML}
                     </div>
                 </section>
 
