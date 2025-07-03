@@ -1295,12 +1295,12 @@
             const records = recordsSnapshot.docs.map(d => d.data());
             const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
 
-            // --- NEW LOGIC FOR DETAILED SUMMARY ---
+            // --- MODIFICATION START: Logic now respects 'includedInPayroll' flag ---
             const allAllowances = new Set();
             const allDeductions = new Set();
             records.forEach(r => {
-                if(r.allowances) r.allowances.forEach(a => allAllowances.add(a.name));
-                if(r.deductions) r.deductions.forEach(d => allDeductions.add(d.name));
+                if(r.allowances) r.allowances.filter(a => a.includedInPayroll).forEach(a => allAllowances.add(a.name));
+                if(r.deductions) r.deductions.filter(d => d.includedInPayroll).forEach(d => allDeductions.add(d.name));
             });
             const allowanceHeaders = Array.from(allAllowances);
             const deductionHeaders = Array.from(allDeductions);
@@ -1321,43 +1321,59 @@
             `;
 
             const bodyHTML = records.map(r => {
-                const employeeAllowances = new Map(r.allowances.map(a => [a.name, a.amount]));
-                const employeeDeductions = new Map(r.deductions.map(d => [d.name, d.amount]));
-                const totalDeductionsForEmp = (r.deductions.reduce((s, i) => s + i.amount, 0)) + (r.absenceDeduction || 0) + (r.lateDeduction || 0);
+                const employeeAllowances = new Map(r.allowances.filter(a => a.includedInPayroll).map(a => [a.name, a.amount]));
+                const employeeDeductions = new Map(r.deductions.filter(d => d.includedInPayroll).map(d => [d.name, d.amount]));
+                
+                const totalAllowancesForEmp = Array.from(employeeAllowances.values()).reduce((s, v) => s + v, 0);
+                const grossSalaryForEmp = r.salary + totalAllowancesForEmp;
+                
+                const totalFixedDeductionsForEmp = Array.from(employeeDeductions.values()).reduce((s, v) => s + v, 0);
+                const totalDeductionsForEmp = totalFixedDeductionsForEmp + (r.absenceDeduction || 0) + (r.lateDeduction || 0);
+
+                const netPayForEmp = (grossSalaryForEmp + (r.overtimePay || 0)) - totalDeductionsForEmp;
 
                 return `
                     <tr class="border-b">
                         <td class="p-2 border border-slate-300">${r.name}</td>
                         <td class="p-2 border border-slate-300">${formatNumber(r.salary)}</td>
                         ${allowanceHeaders.map(name => `<td class="p-2 border border-slate-300">${formatNumber(employeeAllowances.get(name) || 0)}</td>`).join('')}
-                        <td class="p-2 border border-slate-300 font-bold bg-yellow-100">${formatNumber(r.grossSalary)}</td>
+                        <td class="p-2 border border-slate-300 font-bold bg-yellow-100">${formatNumber(grossSalaryForEmp)}</td>
                         ${deductionHeaders.map(name => `<td class="p-2 border border-slate-300 text-red-600">${formatNumber(employeeDeductions.get(name) || 0)}</td>`).join('')}
                         <td class="p-2 border border-slate-300 text-red-600">${formatNumber(r.absenceDeduction || 0)}</td>
                         <td class="p-2 border border-slate-300 text-red-600">${formatNumber(r.lateDeduction || 0)}</td>
                         <td class="p-2 border border-slate-300 font-bold bg-red-100">${formatNumber(totalDeductionsForEmp)}</td>
                         <td class="p-2 border border-slate-300 text-green-600">${formatNumber(r.overtimePay || 0)}</td>
-                        <td class="p-2 border border-slate-300 font-bold bg-green-100">${formatNumber(r.netPay)}</td>
+                        <td class="p-2 border border-slate-300 font-bold bg-green-100">${formatNumber(netPayForEmp)}</td>
                     </tr>
                 `;
             }).join('');
-
-            const allowanceTotals = allowanceHeaders.map(name => records.reduce((sum, r) => sum + (r.allowances.find(a => a.name === name)?.amount || 0), 0));
-            const deductionTotals = deductionHeaders.map(name => records.reduce((sum, r) => sum + (r.deductions.find(d => d.name === name)?.amount || 0), 0));
             
+            const totalBaseSalary = records.reduce((sum, r) => sum + r.salary, 0);
+            const allowanceTotals = allowanceHeaders.map(name => records.reduce((sum, r) => sum + (r.allowances.find(a => a.name === name && a.includedInPayroll)?.amount || 0), 0));
+            const deductionTotals = deductionHeaders.map(name => records.reduce((sum, r) => sum + (r.deductions.find(d => d.name === name && d.includedInPayroll)?.amount || 0), 0));
+            const totalGross = totalBaseSalary + allowanceTotals.reduce((s, t) => s + t, 0);
+            const totalAbsence = records.reduce((s, r) => s + (r.absenceDeduction || 0), 0);
+            const totalLate = records.reduce((s, r) => s + (r.lateDeduction || 0), 0);
+            const totalFixedDeductions = deductionTotals.reduce((s, t) => s + t, 0);
+            const totalDeductions = totalFixedDeductions + totalAbsence + totalLate;
+            const totalOvertime = records.reduce((s, r) => s + (r.overtimePay || 0), 0);
+            const totalNet = totalGross + totalOvertime - totalDeductions;
+
             const footerHTML = `
                 <tr class="font-bold bg-slate-200">
                     <td class="p-2 border border-slate-300">الإجمالي</td>
-                    <td class="p-2 border border-slate-300">${formatNumber(payroll.totalBaseSalary)}</td>
+                    <td class="p-2 border border-slate-300">${formatNumber(totalBaseSalary)}</td>
                     ${allowanceTotals.map(total => `<td class="p-2 border border-slate-300">${formatNumber(total)}</td>`).join('')}
-                    <td class="p-2 border border-slate-300 bg-yellow-200">${formatNumber(payroll.totalBaseSalary + payroll.totalAllowances)}</td>
+                    <td class="p-2 border border-slate-300 bg-yellow-200">${formatNumber(totalGross)}</td>
                     ${deductionTotals.map(total => `<td class="p-2 border border-slate-300 text-red-600">${formatNumber(total)}</td>`).join('')}
-                    <td class="p-2 border border-slate-300 text-red-600">${formatNumber(payroll.totalAbsenceDeduction || 0)}</td>
-                    <td class="p-2 border border-slate-300 text-red-600">${formatNumber(payroll.totalLateDeduction || 0)}</td>
-                    <td class="p-2 border border-slate-300 bg-red-200">${formatNumber(payroll.totalDeductions + (payroll.totalAbsenceDeduction || 0) + (payroll.totalLateDeduction || 0))}</td>
-                    <td class="p-2 border border-slate-300 text-green-600">${formatNumber(payroll.totalOvertimePay || 0)}</td>
-                    <td class="p-2 border border-slate-300 bg-green-200">${formatNumber(payroll.netPay)}</td>
+                    <td class="p-2 border border-slate-300 text-red-600">${formatNumber(totalAbsence)}</td>
+                    <td class="p-2 border border-slate-300 text-red-600">${formatNumber(totalLate)}</td>
+                    <td class="p-2 border border-slate-300 bg-red-200">${formatNumber(totalDeductions)}</td>
+                    <td class="p-2 border border-slate-300 text-green-600">${formatNumber(totalOvertime)}</td>
+                    <td class="p-2 border border-slate-300 bg-green-200">${formatNumber(totalNet)}</td>
                 </tr>
             `;
+            // --- MODIFICATION END ---
 
             const printableDiv = document.getElementById('printable-payroll');
             printableDiv.innerHTML = `
