@@ -29,7 +29,7 @@
         @media print {
             @page {
                 size: A4 landscape;
-                margin: 0;
+                margin: 0.5cm;
             }
             body * { visibility: hidden; }
             #printable-payroll, #printable-payroll * { visibility: visible; }
@@ -938,26 +938,38 @@
             }
 
             const activeEmployees = state.employees.filter(e => e.status === 'active');
-            if (activeEmployees.length === 0) {
-                showAlert('لا يوجد موظفين', 'لا يوجد موظفين نشطين لإصدار مسير رواتب لهم.');
+            
+            const payrollYear = parseInt(year);
+            const payrollMonth = parseInt(month); 
+
+            const eligibleEmployees = activeEmployees.filter(emp => {
+                if (!emp.startDate) return false; 
+                const employeeStartDate = new Date(emp.startDate);
+                const employeeStartYear = employeeStartDate.getFullYear();
+                const employeeStartMonth = employeeStartDate.getMonth();
+
+                return (employeeStartYear < payrollYear) || (employeeStartYear === payrollYear && employeeStartMonth <= payrollMonth);
+            });
+
+
+            if (eligibleEmployees.length === 0) {
+                showAlert('لا يوجد موظفين', 'لا يوجد موظفين مؤهلين (على رأس العمل وبدأوا العمل قبل أو خلال هذا الشهر) لإصدار مسير رواتب لهم.');
                 return;
             }
 
             const batch = writeBatch(db);
             let totalBaseSalary = 0, totalAllowances = 0, totalDeductions = 0, totalAbsenceDeduction = 0, totalLateDeduction = 0, totalOvertimePay = 0, netPay = 0;
             
-            for (const emp of activeEmployees) {
-                // 1. Get salary components
+            for (const emp of eligibleEmployees) { 
                 const allowancesSnapshot = await getDocs(collection(db, "hr-data", userId, "employees", emp.id, "allowances"));
                 const deductionsSnapshot = await getDocs(collection(db, "hr-data", userId, "employees", emp.id, "deductions"));
                 const allowances = allowancesSnapshot.docs.map(d => ({id: d.id, ...d.data()}));
                 let fixedDeductions = deductionsSnapshot.docs.map(d => ({id: d.id, ...d.data()}));
 
-                // GOSI Calculation (for Saudi nationals)
                 if (emp.nationality && emp.nationality.toLowerCase().includes('سعودي')) {
                     const housingAllowance = allowances.find(a => a.name.includes('سكن'))?.amount || 0;
                     const gosiBase = emp.salary + housingAllowance;
-                    const gosiDeductionAmount = gosiBase * 0.10; // Employee share 10%
+                    const gosiDeductionAmount = gosiBase * 0.10; 
 
                     if (!fixedDeductions.some(d => d.name.includes('التأمينات الاجتماعية'))) {
                         fixedDeductions.push({
@@ -973,7 +985,6 @@
                 const empTotalFixedDeductions = fixedDeductions.filter(d => d.includedInPayroll).reduce((s, i) => s + i.amount, 0);
                 const grossSalary = emp.salary + empTotalAllowances;
 
-                // 2. Get attendance data for the month
                 const attendanceId = `${year}-${String(parseInt(month) + 1).padStart(2, '0')}`;
                 const attendanceDocRef = doc(db, "hr-data", userId, "employees", emp.id, "attendance", attendanceId);
                 const attendanceSnap = await getDoc(attendanceDocRef);
@@ -1011,7 +1022,7 @@
             }
 
             const payrollDocRef = doc(db, "hr-data", userId, "payrolls", payrollId);
-            batch.set(payrollDocRef, { createdAt: new Date(), month: parseInt(month), year: parseInt(year), totalBaseSalary, totalAllowances, totalDeductions, totalAbsenceDeduction, totalLateDeduction, totalOvertimePay, netPay, employeeCount: activeEmployees.length });
+            batch.set(payrollDocRef, { createdAt: new Date(), month: parseInt(month), year: parseInt(year), totalBaseSalary, totalAllowances, totalDeductions, totalAbsenceDeduction, totalLateDeduction, totalOvertimePay, netPay, employeeCount: eligibleEmployees.length });
 
             try {
                 await batch.commit();
@@ -1283,52 +1294,91 @@
             const records = recordsSnapshot.docs.map(d => d.data());
             const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
 
+            // --- NEW LOGIC FOR DETAILED SUMMARY ---
+            const allAllowances = new Set();
+            const allDeductions = new Set();
+            records.forEach(r => {
+                if(r.allowances) r.allowances.forEach(a => allAllowances.add(a.name));
+                if(r.deductions) r.deductions.forEach(d => allDeductions.add(d.name));
+            });
+            const allowanceHeaders = Array.from(allAllowances);
+            const deductionHeaders = Array.from(allDeductions);
+
+            const headerHTML = `
+                <tr>
+                    <th class="p-2 border border-slate-300">الموظف</th>
+                    <th class="p-2 border border-slate-300">الراتب الأساسي</th>
+                    ${allowanceHeaders.map(name => `<th class="p-2 border border-slate-300">${name}</th>`).join('')}
+                    <th class="p-2 border border-slate-300 bg-yellow-100">إجمالي الاستحقاقات</th>
+                    ${deductionHeaders.map(name => `<th class="p-2 border border-slate-300">${name}</th>`).join('')}
+                    <th class="p-2 border border-slate-300">خصم الغياب</th>
+                    <th class="p-2 border border-slate-300">خصم التأخير</th>
+                    <th class="p-2 border border-slate-300 bg-red-100">إجمالي الخصومات</th>
+                    <th class="p-2 border border-slate-300">إضافي</th>
+                    <th class="p-2 border border-slate-300 bg-green-100">صافي المستحق</th>
+                </tr>
+            `;
+
+            const bodyHTML = records.map(r => {
+                const employeeAllowances = new Map(r.allowances.map(a => [a.name, a.amount]));
+                const employeeDeductions = new Map(r.deductions.map(d => [d.name, d.amount]));
+                const totalDeductionsForEmp = (r.deductions.reduce((s, i) => s + i.amount, 0)) + (r.absenceDeduction || 0) + (r.lateDeduction || 0);
+
+                return `
+                    <tr class="border-b">
+                        <td class="p-2 border border-slate-300">${r.name}</td>
+                        <td class="p-2 border border-slate-300">${formatNumber(r.salary)}</td>
+                        ${allowanceHeaders.map(name => `<td class="p-2 border border-slate-300">${formatNumber(employeeAllowances.get(name) || 0)}</td>`).join('')}
+                        <td class="p-2 border border-slate-300 font-bold bg-yellow-100">${formatNumber(r.grossSalary)}</td>
+                        ${deductionHeaders.map(name => `<td class="p-2 border border-slate-300 text-red-600">${formatNumber(employeeDeductions.get(name) || 0)}</td>`).join('')}
+                        <td class="p-2 border border-slate-300 text-red-600">${formatNumber(r.absenceDeduction || 0)}</td>
+                        <td class="p-2 border border-slate-300 text-red-600">${formatNumber(r.lateDeduction || 0)}</td>
+                        <td class="p-2 border border-slate-300 font-bold bg-red-100">${formatNumber(totalDeductionsForEmp)}</td>
+                        <td class="p-2 border border-slate-300 text-green-600">${formatNumber(r.overtimePay || 0)}</td>
+                        <td class="p-2 border border-slate-300 font-bold bg-green-100">${formatNumber(r.netPay)}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            const allowanceTotals = allowanceHeaders.map(name => records.reduce((sum, r) => sum + (r.allowances.find(a => a.name === name)?.amount || 0), 0));
+            const deductionTotals = deductionHeaders.map(name => records.reduce((sum, r) => sum + (r.deductions.find(d => d.name === name)?.amount || 0), 0));
+            
+            const footerHTML = `
+                <tr class="font-bold bg-slate-200">
+                    <td class="p-2 border border-slate-300">الإجمالي</td>
+                    <td class="p-2 border border-slate-300">${formatNumber(payroll.totalBaseSalary)}</td>
+                    ${allowanceTotals.map(total => `<td class="p-2 border border-slate-300">${formatNumber(total)}</td>`).join('')}
+                    <td class="p-2 border border-slate-300 bg-yellow-200">${formatNumber(payroll.totalBaseSalary + payroll.totalAllowances)}</td>
+                    ${deductionTotals.map(total => `<td class="p-2 border border-slate-300 text-red-600">${formatNumber(total)}</td>`).join('')}
+                    <td class="p-2 border border-slate-300 text-red-600">${formatNumber(payroll.totalAbsenceDeduction || 0)}</td>
+                    <td class="p-2 border border-slate-300 text-red-600">${formatNumber(payroll.totalLateDeduction || 0)}</td>
+                    <td class="p-2 border border-slate-300 bg-red-200">${formatNumber(payroll.totalDeductions + (payroll.totalAbsenceDeduction || 0) + (payroll.totalLateDeduction || 0))}</td>
+                    <td class="p-2 border border-slate-300 text-green-600">${formatNumber(payroll.totalOvertimePay || 0)}</td>
+                    <td class="p-2 border border-slate-300 bg-green-200">${formatNumber(payroll.netPay)}</td>
+                </tr>
+            `;
+
             const printableDiv = document.getElementById('printable-payroll');
             printableDiv.innerHTML = `
-                <div class="p-8">
-                    <header class="flex justify-center items-center mb-6">
-                        <!-- Logo removed -->
-                        <h1 class="text-3xl font-bold">${state.settings.name || 'ملخص الرواتب'}</h1>
+                <div class="p-4">
+                    <header class="text-center mb-6">
+                        <h1 class="text-2xl font-bold">${state.settings.name || 'ملخص الرواتب'}</h1>
+                        <h2 class="text-xl font-semibold">مسير رواتب شهر ${months[payroll.month]} ${payroll.year}</h2>
+                        <p class="text-sm text-gray-500">تاريخ الطباعة: ${formatGregorianDate(new Date())}</p>
                     </header>
-                    <h2 class="text-2xl font-bold text-center mb-2">مسير رواتب شهر ${months[payroll.month]} ${payroll.year}</h2>
-                    <p class="text-center text-sm mb-6">تاريخ الطباعة: ${formatGregorianDate(new Date())}</p>
-                    <table class="w-full text-sm border-collapse border border-slate-400">
-                        <thead class="bg-slate-200">
-                            <tr>
-                                <th class="p-2 border border-slate-300">الموظف</th>
-                                <th class="p-2 border border-slate-300">إجمالي الراتب</th>
-                                <th class="p-2 border border-slate-300">خصم الغياب</th>
-                                <th class="p-2 border border-slate-300">خصم التأخير</th>
-                                <th class="p-2 border border-slate-300">إضافي</th>
-                                <th class="p-2 border border-slate-300">خصومات أخرى</th>
-                                <th class="p-2 border border-slate-300">صافي المستحق</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${records.map(r => `
-                                <tr class="border-b">
-                                    <td class="p-2 border border-slate-300">${r.name}</td>
-                                    <td class="p-2 border border-slate-300">${formatNumber(r.grossSalary || 0)}</td>
-                                    <td class="p-2 border border-slate-300">-${formatNumber(r.absenceDeduction || 0)}</td>
-                                    <td class="p-2 border border-slate-300">-${formatNumber(r.lateDeduction || 0)}</td>
-                                    <td class="p-2 border border-slate-300">+${formatNumber(r.overtimePay || 0)}</td>
-                                    <td class="p-2 border border-slate-300">-${formatNumber(r.deductions.filter(d=>d.includedInPayroll).reduce((s, i) => s + i.amount, 0))}</td>
-                                    <td class="p-2 border border-slate-300 font-bold">${formatNumber(r.netPay)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                        <tfoot class="font-bold bg-slate-200">
-                            <tr>
-                                <td class="p-2 border border-slate-300">الإجمالي (ر.س)</td>
-                                <td class="p-2 border border-slate-300">${formatNumber(payroll.totalBaseSalary + payroll.totalAllowances)}</td>
-                                <td class="p-2 border border-slate-300">-${formatNumber(payroll.totalAbsenceDeduction || 0)}</td>
-                                <td class="p-2 border border-slate-300">-${formatNumber(payroll.totalLateDeduction || 0)}</td>
-                                <td class="p-2 border border-slate-300">+${formatNumber(payroll.totalOvertimePay || 0)}</td>
-                                <td class="p-2 border border-slate-300">-${formatNumber(payroll.totalDeductions)}</td>
-                                <td class="p-2 border border-slate-300">${formatNumber(payroll.netPay)}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs border-collapse border border-slate-400">
+                            <thead class="bg-slate-200">
+                                ${headerHTML}
+                            </thead>
+                            <tbody>
+                                ${bodyHTML}
+                            </tbody>
+                            <tfoot>
+                                ${footerHTML}
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             `;
             window.print();
