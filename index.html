@@ -245,15 +245,6 @@
                                 <label for="company-cr-input" class="block mb-2 text-sm font-medium text-gray-900">رقم السجل التجاري</label>
                                 <input type="text" id="company-cr-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="1234567890">
                             </div>
-                            <!-- NEW: Weekend Settings -->
-                            <div>
-                                <label class="block mb-2 text-sm font-medium text-gray-900">أيام الراحة الأسبوعية</label>
-                                <div id="weekend-days-container" class="flex items-center space-x-4 rtl:space-x-reverse">
-                                    <label class="flex items-center"><input type="checkbox" name="weekend" value="Friday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> الجمعة</label>
-                                    <label class="flex items-center"><input type="checkbox" name="weekend" value="Saturday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> السبت</label>
-                                    <label class="flex items-center"><input type="checkbox" name="weekend" value="Sunday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> الأحد</label>
-                                </div>
-                            </div>
                         </div>
                         <div class="mt-8 pt-4 border-t">
                             <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">حفظ الإعدادات</button>
@@ -281,11 +272,23 @@
                     <div><label for="employeeNationality" class="block mb-2 text-sm font-medium">الجنسية</label><input type="text" id="employeeNationality" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" placeholder="مثال: سعودي"></div>
                     <div><label for="employeeIBAN" class="block mb-2 text-sm font-medium">رقم الآيبان (IBAN)</label><input type="text" id="employeeIBAN" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" placeholder="SAXXXXXXXXXXXXXXXXXXXXXX"></div>
                     <div><label for="employeeStatus" class="block mb-2 text-sm font-medium">حالة الموظف</label><select id="employeeStatus" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required><option value="active">على رأس العمل</option><option value="on_leave">في إجازة</option><option value="terminated">منتهية خدماته</option></select></div>
-                    <!-- NEW: Annual Leave Entitlement -->
-                    <div class="md:col-span-2"><label class="block mb-2 text-sm font-medium">رصيد الإجازة السنوية</label>
+                    <div><label class="block mb-2 text-sm font-medium">رصيد الإجازة السنوية</label>
                         <div class="flex items-center space-x-4 rtl:space-x-reverse">
                            <label class="flex items-center"><input type="radio" name="annualLeaveEntitlement" value="21" class="ml-2 text-violet-600 focus:ring-violet-500" checked> 21 يوم</label>
                            <label class="flex items-center"><input type="radio" name="annualLeaveEntitlement" value="30" class="ml-2 text-violet-600 focus:ring-violet-500"> 30 يوم</label>
+                        </div>
+                    </div>
+                    <!-- NEW: Employee Weekend Settings -->
+                    <div class="md:col-span-3">
+                        <label class="block mb-2 text-sm font-medium">أيام الراحة الأسبوعية</label>
+                        <div id="employee-weekend-days-container" class="flex items-center flex-wrap gap-x-4 gap-y-2">
+                            <label class="flex items-center"><input type="checkbox" name="employee-weekend" value="Sunday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> الأحد</label>
+                            <label class="flex items-center"><input type="checkbox" name="employee-weekend" value="Monday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> الإثنين</label>
+                            <label class="flex items-center"><input type="checkbox" name="employee-weekend" value="Tuesday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> الثلاثاء</label>
+                            <label class="flex items-center"><input type="checkbox" name="employee-weekend" value="Wednesday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> الأربعاء</label>
+                            <label class="flex items-center"><input type="checkbox" name="employee-weekend" value="Thursday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> الخميس</label>
+                            <label class="flex items-center"><input type="checkbox" name="employee-weekend" value="Friday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> الجمعة</label>
+                            <label class="flex items-center"><input type="checkbox" name="employee-weekend" value="Saturday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> السبت</label>
                         </div>
                     </div>
                 </div>
@@ -456,7 +459,6 @@
                 name: 'شركتك', 
                 address: '',
                 crNumber: '',
-                weekendDays: ['Friday', 'Saturday'] // Default weekends
             },
             currentEmployee: {
                 allowances: [],
@@ -489,7 +491,6 @@
             companyNameInput: document.getElementById('company-name-input'),
             companyAddressInput: document.getElementById('company-address-input'),
             companyCRInput: document.getElementById('company-cr-input'),
-            weekendDaysContainer: document.getElementById('weekend-days-container'),
         };
 
         // --- Utility Functions ---
@@ -518,12 +519,12 @@
             return `${year}-${month}-${day}`;
         }
         
-        function calculateWorkingDays(startDateStr, endDateStr) {
+        function calculateWorkingDays(startDateStr, endDateStr, employeeWeekendDaysArray = []) {
             let count = 0;
             const curDate = new Date(startDateStr);
             const endDate = new Date(endDateStr);
-            const weekendMap = { 'Friday': 5, 'Saturday': 6, 'Sunday': 0 };
-            const weekendDays = (state.settings.weekendDays || []).map(day => weekendMap[day]);
+            const weekendMap = { 'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6 };
+            const weekendDays = (employeeWeekendDaysArray || []).map(day => weekendMap[day]);
 
             while (curDate <= endDate) {
                 const dayOfWeek = curDate.getDay();
@@ -535,6 +536,23 @@
             return count;
         }
 
+        function calculateWorkDaysInMonth(year, month, employeeWeekendDaysArray = []) {
+            let workDays = 0;
+            const startDate = new Date(year, month, 1);
+            const endDate = new Date(year, month + 1, 0);
+             const weekendMap = { 'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6 };
+            const weekendDays = (employeeWeekendDaysArray || []).map(day => weekendMap[day]);
+
+            for (let day = 1; day <= endDate.getDate(); day++) {
+                const currentDate = new Date(year, month, day);
+                if (!weekendDays.includes(currentDate.getDay())) {
+                    workDays++;
+                }
+            }
+            return workDays;
+        }
+
+
         // --- Modal & Alert Functions ---
         window.openModal = async (modalId, context = null) => {
             const modal = document.getElementById(modalId);
@@ -542,6 +560,8 @@
                 ui.addEmployeeForm.reset();
                 ui.employeeEditIdInput.value = '';
                 document.querySelector('input[name="annualLeaveEntitlement"][value="21"]').checked = true; // Reset radio
+                document.querySelectorAll('input[name="employee-weekend"]').forEach(cb => cb.checked = false); // Reset weekend checkboxes
+
 
                 if (context) { // This is an edit operation
                     const employeeId = context;
@@ -563,6 +583,12 @@
                         if (employee.annualLeaveEntitlement) {
                             const radio = document.querySelector(`input[name="annualLeaveEntitlement"][value="${employee.annualLeaveEntitlement}"]`);
                             if(radio) radio.checked = true;
+                        }
+                        if (employee.weekendDays && Array.isArray(employee.weekendDays)) {
+                            employee.weekendDays.forEach(day => {
+                                const checkbox = document.querySelector(`input[name="employee-weekend"][value="${day}"]`);
+                                if (checkbox) checkbox.checked = true;
+                            });
                         }
                     }
                 } else { // This is an add operation
@@ -803,12 +829,6 @@
             ui.companyNameInput.value = state.settings.name || '';
             ui.companyAddressInput.value = state.settings.address || '';
             ui.companyCRInput.value = state.settings.crNumber || '';
-            
-            // Render weekend settings
-            const weekendCheckboxes = ui.weekendDaysContainer.querySelectorAll('input[type="checkbox"]');
-            weekendCheckboxes.forEach(checkbox => {
-                checkbox.checked = (state.settings.weekendDays || []).includes(checkbox.value);
-            });
         }
 
         // --- Firebase Functions ---
@@ -879,7 +899,7 @@
             payrollsUnsubscribe = null;
             settingsUnsubscribe = null;
             leavesUnsubscribe = null;
-            state = { employees: [], payrolls: [], leaves: [], settings: { name: 'شركتك', address: '', crNumber: '', weekendDays: [] }, currentEmployee: { allowances: [], deductions: [] } };
+            state = { employees: [], payrolls: [], leaves: [], settings: { name: 'شركتك', address: '', crNumber: '' }, currentEmployee: { allowances: [], deductions: [] } };
             renderAll();
         }
 
@@ -910,7 +930,7 @@
                 if (doc.exists()) {
                     state.settings = { ...state.settings, ...doc.data() };
                 } else {
-                    state.settings = { name: 'شركتك', address: '', crNumber: '', weekendDays: ['Friday', 'Saturday'] };
+                    state.settings = { name: 'شركتك', address: '', crNumber: '' };
                 }
                 renderSettingsPage();
             });
@@ -926,6 +946,9 @@
         const handleEmployeeFormSubmit = async (event) => {
             event.preventDefault();
             const form = event.target;
+            const weekendCheckboxes = form.querySelectorAll('input[name="employee-weekend"]:checked');
+            const selectedWeekends = Array.from(weekendCheckboxes).map(cb => cb.value);
+
             const employeeData = {
                 name: form.employeeName.value.trim(),
                 employeeId: form.employeeId.value.trim(),
@@ -938,6 +961,7 @@
                 nationality: form.employeeNationality.value.trim(),
                 iban: form.employeeIBAN.value.trim(),
                 annualLeaveEntitlement: Number(form.annualLeaveEntitlement.value),
+                weekendDays: selectedWeekends
             };
 
             if (!employeeData.name || !employeeData.employeeId || !employeeData.nationalId) {
@@ -1167,9 +1191,9 @@
                 return;
             }
 
-            const duration = calculateWorkingDays(startDate, endDate);
-            if (duration <= 0 && state.settings.weekendDays.length > 0) {
-                 showAlert('خطأ في المدة', 'مدة الإجازة المحددة تقع بالكامل في عطلة نهاية الأسبوع.');
+            const duration = calculateWorkingDays(startDate, endDate, employee.weekendDays);
+            if (duration <= 0) {
+                 showAlert('خطأ في المدة', 'مدة الإجازة المحددة تقع بالكامل في عطلة نهاية الأسبوع أو أن المدة صفر.');
                  return;
             }
 
@@ -1306,16 +1330,20 @@
                 const attendanceSnap = await getDoc(attendanceDocRef);
                 
                 let absenceDeduction = 0, lateDeduction = 0, overtimePay = 0;
-                let paidLeaveDaysInMonth = 0;
+                
+                // ** MODIFICATION: Absence calculation logic updated **
+                const workDaysInMonth = calculateWorkDaysInMonth(payrollYear, payrollMonth, emp.weekendDays);
+                const dailyRate = workDaysInMonth > 0 ? (grossSalary / workDaysInMonth) : 0;
+                const hourlyRate = dailyRate / 8; // Assuming 8-hour workday
 
-                // ** MODIFICATION START: Calculate paid leave days to avoid double deduction **
+                let paidLeaveWorkDaysInMonth = 0;
                 const payrollMonthStartDate = new Date(payrollYear, payrollMonth, 1);
                 const payrollMonthEndDate = new Date(payrollYear, payrollMonth + 1, 0);
 
                 const approvedPaidLeavesInMonth = state.leaves.filter(l =>
                     l.employeeId === emp.id &&
                     l.status === 'approved' &&
-                    (l.leaveType === 'annual' || l.leaveType === 'sick') && // Consider both annual and sick as paid
+                    (l.leaveType === 'annual' || l.leaveType === 'sick') &&
                     new Date(l.startDate) <= payrollMonthEndDate &&
                     new Date(l.endDate) >= payrollMonthStartDate
                 );
@@ -1323,28 +1351,19 @@
                 approvedPaidLeavesInMonth.forEach(leave => {
                     const leaveStart = new Date(leave.startDate);
                     const leaveEnd = new Date(leave.endDate);
-
-                    let currentDate = new Date(Math.max(leaveStart, payrollMonthStartDate));
-                    const finalDate = new Date(Math.min(leaveEnd, payrollMonthEndDate));
-                    
-                    while (currentDate <= finalDate) {
-                        paidLeaveDaysInMonth += 1; // Count all days within the range, assuming calculateWorkingDays handles weekends.
-                        currentDate.setDate(currentDate.getDate() + 1);
-                    }
+                    const effectiveStart = new Date(Math.max(leaveStart, payrollMonthStartDate));
+                    const effectiveEnd = new Date(Math.min(leaveEnd, payrollMonthEndDate));
+                    paidLeaveWorkDaysInMonth += calculateWorkingDays(effectiveStart, effectiveEnd, emp.weekendDays);
                 });
-                // ** MODIFICATION END **
-                
+
                 if (attendanceSnap.exists()) {
                     const attendanceData = attendanceSnap.data();
-                    const daysInMonth = attendanceData.totalDaysInMonth;
-                    const dailyRate = grossSalary / daysInMonth; 
-                    const hourlyRate = dailyRate / 8;
+                    const attendedDays = attendanceData.attendedDays || 0;
+                    
+                    const unpaidAbsentWorkDays = Math.max(0, workDaysInMonth - attendedDays - paidLeaveWorkDaysInMonth);
 
-                    const totalDaysNotPresent = daysInMonth - attendanceData.attendedDays;
-                    const unpaidAbsentDays = Math.max(0, totalDaysNotPresent - paidLeaveDaysInMonth); // Deduct only for unpaid absence
-
-                    if (unpaidAbsentDays > 0) {
-                        absenceDeduction = dailyRate * unpaidAbsentDays;
+                    if (unpaidAbsentWorkDays > 0) {
+                        absenceDeduction = dailyRate * unpaidAbsentWorkDays;
                     }
 
                     const totalLateMinutes = (attendanceData.lateHours * 60) + attendanceData.lateMinutes;
@@ -1352,6 +1371,10 @@
 
                     const totalOvertimeMinutes = (attendanceData.overtimeHours * 60) + attendanceData.overtimeMinutes;
                     if (totalOvertimeMinutes > 0) overtimePay = (hourlyRate * 1.5 / 60) * totalOvertimeMinutes;
+                } else {
+                    // If no attendance record, assume full absence minus paid leaves
+                    const unpaidAbsentWorkDays = Math.max(0, workDaysInMonth - paidLeaveWorkDaysInMonth);
+                    absenceDeduction = dailyRate * unpaidAbsentWorkDays;
                 }
                 
                 const empNet = (grossSalary + overtimePay) - (empTotalFixedDeductions + absenceDeduction + lateDeduction);
@@ -1860,15 +1883,11 @@
                 </svg>
                 جاري الحفظ...
             `;
-
-            const weekendCheckboxes = ui.weekendDaysContainer.querySelectorAll('input[type="checkbox"]:checked');
-            const selectedWeekends = Array.from(weekendCheckboxes).map(cb => cb.value);
-
+            
             const settingsData = {
                 name: ui.companyNameInput.value.trim(),
                 address: ui.companyAddressInput.value.trim(),
                 crNumber: ui.companyCRInput.value.trim(),
-                weekendDays: selectedWeekends
             };
 
             if (!db || !userId) {
