@@ -208,7 +208,10 @@
 
             <!-- PAGE: HR Attendance -->
             <main id="page-hr-attendance" class="page">
-                 <h2 class="text-3xl font-bold text-slate-800 mb-6">سجل الحضور والانصراف</h2>
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-slate-800">سجل الحضور والانصراف</h2>
+                    <button onclick="downloadAttendanceTemplate()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">تحميل نموذج ملف الحضور</button>
+                 </div>
                  <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-slate-500">
