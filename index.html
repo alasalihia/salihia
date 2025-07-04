@@ -256,12 +256,12 @@
                                 <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">حفظ إعدادات الشركة</button>
                             </div>
                         </form>
-                     </div>
+                       </div>
                      <div class="bg-white p-6 rounded-xl shadow-lg max-w-4xl mx-auto">
                         <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">إعدادات أنواع الإجازات</h3>
                         <form id="leave-type-form" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end mb-6">
                              <input type="hidden" id="leave-type-edit-id">
-                            <div>
+                           <div>
                                 <label for="leave-type-name" class="block mb-2 text-sm font-medium">اسم الإجازة</label>
                                 <input type="text" id="leave-type-name" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5" required>
                             </div>
@@ -304,7 +304,7 @@
                                 </tbody>
                             </table>
                         </div>
-                     </div>
+                       </div>
                  </div>
             </main>
         </div>
@@ -2062,6 +2062,38 @@
         };
 
         // --- Attendance Functions ---
+        
+        /**
+         * FIX: Added this function to handle the template download.
+         * It creates a CSV file in memory and triggers a download.
+         */
+        window.downloadAttendanceTemplate = () => {
+            const headers = ['Date', 'CheckIn', 'CheckOut', 'Notes'];
+            const csvHeader = headers.join(',');
+            
+            // Example rows for clarity in the template
+            const exampleRow1 = 'YYYY-MM-DD,HH:MM,HH:MM,Your notes here';
+            const exampleRow2 = '2024-07-01,09:00,17:00,Normal Day';
+
+            const csvContent = `${csvHeader}\n${exampleRow1}\n${exampleRow2}`;
+
+            // Using Blob to create the file
+            const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' }); // \uFEFF (BOM) is important for Excel to open UTF-8 CSVs correctly
+            const link = document.createElement("a");
+
+            if (link.download !== undefined) { // Check browser support
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", "attendance_template.csv");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                showAlert('خطأ', 'متصفحك لا يدعم تحميل الملفات مباشرة. يرجى محاولة استخدام متصفح أحدث.');
+            }
+        };
+
         const handleAttendanceFormSubmit = async (event) => {
             event.preventDefault();
             const form = event.target;
@@ -2274,7 +2306,7 @@
         document.getElementById('leave-type').addEventListener('change', updateLeaveBalanceDisplay);
 
         initializeFirebase();
- 
+
     </script>
 </body>
 </html>
