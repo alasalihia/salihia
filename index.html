@@ -229,27 +229,75 @@
 
             <!-- PAGE: HR Settings -->
             <main id="page-hr-settings" class="page">
-                 <h2 class="text-3xl font-bold text-slate-800 mb-6">إعدادات الشركة</h2>
-                 <div class="bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto">
-                    <form id="settings-form">
-                        <div class="space-y-6">
+                 <h2 class="text-3xl font-bold text-slate-800 mb-6">الإعدادات</h2>
+                 <div class="space-y-8">
+                     <div class="bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto">
+                        <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">إعدادات الشركة</h3>
+                        <form id="settings-form">
+                            <div class="space-y-6">
+                                <div>
+                                    <label for="company-name-input" class="block mb-2 text-sm font-medium text-gray-900">اسم الشركة</label>
+                                    <input type="text" id="company-name-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="أدخل اسم شركتك هنا">
+                                </div>
+                                 <div>
+                                    <label for="company-address-input" class="block mb-2 text-sm font-medium text-gray-900">عنوان الشركة</label>
+                                    <input type="text" id="company-address-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="مثال: الرياض، المملكة العربية السعودية">
+                                </div>
+                                 <div>
+                                    <label for="company-cr-input" class="block mb-2 text-sm font-medium text-gray-900">رقم السجل التجاري</label>
+                                    <input type="text" id="company-cr-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="1234567890">
+                                </div>
+                            </div>
+                            <div class="mt-8 pt-4 border-t">
+                                <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">حفظ إعدادات الشركة</button>
+                            </div>
+                        </form>
+                     </div>
+                     <!-- NEW: Custom Leave Type Settings -->
+                     <div class="bg-white p-6 rounded-xl shadow-lg max-w-4xl mx-auto">
+                        <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">إعدادات أنواع الإجازات المخصصة</h3>
+                        <form id="custom-leave-type-form" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end mb-6">
                             <div>
-                                <label for="company-name-input" class="block mb-2 text-sm font-medium text-gray-900">اسم الشركة</label>
-                                <input type="text" id="company-name-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="أدخل اسم شركتك هنا">
+                                <label for="custom-leave-name" class="block mb-2 text-sm font-medium">اسم الإجازة</label>
+                                <input type="text" id="custom-leave-name" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5" required>
                             </div>
                              <div>
-                                <label for="company-address-input" class="block mb-2 text-sm font-medium text-gray-900">عنوان الشركة</label>
-                                <input type="text" id="company-address-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="مثال: الرياض، المملكة العربية السعودية">
+                                <label for="custom-leave-days" class="block mb-2 text-sm font-medium">عدد الأيام</label>
+                                <input type="number" id="custom-leave-days" min="0" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5" required>
                             </div>
                              <div>
-                                <label for="company-cr-input" class="block mb-2 text-sm font-medium text-gray-900">رقم السجل التجاري</label>
-                                <input type="text" id="company-cr-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="1234567890">
+                                <label for="custom-leave-payment" class="block mb-2 text-sm font-medium">نوع الأجر</label>
+                                <select id="custom-leave-payment" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5">
+                                    <option value="paid">مدفوعة الأجر</option>
+                                    <option value="unpaid">بدون أجر</option>
+                                </select>
                             </div>
+                            <div>
+                                <label for="custom-leave-recurring" class="block mb-2 text-sm font-medium">التكرار</label>
+                                <select id="custom-leave-recurring" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5">
+                                    <option value="annually">سنوي</option>
+                                    <option value="once">مرة واحدة</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg transition-colors h-fit">إضافة نوع</button>
+                        </form>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-slate-500">
+                                <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                                    <tr>
+                                        <th class="px-6 py-3">اسم الإجازة</th>
+                                        <th class="px-6 py-3">الأيام</th>
+                                        <th class="px-6 py-3">الأجر</th>
+                                        <th class="px-6 py-3">التكرار</th>
+                                        <th class="px-6 py-3">إجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="custom-leave-types-table-body">
+                                    <!-- Custom leave types will be rendered here -->
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="mt-8 pt-4 border-t">
-                            <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">حفظ الإعدادات</button>
-                        </div>
-                    </form>
+                     </div>
                  </div>
             </main>
         </div>
@@ -399,17 +447,7 @@
                     <div>
                         <label for="leave-type" class="block mb-2 text-sm font-medium">نوع الإجازة</label>
                         <select id="leave-type" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required>
-                            <option value="annual">إجازة سنوية</option>
-                            <option value="sick">إجازة مرضية</option>
-                            <option value="unpaid">إجازة بدون أجر</option>
-                            <option value="maternity">إجازة وضع</option>
-                            <option value="marriage">إجازة زواج</option>
-                            <option value="bereavement">إجازة وفاة</option>
-                            <option value="hajj">إجازة حج</option>
-                            <option value="child_care">إجازة رعاية طفل</option>
-                            <option value="exceptional">إجازة استثنائية</option>
-                            <option value="eid_fitr">إجازة عيد الفطر</option>
-                            <option value="eid_adha">إجازة عيد الأضحى</option>
+                            <!-- Options will be populated by JS -->
                         </select>
                     </div>
                     <div id="leave-balance-info" class="hidden bg-slate-100 p-3 rounded-lg text-sm space-y-1 mt-2">
@@ -455,12 +493,13 @@
         
         // --- Global Variables ---
         let app, auth, db, userId;
-        let employeesUnsubscribe, payrollsUnsubscribe, settingsUnsubscribe, leavesUnsubscribe;
+        let employeesUnsubscribe, payrollsUnsubscribe, settingsUnsubscribe, leavesUnsubscribe, customLeaveTypesUnsubscribe;
         let allowancesUnsubscribe, deductionsUnsubscribe;
         let state = { 
             employees: [], 
             payrolls: [],
             leaves: [],
+            customLeaveTypes: [],
             settings: { 
                 name: 'شركتك', 
                 address: '',
@@ -473,6 +512,23 @@
         };
         let confirmationCallback = null;
         let departmentChart = null;
+
+        const STANDARD_LEAVE_POLICIES = {
+            annual: { name: 'إجازة سنوية', isStandard: true, paymentType: 'paid', recurring: 'annually'},
+            sick: { name: 'إجازة مرضية', isStandard: true, paymentType: 'paid', recurring: 'annually'},
+            unpaid: { name: 'إجازة بدون أجر', isStandard: true, paymentType: 'unpaid', recurring: 'none'},
+            maternity: { name: 'إجازة وضع', days: 70, isStandard: true, paymentType: 'paid', recurring: 'none'},
+            marriage: { name: 'إجازة زواج', days: 5, isStandard: true, paymentType: 'paid', recurring: 'once'},
+            bereavement: { name: 'إجازة وفاة', days: 5, isStandard: true, paymentType: 'paid', recurring: 'none'},
+            hajj: { name: 'إجازة حج', days: 14, isStandard: true, paymentType: 'paid', recurring: 'once'},
+            child_care: { name: 'إجازة رعاية طفل', isStandard: true, paymentType: 'unpaid', recurring: 'none'},
+            new_born: { name: 'إجازة مولود', days: 3, isStandard: true, paymentType: 'paid', recurring: 'none'},
+            eid_fitr: { name: 'إجازة عيد الفطر', days: 4, isStandard: true, paymentType: 'paid', recurring: 'annually'},
+            eid_adha: { name: 'إجازة عيد الأضحى', days: 4, isStandard: true, paymentType: 'paid', recurring: 'annually'},
+            national_day: { name: 'إجازة اليوم الوطني', days: 1, isStandard: true, paymentType: 'paid', recurring: 'annually'},
+            foundation_day: { name: 'إجازة يوم التأسيس', days: 1, isStandard: true, paymentType: 'paid', recurring: 'annually'},
+        };
+
 
         // --- UI Elements ---
         const ui = {
@@ -497,6 +553,8 @@
             companyNameInput: document.getElementById('company-name-input'),
             companyAddressInput: document.getElementById('company-address-input'),
             companyCRInput: document.getElementById('company-cr-input'),
+            customLeaveTypeForm: document.getElementById('custom-leave-type-form'),
+            customLeaveTypesTableBody: document.getElementById('custom-leave-types-table-body'),
         };
 
         // --- Utility Functions ---
@@ -611,7 +669,8 @@
                 document.getElementById('leave-start-date').valueAsDate = new Date();
                 document.getElementById('leave-end-date').valueAsDate = new Date();
                 document.getElementById('leave-balance-info').classList.add('hidden');
-                updateLeaveBalanceDisplay(); // Call to show initial balance for the first employee and leave type
+                populateLeaveTypeDropdown();
+                updateLeaveBalanceDisplay();
             } else if (modalId === 'generatePayrollModal' || modalId === 'attendanceModal') {
                 const monthSelectId = modalId === 'generatePayrollModal' ? 'payroll-month' : 'attendance-month';
                 const yearInputId = modalId === 'generatePayrollModal' ? 'payroll-year' : 'attendance-year';
@@ -712,6 +771,7 @@
             renderOrUpdateDepartmentChart();
             renderPayrollHistory();
             renderSettingsPage();
+            renderCustomLeaveTypes();
         }
 
         async function renderHrDashboard() {
@@ -843,7 +903,6 @@
         
         async function initializeFirebase() {
             try {
-                // --- Firebase Config Restored ---
                 const firebaseConfig = {
                     apiKey: "AIzaSyDSlxf95W00Ow6LZba8waAKJINptIRPkU8",
                     authDomain: "sample-firebase-ai-app-960f4.firebaseapp.com",
@@ -903,11 +962,15 @@
             if (payrollsUnsubscribe) payrollsUnsubscribe();
             if (settingsUnsubscribe) settingsUnsubscribe();
             if (leavesUnsubscribe) leavesUnsubscribe();
+            if (customLeaveTypesUnsubscribe) customLeaveTypesUnsubscribe();
+            
             employeesUnsubscribe = null;
             payrollsUnsubscribe = null;
             settingsUnsubscribe = null;
             leavesUnsubscribe = null;
-            state = { employees: [], payrolls: [], leaves: [], settings: { name: 'شركتك', address: '', crNumber: '' }, currentEmployee: { allowances: [], deductions: [] } };
+            customLeaveTypesUnsubscribe = null;
+
+            state = { employees: [], payrolls: [], leaves: [], customLeaveTypes: [], settings: { name: 'شركتك', address: '', crNumber: '' }, currentEmployee: { allowances: [], deductions: [] } };
             renderAll();
         }
 
@@ -947,6 +1010,12 @@
             leavesUnsubscribe = onSnapshot(query(leavesRef), snapshot => {
                 state.leaves = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderAll();
+            });
+
+            const customLeaveTypesRef = collection(db, "hr-data", userId, "leave-types");
+            customLeaveTypesUnsubscribe = onSnapshot(customLeaveTypesRef, snapshot => {
+                state.customLeaveTypes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderCustomLeaveTypes();
             });
         }
 
@@ -1156,16 +1225,19 @@
 
                 const statusClasses = { pending: 'bg-amber-100 text-amber-800', approved: 'bg-green-100 text-green-800', rejected: 'bg-red-100 text-red-800' };
                 const statusText = { pending: 'معلق', approved: 'موافق عليه', rejected: 'مرفوض' };
-                const leaveTypes = { 
-                    annual: 'سنوية', sick: 'مرضية', unpaid: 'بدون أجر', maternity: 'وضع',
-                    marriage: 'زواج', bereavement: 'وفاة', hajj: 'حج', child_care: 'رعاية طفل',
-                    exceptional: 'استثنائية', eid_fitr: 'عيد الفطر', eid_adha: 'عيد الأضحى'
-                };
+                
+                const allLeaveTypes = { ...STANDARD_LEAVE_POLICIES };
+                state.customLeaveTypes.forEach(lt => {
+                    allLeaveTypes[lt.id] = { name: lt.name, isStandard: false };
+                });
+
 
                 ui.leavesTableBody.innerHTML = state.leaves
                     .sort((a,b) => new Date(b.startDate) - new Date(a.startDate))
                     .map(l => {
                         const emp = state.employees.find(e => e.id === l.employeeId);
+                        const leavePolicy = allLeaveTypes[l.leaveType] || { name: l.leaveType };
+
                         const actions = l.status === 'pending' ?
                             `<button onclick="approveLeave('${l.id}')" class="text-green-600 hover:text-green-800 font-semibold px-2">موافقة</button>
                              <button onclick="rejectLeave('${l.id}')" class="text-orange-600 hover:text-orange-800 font-semibold px-2">رفض</button>
@@ -1174,7 +1246,7 @@
 
                         return `<tr class="bg-white border-b hover:bg-slate-50">
                             <td class="px-6 py-4 font-medium text-slate-900">${emp ? emp.name : 'غير معروف'}</td>
-                            <td class="px-6 py-4">${leaveTypes[l.leaveType] || l.leaveType}</td>
+                            <td class="px-6 py-4">${leavePolicy.name}</td>
                             <td class="px-6 py-4">${l.startDate}</td>
                             <td class="px-6 py-4">${l.endDate}</td>
                             <td class="px-6 py-4">${l.duration}</td>
@@ -1187,10 +1259,10 @@
 
         async function updateLeaveBalanceDisplay() {
             const employeeId = document.getElementById('leave-employee-id').value;
-            const leaveType = document.getElementById('leave-type').value;
+            const leaveTypeKey = document.getElementById('leave-type').value;
             const balanceInfoDiv = document.getElementById('leave-balance-info');
 
-            if (!employeeId || !leaveType) {
+            if (!employeeId || !leaveTypeKey) {
                 balanceInfoDiv.classList.add('hidden');
                 return;
             }
@@ -1198,55 +1270,51 @@
             const employee = state.employees.find(e => e.id === employeeId);
             if (!employee) return;
 
+            let policy = STANDARD_LEAVE_POLICIES[leaveTypeKey];
+            if (!policy) {
+                policy = state.customLeaveTypes.find(lt => lt.id === leaveTypeKey);
+            }
+            if (!policy) return;
+
             let totalEntitlement = 0;
             let daysTaken = 0;
             let message = '';
-            let showBalance = true;
+            let showBalance = false;
             const currentYear = new Date().getFullYear();
 
-            switch (leaveType) {
+            const leavesOfType = state.leaves.filter(l => l.employeeId === employeeId && l.leaveType === leaveTypeKey && l.status === 'approved');
+
+            switch (leaveTypeKey) {
                 case 'annual':
                     totalEntitlement = employee.annualLeaveEntitlement || 0;
-                    daysTaken = state.leaves
-                        .filter(l => l.employeeId === employeeId && l.leaveType === 'annual' && l.status === 'approved' && new Date(l.startDate).getFullYear() === currentYear)
-                        .reduce((sum, l) => sum + l.duration, 0);
+                    daysTaken = leavesOfType.filter(l => new Date(l.startDate).getFullYear() === currentYear).reduce((sum, l) => sum + l.duration, 0);
+                    showBalance = true;
                     break;
                 case 'sick':
-                    totalEntitlement = 30; // 30 days full pay
-                    daysTaken = state.leaves
-                        .filter(l => l.employeeId === employeeId && l.leaveType === 'sick' && l.status === 'approved' && new Date(l.startDate).getFullYear() === currentYear)
-                        .reduce((sum, l) => sum + l.duration, 0);
-                    message = `<p class="text-xs text-slate-500">ملاحظة: أول 30 يومًا مدفوعة بالكامل.</p>`;
+                    message = `<p class="text-xs text-slate-500">تحتسب حسب نظام العمل: 30 يوم بأجر كامل، ثم 60 يوم بـ 75% من الأجر، ثم 30 يوم بدون أجر.</p>`;
+                    showBalance = false;
                     break;
                 case 'hajj':
-                    const hajjTaken = state.leaves.some(l => l.employeeId === employeeId && l.leaveType === 'hajj' && l.status === 'approved');
-                    if (hajjTaken) {
-                        message = `<p class="text-red-600 font-bold">تم الاستفادة من هذه الإجازة مسبقاً.</p>`;
-                    } else {
-                        message = `<p>الرصيد المتاح: 14 يومًا (مرة واحدة طوال فترة الخدمة)</p>`;
-                    }
-                    showBalance = false;
-                    break;
                 case 'marriage':
-                     totalEntitlement = 5;
-                     daysTaken = state.leaves
-                        .filter(l => l.employeeId === employeeId && l.leaveType === 'marriage' && l.status === 'approved')
-                        .reduce((sum, l) => sum + l.duration, 0);
+                    daysTaken = leavesOfType.reduce((sum, l) => sum + l.duration, 0);
+                    totalEntitlement = policy.days;
                      if (daysTaken >= totalEntitlement) {
-                         message = `<p class="text-red-600 font-bold">تم استنفاذ رصيد إجازة الزواج.</p>`;
-                         showBalance = false;
+                         message = `<p class="text-red-600 font-bold">تم استنفاذ رصيد هذه الإجازة.</p>`;
                      }
-                    break;
-                case 'bereavement':
-                    message = `<p>المدة المسموحة: 3 أيام لكل حالة.</p>`;
-                    showBalance = false;
-                    break;
-                case 'maternity':
-                     message = `<p>المدة المسموحة: 12 أسبوعًا.</p>`;
-                     showBalance = false;
+                     showBalance = true;
                     break;
                 default:
-                    showBalance = false;
+                    if (policy.recurring === 'annually') {
+                        totalEntitlement = policy.days;
+                        daysTaken = leavesOfType.filter(l => new Date(l.startDate).getFullYear() === currentYear).reduce((sum, l) => sum + l.duration, 0);
+                        showBalance = true;
+                    } else if (policy.recurring === 'once') {
+                        totalEntitlement = policy.days;
+                        daysTaken = leavesOfType.reduce((sum, l) => sum + l.duration, 0);
+                        showBalance = true;
+                    } else {
+                        showBalance = false;
+                    }
                     break;
             }
 
@@ -1439,7 +1507,7 @@
                 const payrollMonthStartDate = new Date(payrollYear, payrollMonth, 1);
                 const payrollMonthEndDate = new Date(payrollYear, payrollMonth + 1, 0);
 
-                const paidLeaveTypes = ['annual', 'sick', 'maternity', 'marriage', 'bereavement', 'hajj', 'exceptional', 'eid_fitr', 'eid_adha'];
+                const paidLeaveTypes = ['annual', 'sick', 'maternity', 'marriage', 'bereavement', 'hajj', 'exceptional', 'eid_fitr', 'eid_adha', 'national_day', 'foundation_day', 'new_born'];
                 const approvedPaidLeavesInMonth = state.leaves.filter(l =>
                     l.employeeId === emp.id &&
                     l.status === 'approved' &&
@@ -2002,6 +2070,85 @@
             }
         };
 
+        const handleCustomLeaveTypeSubmit = async (event) => {
+            event.preventDefault();
+            const form = event.target;
+            const leaveData = {
+                name: form['custom-leave-name'].value.trim(),
+                days: Number(form['custom-leave-days'].value),
+                paymentType: form['custom-leave-payment'].value,
+                recurring: form['custom-leave-recurring'].value,
+            };
+
+            if (!leaveData.name || isNaN(leaveData.days)) {
+                showAlert('بيانات ناقصة', 'يرجى إدخال اسم الإجازة وعدد الأيام بشكل صحيح.');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "hr-data", userId, "leave-types"), leaveData);
+                showAlert('نجاح', 'تمت إضافة نوع الإجازة المخصص بنجاح.');
+                form.reset();
+            } catch (e) {
+                console.error("Error adding custom leave type:", e);
+                showAlert('خطأ', 'فشل إضافة نوع الإجازة.');
+            }
+        };
+
+        function renderCustomLeaveTypes() {
+            if (!ui.customLeaveTypesTableBody) return;
+            if (state.customLeaveTypes.length === 0) {
+                ui.customLeaveTypesTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4">لم يتم إضافة أنواع إجازات مخصصة.</td></tr>`;
+                return;
+            }
+            ui.customLeaveTypesTableBody.innerHTML = state.customLeaveTypes.map(lt => {
+                const paymentText = { paid: 'مدفوعة', unpaid: 'بدون أجر' };
+                const recurringText = { annually: 'سنوي', once: 'مرة واحدة' };
+                return `
+                    <tr class="border-b">
+                        <td class="px-6 py-4">${lt.name}</td>
+                        <td class="px-6 py-4">${lt.days}</td>
+                        <td class="px-6 py-4">${paymentText[lt.paymentType] || lt.paymentType}</td>
+                        <td class="px-6 py-4">${recurringText[lt.recurring] || lt.recurring}</td>
+                        <td class="px-6 py-4"><button onclick="deleteCustomLeaveType('${lt.id}')" class="text-red-500 hover:text-red-700">حذف</button></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        window.deleteCustomLeaveType = (id) => {
+            showConfirmation('تأكيد الحذف', 'هل أنت متأكد من حذف نوع الإجازة هذا؟', async () => {
+                try {
+                    await deleteDoc(doc(db, "hr-data", userId, "leave-types", id));
+                    showAlert('نجاح', 'تم حذف نوع الإجازة.');
+                } catch (e) {
+                    console.error("Error deleting custom leave type:", e);
+                    showAlert('خطأ', 'فشلت عملية الحذف.');
+                }
+            });
+        };
+
+        function populateLeaveTypeDropdown() {
+            const select = document.getElementById('leave-type');
+            select.innerHTML = ''; // Clear existing
+            
+            // Add standard types
+            for (const [key, value] of Object.entries(STANDARD_LEAVE_POLICIES)) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = value.name;
+                select.appendChild(option);
+            }
+
+            // Add custom types
+            state.customLeaveTypes.forEach(lt => {
+                const option = document.createElement('option');
+                option.value = lt.id;
+                option.textContent = lt.name;
+                select.appendChild(option);
+            });
+        }
+
 
         // --- Initial Application Load ---
         ui.addEmployeeForm.addEventListener('submit', handleEmployeeFormSubmit);
@@ -2009,6 +2156,8 @@
         ui.attendanceForm.addEventListener('submit', handleAttendanceFormSubmit);
         ui.settingsForm.addEventListener('submit', handleSettingsSubmit);
         ui.leaveRequestForm.addEventListener('submit', handleLeaveRequestSubmit);
+        ui.customLeaveTypeForm.addEventListener('submit', handleCustomLeaveTypeSubmit);
+
         document.getElementById('attendance-month').addEventListener('change', updateMonthDaysDisplay);
         document.getElementById('attendance-year').addEventListener('change', updateMonthDaysDisplay);
         document.getElementById('leave-employee-id').addEventListener('change', updateLeaveBalanceDisplay);
