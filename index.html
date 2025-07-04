@@ -978,7 +978,7 @@
 
         async function initializeDefaultLeaveTypes() {
             const leaveTypesRef = collection(db, "hr-data", userId, "leave-types");
-            const snapshot = await getDocs(query(leaveTypesRef, where("isStandard", "==", true)));
+            const snapshot = await getDocs(leaveTypesRef);
             if (snapshot.empty) {
                 const batch = writeBatch(db);
                 for (const [key, value] of Object.entries(DEFAULT_LEAVE_POLICIES)) {
@@ -2107,7 +2107,6 @@
                 days: Number(form['leave-type-days'].value),
                 paymentType: form['leave-type-payment'].value,
                 recurring: form['leave-type-recurring'].value,
-                isStandard: false, // Custom types are not standard
             };
 
             if (!leaveData.name || isNaN(leaveData.days)) {
@@ -2119,12 +2118,11 @@
 
             try {
                 if (editId) {
-                    // Update existing
                     const docRef = doc(db, "hr-data", userId, "leave-types", editId);
                     await updateDoc(docRef, leaveData);
                     showAlert('نجاح', 'تم تعديل نوع الإجازة بنجاح.');
                 } else {
-                    // Add new
+                    leaveData.isStandard = false; // Ensure new types are marked as custom
                     await addDoc(collection(db, "hr-data", userId, "leave-types"), leaveData);
                     showAlert('نجاح', 'تمت إضافة نوع الإجازة المخصص بنجاح.');
                 }
@@ -2152,7 +2150,7 @@
                         <td class="px-6 py-4">${recurringText[lt.recurring] || lt.recurring}</td>
                         <td class="px-6 py-4">
                             <button onclick="editLeaveType('${lt.id}')" class="text-blue-600 hover:text-blue-800 font-semibold px-2">تعديل</button>
-                            ${!lt.isStandard ? `<button onclick="deleteLeaveType('${lt.id}')" class="text-red-500 hover:text-red-700 font-semibold px-2">حذف</button>` : ''}
+                            <button onclick="deleteLeaveType('${lt.id}')" class="text-red-500 hover:text-red-700 font-semibold px-2">حذف</button>
                         </td>
                     </tr>
                 `;
@@ -2174,6 +2172,11 @@
         };
 
         window.deleteLeaveType = (id) => {
+            const leaveType = state.leaveTypes.find(lt => lt.id === id);
+            if (leaveType && leaveType.isStandard) {
+                showAlert('لا يمكن الحذف', 'لا يمكن حذف أنواع الإجازات الأساسية.');
+                return;
+            }
             showConfirmation('تأكيد الحذف', 'هل أنت متأكد من حذف نوع الإجازة هذا؟', async () => {
                 try {
                     await deleteDoc(doc(db, "hr-data", userId, "leave-types", id));
