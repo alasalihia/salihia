@@ -253,33 +253,35 @@
                             </div>
                         </form>
                      </div>
-                     <!-- NEW: Custom Leave Type Settings -->
                      <div class="bg-white p-6 rounded-xl shadow-lg max-w-4xl mx-auto">
-                        <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">إعدادات أنواع الإجازات المخصصة</h3>
-                        <form id="custom-leave-type-form" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end mb-6">
+                        <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">إعدادات أنواع الإجازات</h3>
+                        <form id="leave-type-form" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end mb-6">
+                             <input type="hidden" id="leave-type-edit-id">
                             <div>
-                                <label for="custom-leave-name" class="block mb-2 text-sm font-medium">اسم الإجازة</label>
-                                <input type="text" id="custom-leave-name" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5" required>
+                                <label for="leave-type-name" class="block mb-2 text-sm font-medium">اسم الإجازة</label>
+                                <input type="text" id="leave-type-name" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5" required>
                             </div>
                              <div>
-                                <label for="custom-leave-days" class="block mb-2 text-sm font-medium">عدد الأيام</label>
-                                <input type="number" id="custom-leave-days" min="0" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5" required>
+                                <label for="leave-type-days" class="block mb-2 text-sm font-medium">عدد الأيام</label>
+                                <input type="number" id="leave-type-days" min="0" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5" required>
                             </div>
                              <div>
-                                <label for="custom-leave-payment" class="block mb-2 text-sm font-medium">نوع الأجر</label>
-                                <select id="custom-leave-payment" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5">
+                                <label for="leave-type-payment" class="block mb-2 text-sm font-medium">نوع الأجر</label>
+                                <select id="leave-type-payment" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5">
                                     <option value="paid">مدفوعة الأجر</option>
+                                    <option value="paid_in_advance">مدفوعة مقدماً</option>
                                     <option value="unpaid">بدون أجر</option>
                                 </select>
                             </div>
                             <div>
-                                <label for="custom-leave-recurring" class="block mb-2 text-sm font-medium">التكرار</label>
-                                <select id="custom-leave-recurring" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5">
+                                <label for="leave-type-recurring" class="block mb-2 text-sm font-medium">التكرار</label>
+                                <select id="leave-type-recurring" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5">
                                     <option value="annually">سنوي</option>
                                     <option value="once">مرة واحدة</option>
+                                    <option value="none">غير متكرر</option>
                                 </select>
                             </div>
-                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg transition-colors h-fit">إضافة نوع</button>
+                            <button type="submit" id="leave-type-submit-button" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg transition-colors h-fit">إضافة نوع</button>
                         </form>
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm text-left text-slate-500">
@@ -289,11 +291,11 @@
                                         <th class="px-6 py-3">الأيام</th>
                                         <th class="px-6 py-3">الأجر</th>
                                         <th class="px-6 py-3">التكرار</th>
-                                        <th class="px-6 py-3">إجراء</th>
+                                        <th class="px-6 py-3">إجراءات</th>
                                     </tr>
                                 </thead>
-                                <tbody id="custom-leave-types-table-body">
-                                    <!-- Custom leave types will be rendered here -->
+                                <tbody id="leave-types-table-body">
+                                    <!-- Leave types will be rendered here -->
                                 </tbody>
                             </table>
                         </div>
@@ -493,13 +495,13 @@
         
         // --- Global Variables ---
         let app, auth, db, userId;
-        let employeesUnsubscribe, payrollsUnsubscribe, settingsUnsubscribe, leavesUnsubscribe, customLeaveTypesUnsubscribe;
+        let employeesUnsubscribe, payrollsUnsubscribe, settingsUnsubscribe, leavesUnsubscribe, leaveTypesUnsubscribe;
         let allowancesUnsubscribe, deductionsUnsubscribe;
         let state = { 
             employees: [], 
             payrolls: [],
             leaves: [],
-            customLeaveTypes: [],
+            leaveTypes: [],
             settings: { 
                 name: 'شركتك', 
                 address: '',
@@ -513,15 +515,15 @@
         let confirmationCallback = null;
         let departmentChart = null;
 
-        const STANDARD_LEAVE_POLICIES = {
-            annual: { name: 'إجازة سنوية', isStandard: true, paymentType: 'paid', recurring: 'annually'},
-            sick: { name: 'إجازة مرضية', isStandard: true, paymentType: 'paid', recurring: 'annually'},
-            unpaid: { name: 'إجازة بدون أجر', isStandard: true, paymentType: 'unpaid', recurring: 'none'},
+        const DEFAULT_LEAVE_POLICIES = {
+            annual: { name: 'إجازة سنوية', isStandard: true, paymentType: 'paid_in_advance', recurring: 'annually', days: 0 },
+            sick: { name: 'إجازة مرضية', isStandard: true, paymentType: 'paid', recurring: 'annually', days: 120 },
+            unpaid: { name: 'إجازة بدون أجر', isStandard: true, paymentType: 'unpaid', recurring: 'none', days: 0 },
             maternity: { name: 'إجازة وضع', days: 70, isStandard: true, paymentType: 'paid', recurring: 'none'},
             marriage: { name: 'إجازة زواج', days: 5, isStandard: true, paymentType: 'paid', recurring: 'once'},
             bereavement: { name: 'إجازة وفاة', days: 5, isStandard: true, paymentType: 'paid', recurring: 'none'},
             hajj: { name: 'إجازة حج', days: 14, isStandard: true, paymentType: 'paid', recurring: 'once'},
-            child_care: { name: 'إجازة رعاية طفل', isStandard: true, paymentType: 'unpaid', recurring: 'none'},
+            child_care: { name: 'إجازة رعاية طفل', isStandard: true, paymentType: 'unpaid', recurring: 'none', days: 180},
             new_born: { name: 'إجازة مولود', days: 3, isStandard: true, paymentType: 'paid', recurring: 'none'},
             eid_fitr: { name: 'إجازة عيد الفطر', days: 4, isStandard: true, paymentType: 'paid', recurring: 'annually'},
             eid_adha: { name: 'إجازة عيد الأضحى', days: 4, isStandard: true, paymentType: 'paid', recurring: 'annually'},
@@ -553,8 +555,8 @@
             companyNameInput: document.getElementById('company-name-input'),
             companyAddressInput: document.getElementById('company-address-input'),
             companyCRInput: document.getElementById('company-cr-input'),
-            customLeaveTypeForm: document.getElementById('custom-leave-type-form'),
-            customLeaveTypesTableBody: document.getElementById('custom-leave-types-table-body'),
+            leaveTypeForm: document.getElementById('leave-type-form'),
+            leaveTypesTableBody: document.getElementById('leave-types-table-body'),
         };
 
         // --- Utility Functions ---
@@ -771,7 +773,7 @@
             renderOrUpdateDepartmentChart();
             renderPayrollHistory();
             renderSettingsPage();
-            renderCustomLeaveTypes();
+            renderLeaveTypesSettings();
         }
 
         async function renderHrDashboard() {
@@ -962,16 +964,29 @@
             if (payrollsUnsubscribe) payrollsUnsubscribe();
             if (settingsUnsubscribe) settingsUnsubscribe();
             if (leavesUnsubscribe) leavesUnsubscribe();
-            if (customLeaveTypesUnsubscribe) customLeaveTypesUnsubscribe();
+            if (leaveTypesUnsubscribe) leaveTypesUnsubscribe();
             
             employeesUnsubscribe = null;
             payrollsUnsubscribe = null;
             settingsUnsubscribe = null;
             leavesUnsubscribe = null;
-            customLeaveTypesUnsubscribe = null;
+            leaveTypesUnsubscribe = null;
 
-            state = { employees: [], payrolls: [], leaves: [], customLeaveTypes: [], settings: { name: 'شركتك', address: '', crNumber: '' }, currentEmployee: { allowances: [], deductions: [] } };
+            state = { employees: [], payrolls: [], leaves: [], leaveTypes: [], settings: { name: 'شركتك', address: '', crNumber: '' }, currentEmployee: { allowances: [], deductions: [] } };
             renderAll();
+        }
+
+        async function initializeDefaultLeaveTypes() {
+            const leaveTypesRef = collection(db, "hr-data", userId, "leave-types");
+            const snapshot = await getDocs(query(leaveTypesRef, where("isStandard", "==", true)));
+            if (snapshot.empty) {
+                const batch = writeBatch(db);
+                for (const [key, value] of Object.entries(DEFAULT_LEAVE_POLICIES)) {
+                    const docRef = doc(leaveTypesRef, key); // Use the key as the document ID
+                    batch.set(docRef, value);
+                }
+                await batch.commit();
+            }
         }
 
         function setupRealtimeListeners() {
@@ -980,6 +995,8 @@
                 console.error("Cannot setup listeners: userId is missing.");
                 return;
             };
+
+            initializeDefaultLeaveTypes();
 
             const employeesRef = collection(db, "hr-data", userId, "employees");
             employeesUnsubscribe = onSnapshot(employeesRef, snapshot => {
@@ -1012,10 +1029,10 @@
                 renderAll();
             });
 
-            const customLeaveTypesRef = collection(db, "hr-data", userId, "leave-types");
-            customLeaveTypesUnsubscribe = onSnapshot(customLeaveTypesRef, snapshot => {
-                state.customLeaveTypes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderCustomLeaveTypes();
+            const leaveTypesRef = collection(db, "hr-data", userId, "leave-types");
+            leaveTypesUnsubscribe = onSnapshot(leaveTypesRef, snapshot => {
+                state.leaveTypes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderLeaveTypesSettings();
             });
         }
 
@@ -1226,9 +1243,9 @@
                 const statusClasses = { pending: 'bg-amber-100 text-amber-800', approved: 'bg-green-100 text-green-800', rejected: 'bg-red-100 text-red-800' };
                 const statusText = { pending: 'معلق', approved: 'موافق عليه', rejected: 'مرفوض' };
                 
-                const allLeaveTypes = { ...STANDARD_LEAVE_POLICIES };
-                state.customLeaveTypes.forEach(lt => {
-                    allLeaveTypes[lt.id] = { name: lt.name, isStandard: false };
+                const allLeaveTypes = {};
+                state.leaveTypes.forEach(lt => {
+                    allLeaveTypes[lt.id] = lt;
                 });
 
 
@@ -1270,10 +1287,7 @@
             const employee = state.employees.find(e => e.id === employeeId);
             if (!employee) return;
 
-            let policy = STANDARD_LEAVE_POLICIES[leaveTypeKey];
-            if (!policy) {
-                policy = state.customLeaveTypes.find(lt => lt.id === leaveTypeKey);
-            }
+            let policy = state.leaveTypes.find(lt => lt.id === leaveTypeKey);
             if (!policy) return;
 
             let totalEntitlement = 0;
@@ -1291,17 +1305,23 @@
                     showBalance = true;
                     break;
                 case 'sick':
-                    message = `<p class="text-xs text-slate-500">تحتسب حسب نظام العمل: 30 يوم بأجر كامل، ثم 60 يوم بـ 75% من الأجر، ثم 30 يوم بدون أجر.</p>`;
+                    const sickLeaveYearStart = employee.firstSickLeaveDate ? new Date(employee.firstSickLeaveDate) : null;
+                    let sickLeaveYear = currentYear;
+                    if(sickLeaveYearStart && sickLeaveYearStart.getFullYear() < currentYear){
+                        sickLeaveYear = sickLeaveYearStart.getFullYear();
+                    }
+                    
+                    const sickLeavesInYear = state.leaves.filter(l => 
+                        l.employeeId === employeeId && 
+                        l.leaveType === 'sick' && 
+                        l.status === 'approved' &&
+                        new Date(l.startDate).getFullYear() >= sickLeaveYear
+                    );
+                    daysTaken = sickLeavesInYear.reduce((sum, l) => sum + l.duration, 0);
+                    
+                    message = `<p>الأيام المأخوذة في السنة المرضية الحالية: ${daysTaken} يوم.</p>`;
+                    message += `<p class="text-xs text-slate-500">تحتسب حسب نظام العمل: 30 يوم بأجر كامل، ثم 60 يوم بـ 75% من الأجر، ثم 30 يوم بدون أجر.</p>`;
                     showBalance = false;
-                    break;
-                case 'hajj':
-                case 'marriage':
-                    daysTaken = leavesOfType.reduce((sum, l) => sum + l.duration, 0);
-                    totalEntitlement = policy.days;
-                     if (daysTaken >= totalEntitlement) {
-                         message = `<p class="text-red-600 font-bold">تم استنفاذ رصيد هذه الإجازة.</p>`;
-                     }
-                     showBalance = true;
                     break;
                 default:
                     if (policy.recurring === 'annually') {
@@ -1311,6 +1331,9 @@
                     } else if (policy.recurring === 'once') {
                         totalEntitlement = policy.days;
                         daysTaken = leavesOfType.reduce((sum, l) => sum + l.duration, 0);
+                         if (daysTaken >= totalEntitlement) {
+                             message = `<p class="text-red-600 font-bold">تم استنفاذ رصيد هذه الإجازة.</p>`;
+                         }
                         showBalance = true;
                     } else {
                         showBalance = false;
@@ -1343,9 +1366,9 @@
             const employee = state.employees.find(e => e.id === employeeId);
             const startDate = form['leave-start-date'].value;
             const endDate = form['leave-end-date'].value;
-            const leaveType = form['leave-type'].value;
+            const leaveTypeKey = form['leave-type'].value;
 
-            if (!employeeId || !startDate || !endDate || !leaveType) {
+            if (!employeeId || !startDate || !endDate || !leaveTypeKey) {
                 showAlert('بيانات ناقصة', 'يرجى ملء جميع الحقول المطلوبة.');
                 return;
             }
@@ -1360,29 +1383,34 @@
                  return;
             }
 
-            // Final validation before submission
-            const currentYear = new Date(startDate).getFullYear();
-            if (leaveType === 'annual') {
-                const approvedAnnualLeaves = state.leaves.filter(l => 
-                    l.employeeId === employeeId && l.status === 'approved' && l.leaveType === 'annual' && new Date(l.startDate).getFullYear() === currentYear
-                );
-                const daysTaken = approvedAnnualLeaves.reduce((sum, l) => sum + l.duration, 0);
+            let policy = state.leaveTypes.find(lt => lt.id === leaveTypeKey);
+            if (!policy) {
+                 showAlert('خطأ', 'نوع الإجازة غير معروف.');
+                 return;
+            }
+
+            const leavesOfType = state.leaves.filter(l => l.employeeId === employeeId && l.leaveType === leaveTypeKey && l.status === 'approved');
+            
+            if (policy.recurring === 'once') {
+                const daysTaken = leavesOfType.reduce((sum, l) => sum + l.duration, 0);
+                if (daysTaken >= policy.days) {
+                    showAlert('رصيد مستنفذ', `سبق للموظف الحصول على إجازة ${policy.name}.`);
+                    return;
+                }
+            } else if (leaveTypeKey === 'annual') {
+                 const currentYear = new Date(startDate).getFullYear();
+                const daysTaken = leavesOfType.filter(l => new Date(l.startDate).getFullYear() === currentYear).reduce((sum, l) => sum + l.duration, 0);
                 const balance = (employee.annualLeaveEntitlement || 0) - daysTaken;
                 if (duration > balance) {
                     showAlert('رصيد غير كافٍ', `رصيد الإجازات السنوية للموظف هو ${balance} يوم فقط.`);
                     return;
                 }
-            } else if (leaveType === 'hajj') {
-                 const hajjTaken = state.leaves.some(l => l.employeeId === employeeId && l.leaveType === 'hajj' && l.status === 'approved');
-                 if (hajjTaken) {
-                    showAlert('طلب مكرر', 'سبق للموظف الحصول على إجازة الحج.');
-                    return;
-                 }
             }
+
 
             const leaveData = {
                 employeeId,
-                leaveType,
+                leaveType: leaveTypeKey,
                 startDate,
                 endDate,
                 duration,
@@ -1507,7 +1535,8 @@
                 const payrollMonthStartDate = new Date(payrollYear, payrollMonth, 1);
                 const payrollMonthEndDate = new Date(payrollYear, payrollMonth + 1, 0);
 
-                const paidLeaveTypes = ['annual', 'sick', 'maternity', 'marriage', 'bereavement', 'hajj', 'exceptional', 'eid_fitr', 'eid_adha', 'national_day', 'foundation_day', 'new_born'];
+                const paidLeaveTypes = state.leaveTypes.filter(lt => lt.paymentType === 'paid' || lt.paymentType === 'paid_in_advance').map(lt => lt.id);
+                
                 const approvedPaidLeavesInMonth = state.leaves.filter(l =>
                     l.employeeId === emp.id &&
                     l.status === 'approved' &&
@@ -2070,14 +2099,15 @@
             }
         };
 
-        const handleCustomLeaveTypeSubmit = async (event) => {
+        const handleLeaveTypeFormSubmit = async (event) => {
             event.preventDefault();
             const form = event.target;
             const leaveData = {
-                name: form['custom-leave-name'].value.trim(),
-                days: Number(form['custom-leave-days'].value),
-                paymentType: form['custom-leave-payment'].value,
-                recurring: form['custom-leave-recurring'].value,
+                name: form['leave-type-name'].value.trim(),
+                days: Number(form['leave-type-days'].value),
+                paymentType: form['leave-type-payment'].value,
+                recurring: form['leave-type-recurring'].value,
+                isStandard: false, // Custom types are not standard
             };
 
             if (!leaveData.name || isNaN(leaveData.days)) {
@@ -2085,44 +2115,71 @@
                 return;
             }
 
+            const editId = form['leave-type-edit-id'].value;
+
             try {
-                await addDoc(collection(db, "hr-data", userId, "leave-types"), leaveData);
-                showAlert('نجاح', 'تمت إضافة نوع الإجازة المخصص بنجاح.');
+                if (editId) {
+                    // Update existing
+                    const docRef = doc(db, "hr-data", userId, "leave-types", editId);
+                    await updateDoc(docRef, leaveData);
+                    showAlert('نجاح', 'تم تعديل نوع الإجازة بنجاح.');
+                } else {
+                    // Add new
+                    await addDoc(collection(db, "hr-data", userId, "leave-types"), leaveData);
+                    showAlert('نجاح', 'تمت إضافة نوع الإجازة المخصص بنجاح.');
+                }
                 form.reset();
+                form['leave-type-edit-id'].value = '';
+                ui.leaveTypeForm.querySelector('button[type="submit"]').textContent = 'إضافة نوع';
+
             } catch (e) {
-                console.error("Error adding custom leave type:", e);
-                showAlert('خطأ', 'فشل إضافة نوع الإجازة.');
+                console.error("Error handling leave type form:", e);
+                showAlert('خطأ', 'فشل حفظ نوع الإجازة.');
             }
         };
 
-        function renderCustomLeaveTypes() {
-            if (!ui.customLeaveTypesTableBody) return;
-            if (state.customLeaveTypes.length === 0) {
-                ui.customLeaveTypesTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4">لم يتم إضافة أنواع إجازات مخصصة.</td></tr>`;
-                return;
-            }
-            ui.customLeaveTypesTableBody.innerHTML = state.customLeaveTypes.map(lt => {
-                const paymentText = { paid: 'مدفوعة', unpaid: 'بدون أجر' };
-                const recurringText = { annually: 'سنوي', once: 'مرة واحدة' };
+        function renderLeaveTypesSettings() {
+            if (!ui.leaveTypesTableBody) return;
+            
+            ui.leaveTypesTableBody.innerHTML = state.leaveTypes.map(lt => {
+                const paymentText = { paid: 'مدفوعة', unpaid: 'بدون أجر', paid_in_advance: 'مدفوعة مقدماً' };
+                const recurringText = { annually: 'سنوي', once: 'مرة واحدة', none: 'غير متكرر' };
                 return `
                     <tr class="border-b">
                         <td class="px-6 py-4">${lt.name}</td>
                         <td class="px-6 py-4">${lt.days}</td>
                         <td class="px-6 py-4">${paymentText[lt.paymentType] || lt.paymentType}</td>
                         <td class="px-6 py-4">${recurringText[lt.recurring] || lt.recurring}</td>
-                        <td class="px-6 py-4"><button onclick="deleteCustomLeaveType('${lt.id}')" class="text-red-500 hover:text-red-700">حذف</button></td>
+                        <td class="px-6 py-4">
+                            <button onclick="editLeaveType('${lt.id}')" class="text-blue-600 hover:text-blue-800 font-semibold px-2">تعديل</button>
+                            ${!lt.isStandard ? `<button onclick="deleteLeaveType('${lt.id}')" class="text-red-500 hover:text-red-700 font-semibold px-2">حذف</button>` : ''}
+                        </td>
                     </tr>
                 `;
             }).join('');
         }
+        
+        window.editLeaveType = (id) => {
+            const leaveType = state.leaveTypes.find(lt => lt.id === id);
+            if (!leaveType) return;
 
-        window.deleteCustomLeaveType = (id) => {
+            const form = ui.leaveTypeForm;
+            form['leave-type-edit-id'].value = id;
+            form['leave-type-name'].value = leaveType.name;
+            form['leave-type-days'].value = leaveType.days;
+            form['leave-type-payment'].value = leaveType.paymentType;
+            form['leave-type-recurring'].value = leaveType.recurring;
+            form.querySelector('button[type="submit"]').textContent = 'حفظ التعديلات';
+            form['leave-type-name'].focus();
+        };
+
+        window.deleteLeaveType = (id) => {
             showConfirmation('تأكيد الحذف', 'هل أنت متأكد من حذف نوع الإجازة هذا؟', async () => {
                 try {
                     await deleteDoc(doc(db, "hr-data", userId, "leave-types", id));
                     showAlert('نجاح', 'تم حذف نوع الإجازة.');
                 } catch (e) {
-                    console.error("Error deleting custom leave type:", e);
+                    console.error("Error deleting leave type:", e);
                     showAlert('خطأ', 'فشلت عملية الحذف.');
                 }
             });
@@ -2132,16 +2189,7 @@
             const select = document.getElementById('leave-type');
             select.innerHTML = ''; // Clear existing
             
-            // Add standard types
-            for (const [key, value] of Object.entries(STANDARD_LEAVE_POLICIES)) {
-                const option = document.createElement('option');
-                option.value = key;
-                option.textContent = value.name;
-                select.appendChild(option);
-            }
-
-            // Add custom types
-            state.customLeaveTypes.forEach(lt => {
+            state.leaveTypes.sort((a,b) => a.name.localeCompare(b.name)).forEach(lt => {
                 const option = document.createElement('option');
                 option.value = lt.id;
                 option.textContent = lt.name;
@@ -2156,7 +2204,7 @@
         ui.attendanceForm.addEventListener('submit', handleAttendanceFormSubmit);
         ui.settingsForm.addEventListener('submit', handleSettingsSubmit);
         ui.leaveRequestForm.addEventListener('submit', handleLeaveRequestSubmit);
-        ui.customLeaveTypeForm.addEventListener('submit', handleCustomLeaveTypeSubmit);
+        ui.leaveTypeForm.addEventListener('submit', handleLeaveTypeFormSubmit);
 
         document.getElementById('attendance-month').addEventListener('change', updateMonthDaysDisplay);
         document.getElementById('attendance-year').addEventListener('change', updateMonthDaysDisplay);
