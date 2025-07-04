@@ -277,7 +277,8 @@
                                 <label for="leave-type-recurring" class="block mb-2 text-sm font-medium">التكرار</label>
                                 <select id="leave-type-recurring" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5">
                                     <option value="annually">سنوي</option>
-                                    <option value="once">مرة واحدة</option>
+                                    <option value="once">مرة واحدة طوال الخدمة</option>
+                                    <option value="multiple_per_year">متعددة سنوياً (لكل حالة)</option>
                                     <option value="none">غير متكرر</option>
                                 </select>
                             </div>
@@ -520,11 +521,11 @@
             sick: { name: 'إجازة مرضية', isStandard: true, paymentType: 'paid', recurring: 'annually', days: 120 },
             unpaid: { name: 'إجازة بدون أجر', isStandard: true, paymentType: 'unpaid', recurring: 'none', days: 0 },
             maternity: { name: 'إجازة وضع', days: 70, isStandard: true, paymentType: 'paid', recurring: 'none'},
-            marriage: { name: 'إجازة زواج', days: 5, isStandard: true, paymentType: 'paid', recurring: 'once'},
-            bereavement: { name: 'إجازة وفاة', days: 5, isStandard: true, paymentType: 'paid', recurring: 'none'},
+            marriage: { name: 'إجازة زواج', days: 5, isStandard: true, paymentType: 'paid', recurring: 'multiple_per_year'},
+            bereavement: { name: 'إجازة وفاة', days: 5, isStandard: true, paymentType: 'paid', recurring: 'multiple_per_year'},
             hajj: { name: 'إجازة حج', days: 14, isStandard: true, paymentType: 'paid', recurring: 'once'},
             child_care: { name: 'إجازة رعاية طفل', isStandard: true, paymentType: 'unpaid', recurring: 'none', days: 180},
-            new_born: { name: 'إجازة مولود', days: 3, isStandard: true, paymentType: 'paid', recurring: 'none'},
+            new_born: { name: 'إجازة مولود', days: 3, isStandard: true, paymentType: 'paid', recurring: 'multiple_per_year'},
             eid_fitr: { name: 'إجازة عيد الفطر', days: 4, isStandard: true, paymentType: 'paid', recurring: 'annually'},
             eid_adha: { name: 'إجازة عيد الأضحى', days: 4, isStandard: true, paymentType: 'paid', recurring: 'annually'},
             national_day: { name: 'إجازة اليوم الوطني', days: 1, isStandard: true, paymentType: 'paid', recurring: 'annually'},
@@ -1298,48 +1299,48 @@
 
             const leavesOfType = state.leaves.filter(l => l.employeeId === employeeId && l.leaveType === leaveTypeKey && l.status === 'approved');
 
-            switch (leaveTypeKey) {
-                case 'annual':
+            if (policy.recurring === 'annually') {
+                 if (leaveTypeKey === 'annual') {
                     totalEntitlement = employee.annualLeaveEntitlement || 0;
-                    daysTaken = leavesOfType.filter(l => new Date(l.startDate).getFullYear() === currentYear).reduce((sum, l) => sum + l.duration, 0);
-                    showBalance = true;
-                    break;
-                case 'sick':
-                    const sickLeaveYearStart = employee.firstSickLeaveDate ? new Date(employee.firstSickLeaveDate) : null;
-                    let sickLeaveYear = currentYear;
-                    if(sickLeaveYearStart && sickLeaveYearStart.getFullYear() < currentYear){
-                        sickLeaveYear = sickLeaveYearStart.getFullYear();
-                    }
-                    
-                    const sickLeavesInYear = state.leaves.filter(l => 
-                        l.employeeId === employeeId && 
-                        l.leaveType === 'sick' && 
-                        l.status === 'approved' &&
-                        new Date(l.startDate).getFullYear() >= sickLeaveYear
-                    );
-                    daysTaken = sickLeavesInYear.reduce((sum, l) => sum + l.duration, 0);
-                    
-                    message = `<p>الأيام المأخوذة في السنة المرضية الحالية: ${daysTaken} يوم.</p>`;
-                    message += `<p class="text-xs text-slate-500">تحتسب حسب نظام العمل: 30 يوم بأجر كامل، ثم 60 يوم بـ 75% من الأجر، ثم 30 يوم بدون أجر.</p>`;
-                    showBalance = false;
-                    break;
-                default:
-                    if (policy.recurring === 'annually') {
-                        totalEntitlement = policy.days;
-                        daysTaken = leavesOfType.filter(l => new Date(l.startDate).getFullYear() === currentYear).reduce((sum, l) => sum + l.duration, 0);
-                        showBalance = true;
-                    } else if (policy.recurring === 'once') {
-                        totalEntitlement = policy.days;
-                        daysTaken = leavesOfType.reduce((sum, l) => sum + l.duration, 0);
-                         if (daysTaken >= totalEntitlement) {
-                             message = `<p class="text-red-600 font-bold">تم استنفاذ رصيد هذه الإجازة.</p>`;
-                         }
-                        showBalance = true;
-                    } else {
-                        showBalance = false;
-                    }
-                    break;
+                } else {
+                    totalEntitlement = policy.days;
+                }
+                daysTaken = leavesOfType.filter(l => new Date(l.startDate).getFullYear() === currentYear).reduce((sum, l) => sum + l.duration, 0);
+                showBalance = true;
+            } else if (policy.recurring === 'once') {
+                totalEntitlement = policy.days;
+                daysTaken = leavesOfType.reduce((sum, l) => sum + l.duration, 0);
+                if (daysTaken >= totalEntitlement) {
+                    message = `<p class="text-red-600 font-bold">تم استنفاذ رصيد هذه الإجازة.</p>`;
+                }
+                showBalance = true;
+            } else if (policy.recurring === 'multiple_per_year') {
+                message = `<p>المدة المسموحة: ${policy.days} يوم لكل حالة.</p>`;
+                showBalance = false;
+            } else { // 'none'
+                showBalance = false;
             }
+
+            if (leaveTypeKey === 'sick') {
+                 const sickLeaveYearStart = employee.firstSickLeaveDate ? new Date(employee.firstSickLeaveDate) : null;
+                let sickLeaveYear = currentYear;
+                if(sickLeaveYearStart && sickLeaveYearStart.getFullYear() < currentYear){
+                    sickLeaveYear = sickLeaveYearStart.getFullYear();
+                }
+                
+                const sickLeavesInYear = state.leaves.filter(l => 
+                    l.employeeId === employeeId && 
+                    l.leaveType === 'sick' && 
+                    l.status === 'approved' &&
+                    new Date(l.startDate).getFullYear() >= sickLeaveYear
+                );
+                daysTaken = sickLeavesInYear.reduce((sum, l) => sum + l.duration, 0);
+                
+                message = `<p>الأيام المأخوذة في السنة المرضية الحالية: ${daysTaken} يوم.</p>`;
+                message += `<p class="text-xs text-slate-500">تحتسب حسب نظام العمل: 30 يوم بأجر كامل، ثم 60 يوم بـ 75% من الأجر، ثم 30 يوم بدون أجر.</p>`;
+                showBalance = false;
+            }
+
 
             if (showBalance) {
                 const remainingBalance = totalEntitlement - daysTaken;
@@ -1397,7 +1398,12 @@
                     showAlert('رصيد مستنفذ', `سبق للموظف الحصول على إجازة ${policy.name}.`);
                     return;
                 }
-            } else if (leaveTypeKey === 'annual') {
+            } else if (policy.recurring === 'multiple_per_year') {
+                if (duration > policy.days) {
+                    showAlert('المدة تجاوزت الحد', `المدة المسموحة لإجازة ${policy.name} هي ${policy.days} أيام فقط لكل حالة.`);
+                    return;
+                }
+            } else if (policy.recurring === 'annually' && leaveTypeKey === 'annual') {
                  const currentYear = new Date(startDate).getFullYear();
                 const daysTaken = leavesOfType.filter(l => new Date(l.startDate).getFullYear() === currentYear).reduce((sum, l) => sum + l.duration, 0);
                 const balance = (employee.annualLeaveEntitlement || 0) - daysTaken;
@@ -2141,7 +2147,7 @@
             
             ui.leaveTypesTableBody.innerHTML = state.leaveTypes.map(lt => {
                 const paymentText = { paid: 'مدفوعة', unpaid: 'بدون أجر', paid_in_advance: 'مدفوعة مقدماً' };
-                const recurringText = { annually: 'سنوي', once: 'مرة واحدة', none: 'غير متكرر' };
+                const recurringText = { annually: 'سنوي', once: 'مرة واحدة طوال الخدمة', 'multiple_per_year': 'متعددة سنوياً', none: 'غير متكرر' };
                 return `
                     <tr class="border-b">
                         <td class="px-6 py-4">${lt.name}</td>
@@ -2172,11 +2178,6 @@
         };
 
         window.deleteLeaveType = (id) => {
-            const leaveType = state.leaveTypes.find(lt => lt.id === id);
-            if (leaveType && leaveType.isStandard) {
-                showAlert('لا يمكن الحذف', 'لا يمكن حذف أنواع الإجازات الأساسية.');
-                return;
-            }
             showConfirmation('تأكيد الحذف', 'هل أنت متأكد من حذف نوع الإجازة هذا؟', async () => {
                 try {
                     await deleteDoc(doc(db, "hr-data", userId, "leave-types", id));
