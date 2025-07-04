@@ -45,7 +45,6 @@
 </head>
 <body class="bg-slate-100 text-slate-800">
 
-    <!-- شاشة تسجيل الدخول -->
     <div id="login-screen" class="flex flex-col items-center justify-center p-8 min-h-screen">
         <div class="text-center bg-white p-12 rounded-2xl shadow-xl max-w-lg w-full">
             <h1 class="text-3xl md:text-4xl font-bold text-violet-700 mb-4">منصة إدارة شؤون الموظفين</h1>
@@ -57,7 +56,6 @@
         </div>
     </div>
 
-    <!-- شاشة اختيار الأنظمة الرئيسية -->
     <div id="main-menu-screen" class="min-h-screen p-8">
         <header class="flex justify-between items-center mb-12">
             <h1 class="text-3xl font-bold text-slate-800">القائمة الرئيسية</h1>
@@ -77,7 +75,6 @@
         </div>
     </div>
     
-    <!-- MODULE: HR System -->
     <div id="hr-module-container" class="module-container flex min-h-screen w-full">
         <aside class="w-64 bg-white shadow-lg flex flex-col p-4">
             <h2 class="text-xl font-bold text-violet-700 text-center mb-4 mt-4">شؤون الموظفين</h2>
@@ -110,12 +107,10 @@
             </nav>
         </aside>
         <div class="flex-grow p-4 md:p-8 bg-slate-100">
-            <!-- PAGE: HR Dashboard -->
             <main id="page-hr-dashboard" class="page active">
                 <h2 class="text-3xl font-bold text-slate-800 mb-6">لوحة تحكم الموظفين</h2>
                 <div id="hr-dashboard-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <!-- Stats will be rendered here by JS -->
-                </div>
+                    </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white p-6 rounded-xl shadow-lg">
                         <h3 class="text-xl font-bold text-violet-700 mb-4">توزيع الموظفين على الأقسام</h3>
@@ -126,13 +121,11 @@
                      <div class="bg-white p-6 rounded-xl shadow-lg">
                         <h3 class="text-xl font-bold text-violet-700 mb-4">طلبات الإجازة المعلقة</h3>
                         <div id="pending-leaves-dashboard" class="space-y-3 max-h-80 overflow-y-auto">
-                           <!-- Pending leaves will be rendered here -->
-                        </div>
+                           </div>
                     </div>
                 </div>
             </main>
 
-            <!-- PAGE: HR Employees -->
             <main id="page-hr-employees" class="page">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold text-slate-800">إدارة الموظفين</h2>
@@ -152,14 +145,12 @@
                                 </tr>
                             </thead>
                             <tbody id="employees-table-body">
-                                <!-- Employee rows will be rendered here by JS -->
-                            </tbody>
+                                </tbody>
                         </table>
                     </div>
                 </div>
             </main>
 
-            <!-- PAGE: HR Leaves -->
             <main id="page-hr-leaves" class="page">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold text-slate-800">إدارة الإجازات</h2>
@@ -180,14 +171,12 @@
                                 </tr>
                             </thead>
                             <tbody id="leaves-table-body">
-                                <!-- Leave requests will be rendered here -->
-                            </tbody>
+                                </tbody>
                         </table>
                     </div>
                 </div>
             </main>
             
-            <!-- PAGE: HR Salaries -->
             <main id="page-hr-salaries" class="page">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold text-slate-800">مسير الرواتب</h2>
@@ -197,16 +186,13 @@
                     <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg">
                         <h3 class="font-bold text-lg mb-4">سجل مسيرات الرواتب</h3>
                         <div id="payroll-history-container" class="space-y-2 max-h-96 overflow-y-auto">
-                            <!-- Payroll history will be loaded here -->
-                        </div>
+                            </div>
                     </div>
                     <div id="payroll-details-container" class="lg:col-span-2 hidden">
-                        <!-- Payroll details will be shown here -->
-                    </div>
+                        </div>
                 </div>
             </main>
 
-            <!-- PAGE: HR Attendance -->
             <main id="page-hr-attendance" class="page">
                  <h2 class="text-3xl font-bold text-slate-800 mb-6">سجل الحضور والانصراف</h2>
                  <div class="bg-white p-6 rounded-xl shadow-lg">
@@ -220,14 +206,12 @@
                                 </tr>
                             </thead>
                             <tbody id="attendance-table-body">
-                                <!-- Attendance employee list will be rendered here by JS -->
-                            </tbody>
+                                </tbody>
                         </table>
                     </div>
                 </div>
             </main>
 
-            <!-- PAGE: HR Settings -->
             <main id="page-hr-settings" class="page">
                  <h2 class="text-3xl font-bold text-slate-800 mb-6">إعدادات الشركة</h2>
                  <div class="bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto">
@@ -255,7 +239,6 @@
         </div>
     </div>
 
-    <!-- Modals -->
     <div id="addEmployeeModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
         <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 transform scale-95">
             <h3 id="employeeModalTitle" class="text-xl font-bold mb-4">إضافة موظف جديد</h3>
@@ -278,7 +261,6 @@
                            <label class="flex items-center"><input type="radio" name="annualLeaveEntitlement" value="30" class="ml-2 text-violet-600 focus:ring-violet-500"> 30 يوم</label>
                         </div>
                     </div>
-                    <!-- NEW: Employee Weekend Settings -->
                     <div class="md:col-span-3">
                         <label class="block mb-2 text-sm font-medium">أيام الراحة الأسبوعية</label>
                         <div id="employee-weekend-days-container" class="flex items-center flex-wrap gap-x-4 gap-y-2">
@@ -388,7 +370,6 @@
         </div>
     </div>
     
-    <!-- NEW: Leave Request Modal -->
     <div id="leaveRequestModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
         <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-lg p-6 transform scale-95">
             <h3 class="text-xl font-bold mb-4">تقديم طلب إجازة</h3>
@@ -403,8 +384,15 @@
                         <select id="leave-type" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required>
                             <option value="annual">إجازة سنوية</option>
                             <option value="sick">إجازة مرضية</option>
-                            <option value="unpaid">إجازة بدون راتب</option>
-                            <option value="other">أخرى</option>
+                            <option value="unpaid">إجازة بدون أجر</option>
+                            <option value="maternity">إجازة وضع</option>
+                            <option value="marriage">إجازة زواج</option>
+                            <option value="bereavement">إجازة وفاة</option>
+                            <option value="hajj">إجازة حج</option>
+                            <option value="child_care">إجازة رعاية طفل</option>
+                            <option value="exceptional">إجازة استثنائية</option>
+                            <option value="eid_fitr">إجازة عيد الفطر</option>
+                            <option value="eid_adha">إجازة عيد الأضحى</option>
                         </select>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
@@ -439,7 +427,6 @@
         </div>
     </div>
 
-    <!-- This div will hold the content for printing -->
     <div id="printable-payroll"></div>
 
     <script type="module">
@@ -1148,7 +1135,11 @@
 
                 const statusClasses = { pending: 'bg-amber-100 text-amber-800', approved: 'bg-green-100 text-green-800', rejected: 'bg-red-100 text-red-800' };
                 const statusText = { pending: 'معلق', approved: 'موافق عليه', rejected: 'مرفوض' };
-                const leaveTypes = { annual: 'سنوية', sick: 'مرضية', unpaid: 'بدون راتب', other: 'أخرى' };
+                const leaveTypes = { 
+                    annual: 'سنوية', sick: 'مرضية', unpaid: 'بدون أجر', maternity: 'وضع',
+                    marriage: 'زواج', bereavement: 'وفاة', hajj: 'حج', child_care: 'رعاية طفل',
+                    exceptional: 'استثنائية', eid_fitr: 'عيد الفطر', eid_adha: 'عيد الأضحى'
+                };
 
                 ui.leavesTableBody.innerHTML = state.leaves
                     .sort((a,b) => new Date(b.startDate) - new Date(a.startDate))
@@ -1340,10 +1331,11 @@
                 const payrollMonthStartDate = new Date(payrollYear, payrollMonth, 1);
                 const payrollMonthEndDate = new Date(payrollYear, payrollMonth + 1, 0);
 
+                const paidLeaveTypes = ['annual', 'sick', 'maternity', 'marriage', 'bereavement', 'hajj', 'exceptional', 'eid_fitr', 'eid_adha'];
                 const approvedPaidLeavesInMonth = state.leaves.filter(l =>
                     l.employeeId === emp.id &&
                     l.status === 'approved' &&
-                    (l.leaveType === 'annual' || l.leaveType === 'sick') &&
+                    paidLeaveTypes.includes(l.leaveType) &&
                     new Date(l.startDate) <= payrollMonthEndDate &&
                     new Date(l.endDate) >= payrollMonthStartDate
                 );
@@ -1584,7 +1576,6 @@
             return `
             <div class="payslip-page bg-white text-gray-900" style="width: 100%; height: 100%; margin: auto; display: flex; flex-direction: column; border: 1px solid #e5e7eb; padding: 0.8cm; font-size: 9pt;">
                 
-                <!-- 1. Header -->
                 <header class="flex justify-center items-center pb-2 border-b border-gray-300">
                     <div class="text-center">
                         <h1 class="text-2xl font-bold">${state.settings.name || 'اسم الشركة'}</h1>
@@ -1593,7 +1584,6 @@
                     </div>
                 </header>
 
-                <!-- 2. Employee & Job Information -->
                 <section class="grid grid-cols-4 gap-x-4 py-3 border-b border-gray-200 text-xs">
                     <div><strong class="text-gray-600 block">اسم الموظف:</strong> ${record.name || ''}</div>
                     <div><strong class="text-gray-600 block">الرقم الوظيفي:</strong> ${record.employeeId || ''}</div>
@@ -1603,9 +1593,7 @@
                     <div><strong class="text-gray-600 block">تاريخ الدفع:</strong> ${formatGregorianDate(payPeriodEnd)}</div>
                 </section>
 
-                <!-- 3. & 4. Earnings & Deductions -->
                 <section class="flex-grow grid grid-cols-2 gap-x-6 py-3">
-                    <!-- Earnings -->
                     <div class="bg-gray-50 p-2 rounded">
                         <h3 class="font-bold text-center text-base mb-2 pb-1 border-b">الاستحقاقات / Earnings</h3>
                         <table class="w-full text-xs">
@@ -1616,7 +1604,6 @@
                             </tr>`).join('')}
                         </table>
                     </div>
-                    <!-- Deductions -->
                     <div class="bg-gray-50 p-2 rounded">
                         <h3 class="font-bold text-center text-base mb-2 pb-1 border-b">الاستقطاعات / Deductions</h3>
                         <table class="w-full text-xs">
@@ -1629,7 +1616,6 @@
                     </div>
                 </section>
 
-                <!-- 5. Summary -->
                 <section class="grid grid-cols-2 gap-x-6 py-2 bg-gray-100 rounded">
                     <div class="space-y-1 text-sm">
                         <div class="flex justify-between">
@@ -1650,7 +1636,6 @@
                     </div>
                 </section>
 
-                <!-- 6. Footer -->
                 <footer class="mt-auto pt-4 text-xs">
                     <div class="grid grid-cols-2 gap-8 text-center">
                         <div>
