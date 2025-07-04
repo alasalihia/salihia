@@ -481,6 +481,40 @@
         </div>
     </div>
 
+    <!-- NEW: Attendance Upload Modal -->
+    <div id="attendanceUploadModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-lg p-6 transform scale-95">
+            <h3 class="text-xl font-bold mb-4">رفع ملف الحضور لـ <span id="upload-attendance-employee-name"></span></h3>
+            <form id="attendanceUploadForm">
+                <input type="hidden" id="upload-attendance-employee-id">
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="upload-attendance-month" class="block mb-2 text-sm font-medium">الشهر</label>
+                            <select id="upload-attendance-month" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></select>
+                        </div>
+                        <div>
+                            <label for="upload-attendance-year" class="block mb-2 text-sm font-medium">السنة</label>
+                            <input type="number" id="upload-attendance-year" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="attendance-file-input" class="block mb-2 text-sm font-medium">اختر ملف الحضور (CSV)</label>
+                        <input type="file" id="attendance-file-input" accept=".csv" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
+                    </div>
+                    <div id="attendance-upload-summary" class="hidden bg-slate-100 p-4 rounded-lg text-sm space-y-2">
+                        <!-- Summary will be rendered here -->
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end space-x-2 rtl:space-x-reverse">
+                    <button type="button" onclick="closeModal('attendanceUploadModal')" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">إلغاء</button>
+                    <button type="button" id="process-attendance-file-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">معالجة الملف</button>
+                    <button type="submit" id="save-processed-attendance-btn" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors hidden">اعتماد وحفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <div id="alertModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
         <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center">
@@ -518,6 +552,7 @@
         };
         let confirmationCallback = null;
         let departmentChart = null;
+        let processedAttendanceData = null; // Global to hold processed data before saving
 
         const DEFAULT_LEAVE_POLICIES = {
             annual: { name: 'إجازة سنوية', isStandard: true, paymentType: 'paid_in_advance', recurring: 'annually', days: 0 },
@@ -554,6 +589,7 @@
             payrollDetailsContainer: document.getElementById('payroll-details-container'),
             generatePayrollForm: document.getElementById('generatePayrollForm'),
             attendanceForm: document.getElementById('attendanceForm'),
+            attendanceUploadForm: document.getElementById('attendanceUploadForm'),
             leaveRequestForm: document.getElementById('leaveRequestForm'),
             settingsForm: document.getElementById('settings-form'),
             companyNameInput: document.getElementById('company-name-input'),
@@ -626,6 +662,10 @@
         // --- Modal & Alert Functions ---
         window.openModal = async (modalId, context = null) => {
             const modal = document.getElementById(modalId);
+            if (!modal) {
+                console.error(`Modal with ID "${modalId}" not found.`);
+                return;
+            }
             if (modalId === 'addEmployeeModal') {
                 ui.addEmployeeForm.reset();
                 ui.employeeEditIdInput.value = '';
@@ -677,38 +717,51 @@
                 document.getElementById('leave-balance-info').classList.add('hidden');
                 populateLeaveTypeDropdown();
                 updateLeaveBalanceDisplay();
-            } else if (modalId === 'generatePayrollModal' || modalId === 'attendanceModal') {
-                const monthSelectId = modalId === 'generatePayrollModal' ? 'payroll-month' : 'attendance-month';
-                const yearInputId = modalId === 'generatePayrollModal' ? 'payroll-year' : 'attendance-year';
-                const monthSelect = document.getElementById(monthSelectId);
-                const yearInput = document.getElementById(yearInputId);
-                const now = new Date();
-                const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-                monthSelect.innerHTML = months.map((m, i) => `<option value="${i}">${m}</option>`).join('');
-                monthSelect.value = now.getMonth();
-                yearInput.value = now.getFullYear();
+            } else if (modalId === 'attendanceUploadModal') {
+                const employee = state.employees.find(e => e.id === context);
+                if (employee) {
+                    document.getElementById('upload-attendance-employee-name').textContent = employee.name;
+                    document.getElementById('upload-attendance-employee-id').value = employee.id;
+                    
+                    const monthSelect = document.getElementById('upload-attendance-month');
+                    const yearInput = document.getElementById('upload-attendance-year');
+                    const now = new Date();
+                    const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+                    monthSelect.innerHTML = months.map((m, i) => `<option value="${i}">${m}</option>`).join('');
+                    monthSelect.value = now.getMonth();
+                    yearInput.value = now.getFullYear();
 
-                if (modalId === 'attendanceModal') {
-                    const employee = state.employees.find(e => e.id === context);
-                    if (employee) {
-                        ui.attendanceForm.reset();
-                        monthSelect.value = now.getMonth();
-                        yearInput.value = now.getFullYear();
-                        document.getElementById('attendance-employee-name').textContent = employee.name;
-                        document.getElementById('attendance-employee-id').value = employee.id;
-                        updateMonthDaysDisplay(); // Initial calculation
-                        // Load existing data for this month if available
-                        const attendanceId = `${yearInput.value}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-                        const attendanceDocRef = doc(db, "hr-data", userId, "employees", employee.id, "attendance", attendanceId);
-                        const docSnap = await getDoc(attendanceDocRef);
-                        if (docSnap.exists()) {
-                            const data = docSnap.data();
-                            document.getElementById('attended-days').value = data.attendedDays || 0;
-                            document.getElementById('late-hours').value = data.lateHours || 0;
-                            document.getElementById('late-minutes').value = data.lateMinutes || 0;
-                            document.getElementById('overtime-hours').value = data.overtimeHours || 0;
-                            document.getElementById('overtime-minutes').value = data.overtimeMinutes || 0;
-                        }
+                    document.getElementById('attendance-upload-summary').classList.add('hidden');
+                    document.getElementById('save-processed-attendance-btn').classList.add('hidden');
+                    document.getElementById('process-attendance-file-btn').classList.remove('hidden');
+                    ui.attendanceUploadForm.reset();
+                }
+            } else if (modalId === 'attendanceModal') {
+                const employee = state.employees.find(e => e.id === context);
+                if (employee) {
+                    const monthSelect = document.getElementById('attendance-month');
+                    const yearInput = document.getElementById('attendance-year');
+                    const now = new Date();
+                    const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+                    monthSelect.innerHTML = months.map((m, i) => `<option value="${i}">${m}</option>`).join('');
+                    
+                    ui.attendanceForm.reset();
+                    monthSelect.value = now.getMonth();
+                    yearInput.value = now.getFullYear();
+                    document.getElementById('attendance-employee-name').textContent = employee.name;
+                    document.getElementById('attendance-employee-id').value = employee.id;
+                    updateMonthDaysDisplay(); // Initial calculation
+                    // Load existing data for this month if available
+                    const attendanceId = `${yearInput.value}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                    const attendanceDocRef = doc(db, "hr-data", userId, "employees", employee.id, "attendance", attendanceId);
+                    const docSnap = await getDoc(attendanceDocRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        document.getElementById('attended-days').value = data.attendedDays || 0;
+                        document.getElementById('late-hours').value = data.lateHours || 0;
+                        document.getElementById('late-minutes').value = data.lateMinutes || 0;
+                        document.getElementById('overtime-hours').value = data.overtimeHours || 0;
+                        document.getElementById('overtime-minutes').value = data.overtimeMinutes || 0;
                     }
                 }
             }
