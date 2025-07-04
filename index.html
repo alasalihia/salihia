@@ -2053,7 +2053,8 @@
                     <td class="px-6 py-4 font-medium text-slate-900">${emp.name}</td>
                     <td class="px-6 py-4">${emp.position}</td>
                     <td class="px-6 py-4 text-center">
-                        <button onclick="openModal('attendanceModal', '${emp.id}')" class="bg-violet-100 text-violet-800 font-semibold px-4 py-1 rounded-full hover:bg-violet-200">تسجيل الحضور</button>
+                        <button onclick="openModal('attendanceUploadModal', '${emp.id}')" class="bg-blue-100 text-blue-800 font-semibold px-4 py-1 rounded-full hover:bg-blue-200">رفع ملف</button>
+                        <button onclick="openModal('attendanceModal', '${emp.id}')" class="bg-violet-100 text-violet-800 font-semibold px-4 py-1 rounded-full hover:bg-violet-200 ml-2">تسجيل يدوي</button>
                     </td>
                 </tr>`;
             }).join("");
