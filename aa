@@ -251,6 +251,11 @@
                                     <label for="company-cr-input" class="block mb-2 text-sm font-medium text-gray-900">رقم السجل التجاري</label>
                                     <input type="text" id="company-cr-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="1234567890">
                                 </div>
+                                <!-- NEW: Standard Start Time -->
+                                <div>
+                                    <label for="company-start-time-input" class="block mb-2 text-sm font-medium text-gray-900">وقت بدء الدوام الرسمي</label>
+                                    <input type="time" id="company-start-time-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5">
+                                </div>
                             </div>
                             <div class="mt-8 pt-4 border-t">
                                 <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">حفظ إعدادات الشركة</button>
@@ -311,8 +316,8 @@
     </div>
 
     <!-- Modals -->
-    <div id="addEmployeeModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
-        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 transform scale-95">
+    <div id="addEmployeeModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0 overflow-y-auto">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 transform scale-95 my-8">
             <h3 id="employeeModalTitle" class="text-xl font-bold mb-4">إضافة موظف جديد</h3>
             <form id="addEmployeeForm">
                 <input type="hidden" id="employee-edit-id">
@@ -343,6 +348,24 @@
                             <label class="flex items-center"><input type="checkbox" name="employee-weekend" value="Thursday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> الخميس</label>
                             <label class="flex items-center"><input type="checkbox" name="employee-weekend" value="Friday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> الجمعة</label>
                             <label class="flex items-center"><input type="checkbox" name="employee-weekend" value="Saturday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> السبت</label>
+                        </div>
+                    </div>
+                </div>
+                <!-- NEW: Tardiness Rules Section -->
+                <div class="mt-6 pt-4 border-t">
+                    <h3 class="text-lg font-bold mb-3">قواعد حسم التأخير</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                        <label class="flex items-center md:col-span-3">
+                            <input type="checkbox" id="enableTardinessRule" class="ml-2 rounded text-violet-600 focus:ring-violet-500">
+                            تفعيل قاعدة خصم التأخير لهذا الموظف
+                        </label>
+                        <div>
+                            <label for="gracePeriodMinutes" class="block mb-2 text-sm font-medium">فترة السماح (دقائق)</label>
+                            <input type="number" id="gracePeriodMinutes" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" placeholder="e.g., 15">
+                        </div>
+                        <div>
+                            <label for="deductionHours" class="block mb-2 text-sm font-medium">ساعات الخصم للمخالفة</label>
+                            <input type="number" id="deductionHours" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" placeholder="e.g., 1">
                         </div>
                     </div>
                 </div>
@@ -424,10 +447,11 @@
                         <p class="text-sm">عدد أيام الشهر: <span id="month-days-display" class="font-bold">0</span> يوم</p>
                     </div>
                     <div><label for="attended-days" class="block mb-2 text-sm font-medium">أيام الحضور الفعلية</label><input type="number" id="attended-days" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
-                    <div></div>
+                     <!-- NEW: Late Incidents Manual Input -->
+                    <div><label for="late-incidents-over-grace" class="block mb-2 text-sm font-medium">عدد مخالفات التأخير</label><input type="number" id="late-incidents-over-grace" min="0" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
                     <div class="md:col-span-2 grid grid-cols-2 gap-4">
-                        <div><label for="late-hours" class="block mb-2 text-sm font-medium">ساعات التأخير</label><input type="number" id="late-hours" min="0" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
-                        <div><label for="late-minutes" class="block mb-2 text-sm font-medium">دقائق التأخير</label><input type="number" id="late-minutes" min="0" max="59" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
+                        <div><label for="late-hours" class="block mb-2 text-sm font-medium">إجمالي ساعات التأخير</label><input type="number" id="late-hours" min="0" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
+                        <div><label for="late-minutes" class="block mb-2 text-sm font-medium">إجمالي دقائق التأخير</label><input type="number" id="late-minutes" min="0" max="59" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
                     </div>
                      <div class="md:col-span-2 grid grid-cols-2 gap-4">
                         <div><label for="overtime-hours" class="block mb-2 text-sm font-medium">ساعات الإضافي</label><input type="number" id="overtime-hours" min="0" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
@@ -545,6 +569,7 @@
                 name: 'شركتك', 
                 address: '',
                 crNumber: '',
+                startTime: '09:00', // NEW: Default start time
             },
             currentEmployee: {
                 allowances: [],
@@ -596,6 +621,7 @@
             companyNameInput: document.getElementById('company-name-input'),
             companyAddressInput: document.getElementById('company-address-input'),
             companyCRInput: document.getElementById('company-cr-input'),
+            companyStartTimeInput: document.getElementById('company-start-time-input'), // NEW
             leaveTypeForm: document.getElementById('leave-type-form'),
             leaveTypesTableBody: document.getElementById('leave-types-table-body'),
         };
@@ -672,6 +698,7 @@
                 ui.employeeEditIdInput.value = '';
                 document.querySelector('input[name="annualLeaveEntitlement"][value="21"]').checked = true; // Reset radio
                 document.querySelectorAll('input[name="employee-weekend"]').forEach(cb => cb.checked = false); // Reset weekend checkboxes
+                document.getElementById('enableTardinessRule').checked = false;
 
 
                 if (context) { // This is an edit operation
@@ -700,6 +727,12 @@
                                 const checkbox = document.querySelector(`input[name="employee-weekend"][value="${day}"]`);
                                 if (checkbox) checkbox.checked = true;
                             });
+                        }
+                        // Load tardiness rules
+                        if (employee.tardinessRule) {
+                            document.getElementById('enableTardinessRule').checked = employee.tardinessRule.enabled || false;
+                            document.getElementById('gracePeriodMinutes').value = employee.tardinessRule.gracePeriodMinutes || '';
+                            document.getElementById('deductionHours').value = employee.tardinessRule.deductionHours || '';
                         }
                     }
                 } else { // This is an add operation
@@ -764,6 +797,7 @@
                         document.getElementById('late-minutes').value = data.lateMinutes || 0;
                         document.getElementById('overtime-hours').value = data.overtimeHours || 0;
                         document.getElementById('overtime-minutes').value = data.overtimeMinutes || 0;
+                        document.getElementById('late-incidents-over-grace').value = data.lateIncidentsOverGrace || 0;
                     }
                 }
             }
@@ -958,6 +992,7 @@
             ui.companyNameInput.value = state.settings.name || '';
             ui.companyAddressInput.value = state.settings.address || '';
             ui.companyCRInput.value = state.settings.crNumber || '';
+            ui.companyStartTimeInput.value = state.settings.startTime || '09:00'; // NEW
         }
 
         // --- Firebase Functions ---
@@ -1031,7 +1066,7 @@
             leavesUnsubscribe = null;
             leaveTypesUnsubscribe = null;
 
-            state = { employees: [], payrolls: [], leaves: [], leaveTypes: [], settings: { name: 'شركتك', address: '', crNumber: '' }, currentEmployee: { allowances: [], deductions: [] } };
+            state = { employees: [], payrolls: [], leaves: [], leaveTypes: [], settings: { name: 'شركتك', address: '', crNumber: '', startTime: '09:00' }, currentEmployee: { allowances: [], deductions: [] } };
             renderAll();
         }
 
@@ -1077,7 +1112,7 @@
                 if (doc.exists()) {
                     state.settings = { ...state.settings, ...doc.data() };
                 } else {
-                    state.settings = { name: 'شركتك', address: '', crNumber: '' };
+                    state.settings = { name: 'شركتك', address: '', crNumber: '', startTime: '09:00' };
                 }
                 renderSettingsPage();
             });
@@ -1114,7 +1149,13 @@
                 nationality: form.employeeNationality.value.trim(),
                 iban: form.employeeIBAN.value.trim(),
                 annualLeaveEntitlement: Number(form.annualLeaveEntitlement.value),
-                weekendDays: selectedWeekends
+                weekendDays: selectedWeekends,
+                // NEW: Save tardiness rules
+                tardinessRule: {
+                    enabled: form.enableTardinessRule.checked,
+                    gracePeriodMinutes: Number(form.gracePeriodMinutes.value) || 0,
+                    deductionHours: Number(form.deductionHours.value) || 0,
+                }
             };
 
             if (!employeeData.name || !employeeData.employeeId || !employeeData.nationalId) {
@@ -1627,8 +1668,14 @@
                         absenceDeduction = dailyRate * unpaidAbsentWorkDays;
                     }
 
-                    const totalLateMinutes = (attendanceData.lateHours * 60) + attendanceData.lateMinutes;
-                    if (totalLateMinutes > 0) lateDeduction = (hourlyRate / 60) * totalLateMinutes;
+                    // UPDATED: Late Deduction Logic
+                    if (emp.tardinessRule?.enabled && emp.tardinessRule.deductionHours > 0) {
+                        const incidents = attendanceData.lateIncidentsOverGrace || 0;
+                        lateDeduction = incidents * emp.tardinessRule.deductionHours * hourlyRate;
+                    } else {
+                        const totalLateMinutes = (attendanceData.lateHours * 60) + attendanceData.lateMinutes;
+                        if (totalLateMinutes > 0) lateDeduction = (hourlyRate / 60) * totalLateMinutes;
+                    }
 
                     const totalOvertimeMinutes = (attendanceData.overtimeHours * 60) + attendanceData.overtimeMinutes;
                     if (totalOvertimeMinutes > 0) overtimePay = (hourlyRate * 1.5 / 60) * totalOvertimeMinutes;
@@ -2091,6 +2138,13 @@
 
         const handleProcessAttendanceFile = () => {
             const fileInput = document.getElementById('attendance-file-input');
+            const employeeId = document.getElementById('upload-attendance-employee-id').value;
+            const employee = state.employees.find(e => e.id === employeeId);
+
+            if (!employee) {
+                showAlert('خطأ', 'لم يتم العثور على الموظف.');
+                return;
+            }
             const file = fileInput.files[0];
             if (!file) {
                 showAlert('لم يتم اختيار ملف', 'يرجى اختيار ملف CSV أولاً.');
@@ -2110,7 +2164,11 @@
                     let attendedDays = 0;
                     let totalLateMinutes = 0;
                     let totalOvertimeMinutes = 0;
+                    let lateIncidentsOverGrace = 0; // NEW: Counter for incidents
                     const standardWorkHours = 8;
+                    const companyStartTime = state.settings.startTime || '09:00';
+                    const [startHour, startMinute] = companyStartTime.split(':').map(Number);
+                    const tardinessRule = employee.tardinessRule;
 
                     results.data.forEach(row => {
                         const checkIn = row.CheckIn ? row.CheckIn.trim() : null;
@@ -2120,6 +2178,17 @@
                             attendedDays++;
                             const checkInTime = new Date(`1970-01-01T${checkIn}:00`);
                             const checkOutTime = new Date(`1970-01-01T${checkOut}:00`);
+                            
+                            // Check for lateness
+                            const [checkInHour, checkInMinute] = checkIn.split(':').map(Number);
+                            const dailyLateMinutes = (checkInHour - startHour) * 60 + (checkInMinute - startMinute);
+                            if (dailyLateMinutes > 0) {
+                                totalLateMinutes += dailyLateMinutes;
+                                // Check if this incident violates the grace period rule
+                                if (tardinessRule?.enabled && dailyLateMinutes > (tardinessRule.gracePeriodMinutes || 0)) {
+                                    lateIncidentsOverGrace++;
+                                }
+                            }
                             
                             // Calculate total work duration in hours
                             const durationMs = checkOutTime - checkInTime;
@@ -2138,6 +2207,7 @@
                         lateMinutes: totalLateMinutes % 60,
                         overtimeHours: Math.floor(totalOvertimeMinutes / 60),
                         overtimeMinutes: Math.round(totalOvertimeMinutes % 60),
+                        lateIncidentsOverGrace: lateIncidentsOverGrace, // NEW
                     };
 
                     const summaryDiv = document.getElementById('attendance-upload-summary');
@@ -2146,6 +2216,7 @@
                         <p><strong>إجمالي أيام الحضور:</strong> ${processedAttendanceData.attendedDays} يوم</p>
                         <p><strong>إجمالي التأخير:</strong> ${processedAttendanceData.lateHours} ساعة و ${processedAttendanceData.lateMinutes} دقيقة</p>
                         <p><strong>إجمالي العمل الإضافي:</strong> ${processedAttendanceData.overtimeHours} ساعة و ${processedAttendanceData.overtimeMinutes} دقيقة</p>
+                        <p class="font-bold text-red-600"><strong>عدد مخالفات التأخير:</strong> ${processedAttendanceData.lateIncidentsOverGrace} مخالفة</p>
                     `;
                     summaryDiv.classList.remove('hidden');
                     document.getElementById('process-attendance-file-btn').classList.add('hidden');
@@ -2205,6 +2276,7 @@
                 lateMinutes: Number(form['late-minutes'].value) || 0,
                 overtimeHours: Number(form['overtime-hours'].value) || 0,
                 overtimeMinutes: Number(form['overtime-minutes'].value) || 0,
+                lateIncidentsOverGrace: Number(form['late-incidents-over-grace'].value) || 0, // NEW
             };
 
             if (isNaN(attendanceData.attendedDays)) {
@@ -2267,6 +2339,7 @@
                 name: ui.companyNameInput.value.trim(),
                 address: ui.companyAddressInput.value.trim(),
                 crNumber: ui.companyCRInput.value.trim(),
+                startTime: ui.companyStartTimeInput.value, // NEW
             };
 
             if (!db || !userId) {
