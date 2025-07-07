@@ -527,8 +527,39 @@
                         <label for="attendance-file-input" class="block mb-2 text-sm font-medium">اختر ملف الحضور (CSV)</label>
                         <input type="file" id="attendance-file-input" accept=".csv" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
                     </div>
+                    <!-- Summary of processed file (read-only) -->
                     <div id="attendance-upload-summary" class="hidden bg-slate-100 p-4 rounded-lg text-sm space-y-2">
-                        <!-- Summary will be rendered here -->
+                        <!-- Summary will be rendered here by JS -->
+                    </div>
+                    <!-- EDITABLE FIELDS -->
+                    <div id="attendance-upload-edit-fields" class="hidden mt-4 space-y-4 border-t pt-4">
+                        <h4 class="font-bold">تعديل البيانات المستخرجة</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="upload-attended-days" class="block mb-2 text-sm font-medium">أيام الحضور الفعلية</label>
+                                <input type="number" id="upload-attended-days" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required>
+                            </div>
+                            <div>
+                                <label for="upload-late-incidents" class="block mb-2 text-sm font-medium">عدد مخالفات التأخير</label>
+                                <input type="number" id="upload-late-incidents" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
+                            </div>
+                            <div>
+                                <label for="upload-late-hours" class="block mb-2 text-sm font-medium">إجمالي ساعات التأخير</label>
+                                <input type="number" id="upload-late-hours" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
+                            </div>
+                            <div>
+                                <label for="upload-late-minutes" class="block mb-2 text-sm font-medium">إجمالي دقائق التأخير</label>
+                                <input type="number" id="upload-late-minutes" min="0" max="59" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
+                            </div>
+                            <div>
+                                <label for="upload-overtime-hours" class="block mb-2 text-sm font-medium">ساعات الإضافي</label>
+                                <input type="number" id="upload-overtime-hours" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
+                            </div>
+                            <div>
+                                <label for="upload-overtime-minutes" class="block mb-2 text-sm font-medium">دقائق الإضافي</label>
+                                <input type="number" id="upload-overtime-minutes" min="0" max="59" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="mt-6 flex justify-end space-x-2 rtl:space-x-reverse">
@@ -578,8 +609,7 @@
         };
         let confirmationCallback = null;
         let departmentChart = null;
-        let processedAttendanceData = null; // Global to hold processed data before saving
-
+        
         const DEFAULT_LEAVE_POLICIES = {
             annual: { name: 'إجازة سنوية', isStandard: true, paymentType: 'paid_in_advance', recurring: 'annually', days: 0 },
             sick: { name: 'إجازة مرضية', isStandard: true, paymentType: 'paid', recurring: 'annually', days: 120 },
@@ -766,10 +796,10 @@
                     yearInput.value = now.getFullYear();
 
                     document.getElementById('attendance-upload-summary').classList.add('hidden');
+                    document.getElementById('attendance-upload-edit-fields').classList.add('hidden'); // Hide edit fields initially
                     document.getElementById('save-processed-attendance-btn').classList.add('hidden');
                     document.getElementById('process-attendance-file-btn').classList.remove('hidden');
                     ui.attendanceUploadForm.reset();
-                    processedAttendanceData = null; // Reset processed data
                 }
             } else if (modalId === 'attendanceModal') {
                 const employee = state.employees.find(e => e.id === context);
@@ -2201,24 +2231,36 @@
                         }
                     });
 
-                    processedAttendanceData = {
+                    const calculatedData = {
                         attendedDays: attendedDays,
                         lateHours: Math.floor(totalLateMinutes / 60),
                         lateMinutes: totalLateMinutes % 60,
                         overtimeHours: Math.floor(totalOvertimeMinutes / 60),
                         overtimeMinutes: Math.round(totalOvertimeMinutes % 60),
-                        lateIncidentsOverGrace: lateIncidentsOverGrace, // NEW
+                        lateIncidentsOverGrace: lateIncidentsOverGrace,
                     };
 
+                    // Show the summary (as a reference)
                     const summaryDiv = document.getElementById('attendance-upload-summary');
                     summaryDiv.innerHTML = `
-                        <h4 class="font-bold mb-2">ملخص الملف:</h4>
-                        <p><strong>إجمالي أيام الحضور:</strong> ${processedAttendanceData.attendedDays} يوم</p>
-                        <p><strong>إجمالي التأخير:</strong> ${processedAttendanceData.lateHours} ساعة و ${processedAttendanceData.lateMinutes} دقيقة</p>
-                        <p><strong>إجمالي العمل الإضافي:</strong> ${processedAttendanceData.overtimeHours} ساعة و ${processedAttendanceData.overtimeMinutes} دقيقة</p>
-                        <p class="font-bold text-red-600"><strong>عدد مخالفات التأخير:</strong> ${processedAttendanceData.lateIncidentsOverGrace} مخالفة</p>
+                        <h4 class="font-bold mb-2">البيانات المستخرجة من الملف:</h4>
+                        <p><strong>إجمالي أيام الحضور:</strong> ${calculatedData.attendedDays} يوم</p>
+                        <p><strong>إجمالي التأخير:</strong> ${calculatedData.lateHours} ساعة و ${calculatedData.lateMinutes} دقيقة</p>
+                        <p><strong>إجمالي العمل الإضافي:</strong> ${calculatedData.overtimeHours} ساعة و ${calculatedData.overtimeMinutes} دقيقة</p>
+                        <p class="font-bold text-red-600"><strong>عدد مخالفات التأخير:</strong> ${calculatedData.lateIncidentsOverGrace} مخالفة</p>
                     `;
                     summaryDiv.classList.remove('hidden');
+
+                    // Populate the editable fields
+                    document.getElementById('upload-attended-days').value = calculatedData.attendedDays;
+                    document.getElementById('upload-late-incidents').value = calculatedData.lateIncidentsOverGrace;
+                    document.getElementById('upload-late-hours').value = calculatedData.lateHours;
+                    document.getElementById('upload-late-minutes').value = calculatedData.lateMinutes;
+                    document.getElementById('upload-overtime-hours').value = calculatedData.overtimeHours;
+                    document.getElementById('upload-overtime-minutes').value = calculatedData.overtimeMinutes;
+
+                    // Show the editable fields and the save button
+                    document.getElementById('attendance-upload-edit-fields').classList.remove('hidden');
                     document.getElementById('process-attendance-file-btn').classList.add('hidden');
                     document.getElementById('save-processed-attendance-btn').classList.remove('hidden');
                 },
@@ -2231,11 +2273,7 @@
 
         const handleAttendanceUploadFormSubmit = async (event) => {
             event.preventDefault();
-            if (!processedAttendanceData) {
-                showAlert('لا توجد بيانات', 'يرجى معالجة الملف أولاً قبل الحفظ.');
-                return;
-            }
-
+            
             const form = event.target;
             const employeeId = form['upload-attendance-employee-id'].value;
             const month = form['upload-attendance-month'].value;
@@ -2244,7 +2282,12 @@
             const totalDaysInMonth = getDaysInMonth(parseInt(year), parseInt(month));
 
             const finalAttendanceData = {
-                ...processedAttendanceData,
+                attendedDays: Number(document.getElementById('upload-attended-days').value),
+                lateIncidentsOverGrace: Number(document.getElementById('upload-late-incidents').value),
+                lateHours: Number(document.getElementById('upload-late-hours').value),
+                lateMinutes: Number(document.getElementById('upload-late-minutes').value),
+                overtimeHours: Number(document.getElementById('upload-overtime-hours').value),
+                overtimeMinutes: Number(document.getElementById('upload-overtime-minutes').value),
                 totalDaysInMonth: totalDaysInMonth,
             };
 
