@@ -736,6 +736,7 @@
                     document.getElementById('save-processed-attendance-btn').classList.add('hidden');
                     document.getElementById('process-attendance-file-btn').classList.remove('hidden');
                     ui.attendanceUploadForm.reset();
+                    processedAttendanceData = null; // Reset processed data
                 }
             } else if (modalId === 'attendanceModal') {
                 const employee = state.employees.find(e => e.id === context);
@@ -2063,25 +2064,19 @@
 
         // --- Attendance Functions ---
         
-        /**
-         * FIX: Added this function to handle the template download.
-         * It creates a CSV file in memory and triggers a download.
-         */
         window.downloadAttendanceTemplate = () => {
             const headers = ['Date', 'CheckIn', 'CheckOut', 'Notes'];
             const csvHeader = headers.join(',');
             
-            // Example rows for clarity in the template
             const exampleRow1 = 'YYYY-MM-DD,HH:MM,HH:MM,Your notes here';
             const exampleRow2 = '2024-07-01,09:00,17:00,Normal Day';
 
             const csvContent = `${csvHeader}\n${exampleRow1}\n${exampleRow2}`;
 
-            // Using Blob to create the file
-            const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' }); // \uFEFF (BOM) is important for Excel to open UTF-8 CSVs correctly
+            const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
 
-            if (link.download !== undefined) { // Check browser support
+            if (link.download !== undefined) {
                 const url = URL.createObjectURL(blob);
                 link.setAttribute("href", url);
                 link.setAttribute("download", "attendance_template.csv");
@@ -2091,6 +2086,105 @@
                 document.body.removeChild(link);
             } else {
                 showAlert('خطأ', 'متصفحك لا يدعم تحميل الملفات مباشرة. يرجى محاولة استخدام متصفح أحدث.');
+            }
+        };
+
+        const handleProcessAttendanceFile = () => {
+            const fileInput = document.getElementById('attendance-file-input');
+            const file = fileInput.files[0];
+            if (!file) {
+                showAlert('لم يتم اختيار ملف', 'يرجى اختيار ملف CSV أولاً.');
+                return;
+            }
+
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    if (results.errors.length > 0) {
+                        showAlert('خطأ في الملف', 'حدث خطأ أثناء قراءة الملف. تأكد من أن الملف بصيغة CSV صحيحة.');
+                        console.error("CSV Parsing Errors:", results.errors);
+                        return;
+                    }
+                    
+                    let attendedDays = 0;
+                    let totalLateMinutes = 0;
+                    let totalOvertimeMinutes = 0;
+                    const standardWorkHours = 8;
+
+                    results.data.forEach(row => {
+                        const checkIn = row.CheckIn ? row.CheckIn.trim() : null;
+                        const checkOut = row.CheckOut ? row.CheckOut.trim() : null;
+
+                        if (checkIn && checkOut) {
+                            attendedDays++;
+                            const checkInTime = new Date(`1970-01-01T${checkIn}:00`);
+                            const checkOutTime = new Date(`1970-01-01T${checkOut}:00`);
+                            
+                            // Calculate total work duration in hours
+                            const durationMs = checkOutTime - checkInTime;
+                            const durationHours = durationMs / (1000 * 60 * 60);
+
+                            // Calculate overtime
+                            if (durationHours > standardWorkHours) {
+                                totalOvertimeMinutes += (durationHours - standardWorkHours) * 60;
+                            }
+                        }
+                    });
+
+                    processedAttendanceData = {
+                        attendedDays: attendedDays,
+                        lateHours: Math.floor(totalLateMinutes / 60),
+                        lateMinutes: totalLateMinutes % 60,
+                        overtimeHours: Math.floor(totalOvertimeMinutes / 60),
+                        overtimeMinutes: Math.round(totalOvertimeMinutes % 60),
+                    };
+
+                    const summaryDiv = document.getElementById('attendance-upload-summary');
+                    summaryDiv.innerHTML = `
+                        <h4 class="font-bold mb-2">ملخص الملف:</h4>
+                        <p><strong>إجمالي أيام الحضور:</strong> ${processedAttendanceData.attendedDays} يوم</p>
+                        <p><strong>إجمالي التأخير:</strong> ${processedAttendanceData.lateHours} ساعة و ${processedAttendanceData.lateMinutes} دقيقة</p>
+                        <p><strong>إجمالي العمل الإضافي:</strong> ${processedAttendanceData.overtimeHours} ساعة و ${processedAttendanceData.overtimeMinutes} دقيقة</p>
+                    `;
+                    summaryDiv.classList.remove('hidden');
+                    document.getElementById('process-attendance-file-btn').classList.add('hidden');
+                    document.getElementById('save-processed-attendance-btn').classList.remove('hidden');
+                },
+                error: function(err) {
+                     showAlert('خطأ فادح', 'لا يمكن معالجة الملف. يرجى التحقق من الملف والمحاولة مرة أخرى.');
+                     console.error("PapaParse Error:", err);
+                }
+            });
+        };
+
+        const handleAttendanceUploadFormSubmit = async (event) => {
+            event.preventDefault();
+            if (!processedAttendanceData) {
+                showAlert('لا توجد بيانات', 'يرجى معالجة الملف أولاً قبل الحفظ.');
+                return;
+            }
+
+            const form = event.target;
+            const employeeId = form['upload-attendance-employee-id'].value;
+            const month = form['upload-attendance-month'].value;
+            const year = form['upload-attendance-year'].value;
+            const attendanceId = `${year}-${String(parseInt(month) + 1).padStart(2, '0')}`;
+            const totalDaysInMonth = getDaysInMonth(parseInt(year), parseInt(month));
+
+            const finalAttendanceData = {
+                ...processedAttendanceData,
+                totalDaysInMonth: totalDaysInMonth,
+            };
+
+            try {
+                const attendanceDocRef = doc(db, "hr-data", userId, "employees", employeeId, "attendance", attendanceId);
+                await setDoc(attendanceDocRef, finalAttendanceData);
+                showAlert('نجاح', 'تم حفظ بيانات الحضور من الملف بنجاح.');
+                closeModal('attendanceUploadModal');
+            } catch (e) {
+                console.error("Error saving uploaded attendance:", e);
+                showAlert('خطأ', 'فشل حفظ بيانات الحضور.');
             }
         };
 
@@ -2299,6 +2393,11 @@
         ui.settingsForm.addEventListener('submit', handleSettingsSubmit);
         ui.leaveRequestForm.addEventListener('submit', handleLeaveRequestSubmit);
         ui.leaveTypeForm.addEventListener('submit', handleLeaveTypeFormSubmit);
+        
+        // FIX: Added event listeners for the new upload functionality
+        document.getElementById('process-attendance-file-btn').addEventListener('click', handleProcessAttendanceFile);
+        ui.attendanceUploadForm.addEventListener('submit', handleAttendanceUploadFormSubmit);
+
 
         document.getElementById('attendance-month').addEventListener('change', updateMonthDaysDisplay);
         document.getElementById('attendance-year').addEventListener('change', updateMonthDaysDisplay);
