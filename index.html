@@ -233,25 +233,30 @@
 
             <!-- PAGE: HR Settings -->
             <main id="page-hr-settings" class="page">
-                 <h2 class="text-3xl font-bold text-slate-800 mb-6">الإعدادات</h2>
-                 <div class="space-y-8">
-                     <div class="bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto">
-                        <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">إعدادات الشركة</h3>
+                <h2 class="text-3xl font-bold text-slate-800 mb-6">الإعدادات</h2>
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                    <!-- Card 1: Company Settings -->
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <div class="flex items-center text-xl font-bold text-slate-800 mb-4 border-b pb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-3 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0v-4m0 4h2m0 0v-4m0 4h2m0 0v-4m0 4h2m0 0v-4m-2-4h2v-2h-2v2z" />
+                            </svg>
+                            <span>إعدادات الشركة</span>
+                        </div>
                         <form id="settings-form">
                             <div class="space-y-6">
                                 <div>
                                     <label for="company-name-input" class="block mb-2 text-sm font-medium text-gray-900">اسم الشركة</label>
                                     <input type="text" id="company-name-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="أدخل اسم شركتك هنا">
                                 </div>
-                                 <div>
+                                <div>
                                     <label for="company-address-input" class="block mb-2 text-sm font-medium text-gray-900">عنوان الشركة</label>
                                     <input type="text" id="company-address-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="مثال: الرياض، المملكة العربية السعودية">
                                 </div>
-                                 <div>
+                                <div>
                                     <label for="company-cr-input" class="block mb-2 text-sm font-medium text-gray-900">رقم السجل التجاري</label>
                                     <input type="text" id="company-cr-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="1234567890">
                                 </div>
-                                <!-- NEW: Standard Start Time -->
                                 <div>
                                     <label for="company-start-time-input" class="block mb-2 text-sm font-medium text-gray-900">وقت بدء الدوام الرسمي</label>
                                     <input type="time" id="company-start-time-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5">
@@ -261,23 +266,29 @@
                                 <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">حفظ إعدادات الشركة</button>
                             </div>
                         </form>
-                       </div>
-                     <div class="bg-white p-6 rounded-xl shadow-lg max-w-4xl mx-auto">
-                        <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">إعدادات أنواع الإجازات</h3>
-                        <form id="leave-type-form" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end mb-6">
-                             <input type="hidden" id="leave-type-edit-id">
-                           <div>
+                    </div>
+                    <!-- Card 2: Leave Types Settings -->
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <div class="flex items-center text-xl font-bold text-slate-800 mb-4 border-b pb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-3 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span>إعدادات أنواع الإجازات</span>
+                        </div>
+                        <form id="leave-type-form" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 items-end mb-6">
+                            <input type="hidden" id="leave-type-edit-id">
+                            <div class="lg:col-span-2">
                                 <label for="leave-type-name" class="block mb-2 text-sm font-medium">اسم الإجازة</label>
                                 <input type="text" id="leave-type-name" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5" required>
                             </div>
-                             <div>
-                                <label for="leave-type-days" class="block mb-2 text-sm font-medium">عدد الأيام</label>
+                            <div>
+                                <label for="leave-type-days" class="block mb-2 text-sm font-medium">الأيام</label>
                                 <input type="number" id="leave-type-days" min="0" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5" required>
                             </div>
-                             <div>
-                                <label for="leave-type-payment" class="block mb-2 text-sm font-medium">نوع الأجر</label>
+                            <div>
+                                <label for="leave-type-payment" class="block mb-2 text-sm font-medium">الأجر</label>
                                 <select id="leave-type-payment" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5">
-                                    <option value="paid">مدفوعة الأجر</option>
+                                    <option value="paid">مدفوعة</option>
                                     <option value="paid_in_advance">مدفوعة مقدماً</option>
                                     <option value="unpaid">بدون أجر</option>
                                 </select>
@@ -286,14 +297,14 @@
                                 <label for="leave-type-recurring" class="block mb-2 text-sm font-medium">التكرار</label>
                                 <select id="leave-type-recurring" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5">
                                     <option value="annually">سنوي</option>
-                                    <option value="once">مرة واحدة طوال الخدمة</option>
-                                    <option value="multiple_per_year">متعددة سنوياً (لكل حالة)</option>
+                                    <option value="once">مرة واحدة</option>
+                                    <option value="multiple_per_year">متعددة سنوياً</option>
                                     <option value="none">غير متكرر</option>
                                 </select>
                             </div>
-                            <button type="submit" id="leave-type-submit-button" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg transition-colors h-fit">إضافة نوع</button>
+                            <button type="submit" id="leave-type-submit-button" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg transition-colors h-fit md:col-span-3 lg:col-span-1">إضافة نوع</button>
                         </form>
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto mt-6">
                             <table class="w-full text-sm text-left text-slate-500">
                                 <thead class="text-xs text-slate-700 uppercase bg-slate-100">
                                     <tr>
@@ -309,8 +320,8 @@
                                 </tbody>
                             </table>
                         </div>
-                       </div>
-                 </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
@@ -447,7 +458,7 @@
                         <p class="text-sm">عدد أيام الشهر: <span id="month-days-display" class="font-bold">0</span> يوم</p>
                     </div>
                     <div><label for="attended-days" class="block mb-2 text-sm font-medium">أيام الحضور الفعلية</label><input type="number" id="attended-days" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
-                     <!-- NEW: Late Incidents Manual Input -->
+                    <!-- NEW: Late Incidents Manual Input -->
                     <div><label for="late-incidents-over-grace" class="block mb-2 text-sm font-medium">عدد مخالفات التأخير</label><input type="number" id="late-incidents-over-grace" min="0" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
                     <div class="md:col-span-2 grid grid-cols-2 gap-4">
                         <div><label for="late-hours" class="block mb-2 text-sm font-medium">إجمالي ساعات التأخير</label><input type="number" id="late-hours" min="0" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
@@ -482,7 +493,7 @@
                         </select>
                     </div>
                     <div id="leave-balance-info" class="hidden bg-slate-100 p-3 rounded-lg text-sm space-y-1 mt-2">
-                        </div>
+                    </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label for="leave-start-date" class="block mb-2 text-sm font-medium">تاريخ البدء</label>
@@ -2447,7 +2458,7 @@
             
             ui.leaveTypesTableBody.innerHTML = state.leaveTypes.map(lt => {
                 const paymentText = { paid: 'مدفوعة', unpaid: 'بدون أجر', paid_in_advance: 'مدفوعة مقدماً' };
-                const recurringText = { annually: 'سنوي', once: 'مرة واحدة طوال الخدمة', 'multiple_per_year': 'متعددة سنوياً', none: 'غير متكرر' };
+                const recurringText = { annually: 'سنوي', once: 'مرة واحدة', 'multiple_per_year': 'متعددة سنوياً', none: 'غير متكرر' };
                 return `
                     <tr class="border-b">
                         <td class="px-6 py-4">${lt.name}</td>
