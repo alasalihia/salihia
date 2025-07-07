@@ -14,10 +14,12 @@
         body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; }
         .modal { transition: opacity 0.3s ease; }
         .modal-content { transition: transform 0.3s ease; }
-        .module-container, #login-screen, #main-menu-screen { display: none; } /* Hidden by default */
-        #login-screen.active { display: flex; } /* Show login screen */
-        .page { display: none; } /* Pages are hidden by default */
-        .page.active { display: block; } /* Active page is shown */
+        /* Pages and sections are hidden by default, JS will show them. */
+        .page { display: none; }
+        .page.active { display: block; }
+        .settings-page-section { display: none; }
+        .settings-page-section.active { display: block; }
+        
         .chart-container { position: relative; height: 350px; width: 100%; }
         .sidebar-link { display: flex; align-items: center; padding: 0.75rem 1rem; border-radius: 0.5rem; transition: background-color 0.2s, color 0.2s; }
         .sidebar-link.active, .sidebar-link:hover { background-color: #8b5cf6; color: white; } /* Violet color for HR */
@@ -27,9 +29,7 @@
         /* Toggle Switch Styles */
         .toggle-checkbox:checked { right: 0; border-color: #8b5cf6; }
         .toggle-checkbox:checked + .toggle-label { background-color: #8b5cf6; }
-        /* NEW: Styles for settings sections */
-        .settings-page-section { display: none; }
-        .settings-page-section.active { display: block; }
+        
         @media print {
             @page {
                 size: A4 landscape;
@@ -61,8 +61,8 @@
         </div>
     </div>
 
-    <!-- شاشة اختيار الأنظمة الرئيسية -->
-    <div id="main-menu-screen" class="min-h-screen p-8">
+    <!-- شاشة اختيار الأنظمة الرئيسية (مخفية بشكل افتراضي) -->
+    <div id="main-menu-screen" class="min-h-screen p-8" style="display: none;">
         <header class="flex justify-between items-center mb-12">
             <h1 class="text-3xl font-bold text-slate-800">القائمة الرئيسية</h1>
             <div id="main-menu-user-info" class="flex items-center">
@@ -81,8 +81,8 @@
         </div>
     </div>
     
-    <!-- MODULE: HR System -->
-    <div id="hr-module-container" class="module-container flex min-h-screen w-full">
+    <!-- MODULE: HR System (مخفي بشكل افتراضي) -->
+    <div id="hr-module-container" class="flex min-h-screen w-full" style="display: none;">
         <aside class="w-64 bg-white shadow-lg flex flex-col p-4">
             <h2 class="text-xl font-bold text-violet-700 text-center mb-4 mt-4">شؤون الموظفين</h2>
             <button onclick="showModule('main-menu-screen')" class="mb-4 text-sm text-blue-600 hover:underline"> &larr; العودة للقائمة الرئيسية</button>
@@ -684,6 +684,7 @@
         const ui = {
             loginScreen: document.getElementById('login-screen'),
             mainMenuScreen: document.getElementById('main-menu-screen'),
+            hrModuleContainer: document.getElementById('hr-module-container'),
             userDisplayName: document.getElementById('main-menu-user-display-name'),
             addEmployeeForm: document.getElementById('addEmployeeForm'),
             employeesTableBody: document.getElementById('employees-table-body'),
@@ -919,11 +920,12 @@
 
         // --- Navigation Functions ---
         window.showModule = (moduleId) => {
-            document.querySelectorAll('.module-container, #main-menu-screen').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('#main-menu-screen, #hr-module-container').forEach(el => el.style.display = 'none');
             const targetModule = document.getElementById(moduleId);
             if (targetModule) {
-                targetModule.style.display = moduleId === 'main-menu-screen' ? 'block' : 'flex';
+                targetModule.style.display = 'block'; // Use block for main menu
                 if (moduleId === 'hr-module-container') {
+                    targetModule.style.display = 'flex'; // Use flex for the HR module
                     showPage('page-hr-dashboard');
                 }
             }
@@ -1120,13 +1122,14 @@
                 onAuthStateChanged(auth, user => {
                     if (user) {
                         userId = user.uid;
-                        ui.loginScreen.classList.remove('active');
-                        ui.mainMenuScreen.style.display = "block";
+                        ui.loginScreen.style.display = 'none';
+                        ui.mainMenuScreen.style.display = 'block';
                         ui.userDisplayName.textContent = user.displayName || `مستخدم: ${user.uid.substring(0,6)}…`;
                         setupRealtimeListeners();
                     } else {
-                        ui.loginScreen.classList.add('active');
-                        ui.mainMenuScreen.style.display = "none";
+                        ui.loginScreen.style.display = 'flex';
+                        ui.mainMenuScreen.style.display = 'none';
+                        ui.hrModuleContainer.style.display = 'none';
                         clearDataAndListeners();
                     }
                 });
