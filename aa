@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -7,6 +6,7 @@
     <title>منصة إدارة شؤون الموظفين</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
@@ -30,7 +30,7 @@
         @media print {
             @page {
                 size: A4 landscape;
-                margin: 0;
+                margin: 0.5cm;
             }
             body * { visibility: hidden; }
             #printable-payroll, #printable-payroll * { visibility: visible; }
@@ -92,6 +92,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                     <span>قائمة الموظفين</span>
                 </a>
+                <a href="#" onclick="showPage('page-hr-leaves')" class="sidebar-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2zM12 14l-4-4m0 4l4-4" /></svg>
+                    <span>إدارة الإجازات</span>
+                </a>
                 <a href="#" onclick="showPage('page-hr-salaries')" class="sidebar-link">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                     <span>الرواتب</span>
@@ -110,13 +114,21 @@
             <!-- PAGE: HR Dashboard -->
             <main id="page-hr-dashboard" class="page active">
                 <h2 class="text-3xl font-bold text-slate-800 mb-6">لوحة تحكم الموظفين</h2>
-                <div id="hr-dashboard-stats" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div id="hr-dashboard-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <!-- Stats will be rendered here by JS -->
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-bold text-violet-700 mb-4">توزيع الموظفين على الأقسام</h3>
-                    <div class="chart-container">
-                        <canvas id="department-chart"></canvas>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-bold text-violet-700 mb-4">توزيع الموظفين على الأقسام</h3>
+                        <div class="chart-container">
+                            <canvas id="department-chart"></canvas>
+                        </div>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-bold text-violet-700 mb-4">طلبات الإجازة المعلقة</h3>
+                        <div id="pending-leaves-dashboard" class="space-y-3 max-h-80 overflow-y-auto">
+                           <!-- Pending leaves will be rendered here -->
+                        </div>
                     </div>
                 </div>
             </main>
@@ -135,12 +147,41 @@
                                     <th scope="col" class="px-6 py-3">اسم الموظف</th>
                                     <th scope="col" class="px-6 py-3">الرقم الوظيفي</th>
                                     <th scope="col" class="px-6 py-3">المنصب</th>
+                                    <th scope="col" class="px-6 py-3">رصيد الإجازات</th>
                                     <th scope="col" class="px-6 py-3">الحالة</th>
                                     <th scope="col" class="px-6 py-3 text-center">إجراءات</th>
                                 </tr>
                             </thead>
                             <tbody id="employees-table-body">
                                 <!-- Employee rows will be rendered here by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+
+            <!-- PAGE: HR Leaves -->
+            <main id="page-hr-leaves" class="page">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-slate-800">إدارة الإجازات</h2>
+                    <button onclick="openModal('leaveRequestModal')" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">تقديم طلب إجازة</button>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-slate-500">
+                            <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">اسم الموظف</th>
+                                    <th scope="col" class="px-6 py-3">نوع الإجازة</th>
+                                    <th scope="col" class="px-6 py-3">من تاريخ</th>
+                                    <th scope="col" class="px-6 py-3">إلى تاريخ</th>
+                                    <th scope="col" class="px-6 py-3">المدة (أيام عمل)</th>
+                                    <th scope="col" class="px-6 py-3">الحالة</th>
+                                    <th scope="col" class="px-6 py-3 text-center">إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaves-table-body">
+                                <!-- Leave requests will be rendered here -->
                             </tbody>
                         </table>
                     </div>
@@ -168,7 +209,10 @@
 
             <!-- PAGE: HR Attendance -->
             <main id="page-hr-attendance" class="page">
-                 <h2 class="text-3xl font-bold text-slate-800 mb-6">سجل الحضور والانصراف</h2>
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold text-slate-800">سجل الحضور والانصراف</h2>
+                    <button onclick="downloadAttendanceTemplate()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">تحميل نموذج ملف الحضور</button>
+                 </div>
                  <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-slate-500">
@@ -189,36 +233,78 @@
 
             <!-- PAGE: HR Settings -->
             <main id="page-hr-settings" class="page">
-                 <h2 class="text-3xl font-bold text-slate-800 mb-6">إعدادات الشركة</h2>
-                 <div class="bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto">
-                    <form id="settings-form">
-                        <div class="space-y-6">
-                            <div>
-                                <label for="company-name-input" class="block mb-2 text-sm font-medium text-gray-900">اسم الشركة</label>
-                                <input type="text" id="company-name-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="أدخل اسم شركتك هنا">
-                            </div>
-                             <div>
-                                <label for="company-address-input" class="block mb-2 text-sm font-medium text-gray-900">عنوان الشركة</label>
-                                <input type="text" id="company-address-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="مثال: الرياض، المملكة العربية السعودية">
-                            </div>
-                             <div>
-                                <label for="company-cr-input" class="block mb-2 text-sm font-medium text-gray-900">رقم السجل التجاري</label>
-                                <input type="text" id="company-cr-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="1234567890">
-                            </div>
-                            <div>
-                                <label for="logo-upload-input" class="block mb-2 text-sm font-medium text-gray-900">شعار الشركة</label>
-                                <input type="file" id="logo-upload-input" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
-                                <p class="mt-1 text-sm text-gray-500">ارفع صورة الشعار (يفضل أن تكون مستطيلة)</p>
-                                <div class="mt-4">
-                                    <p class="text-sm font-medium">الشعار الحالي:</p>
-                                    <img id="logo-preview" src="https://placehold.co/150x50/e9d5ff/4c1d95?text=Logo" alt="Company Logo Preview" class="mt-2 h-16 object-contain rounded-md bg-slate-100 border p-1">
+                 <h2 class="text-3xl font-bold text-slate-800 mb-6">الإعدادات</h2>
+                 <div class="space-y-8">
+                     <div class="bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto">
+                        <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">إعدادات الشركة</h3>
+                        <form id="settings-form">
+                            <div class="space-y-6">
+                                <div>
+                                    <label for="company-name-input" class="block mb-2 text-sm font-medium text-gray-900">اسم الشركة</label>
+                                    <input type="text" id="company-name-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="أدخل اسم شركتك هنا">
+                                </div>
+                                 <div>
+                                    <label for="company-address-input" class="block mb-2 text-sm font-medium text-gray-900">عنوان الشركة</label>
+                                    <input type="text" id="company-address-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="مثال: الرياض، المملكة العربية السعودية">
+                                </div>
+                                 <div>
+                                    <label for="company-cr-input" class="block mb-2 text-sm font-medium text-gray-900">رقم السجل التجاري</label>
+                                    <input type="text" id="company-cr-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="1234567890">
                                 </div>
                             </div>
+                            <div class="mt-8 pt-4 border-t">
+                                <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">حفظ إعدادات الشركة</button>
+                            </div>
+                        </form>
+                       </div>
+                     <div class="bg-white p-6 rounded-xl shadow-lg max-w-4xl mx-auto">
+                        <h3 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">إعدادات أنواع الإجازات</h3>
+                        <form id="leave-type-form" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end mb-6">
+                             <input type="hidden" id="leave-type-edit-id">
+                           <div>
+                                <label for="leave-type-name" class="block mb-2 text-sm font-medium">اسم الإجازة</label>
+                                <input type="text" id="leave-type-name" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5" required>
+                            </div>
+                             <div>
+                                <label for="leave-type-days" class="block mb-2 text-sm font-medium">عدد الأيام</label>
+                                <input type="number" id="leave-type-days" min="0" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5" required>
+                            </div>
+                             <div>
+                                <label for="leave-type-payment" class="block mb-2 text-sm font-medium">نوع الأجر</label>
+                                <select id="leave-type-payment" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5">
+                                    <option value="paid">مدفوعة الأجر</option>
+                                    <option value="paid_in_advance">مدفوعة مقدماً</option>
+                                    <option value="unpaid">بدون أجر</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="leave-type-recurring" class="block mb-2 text-sm font-medium">التكرار</label>
+                                <select id="leave-type-recurring" class="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2.5">
+                                    <option value="annually">سنوي</option>
+                                    <option value="once">مرة واحدة طوال الخدمة</option>
+                                    <option value="multiple_per_year">متعددة سنوياً (لكل حالة)</option>
+                                    <option value="none">غير متكرر</option>
+                                </select>
+                            </div>
+                            <button type="submit" id="leave-type-submit-button" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg transition-colors h-fit">إضافة نوع</button>
+                        </form>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-slate-500">
+                                <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                                    <tr>
+                                        <th class="px-6 py-3">اسم الإجازة</th>
+                                        <th class="px-6 py-3">الأيام</th>
+                                        <th class="px-6 py-3">الأجر</th>
+                                        <th class="px-6 py-3">التكرار</th>
+                                        <th class="px-6 py-3">إجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leave-types-table-body">
+                                    <!-- Leave types will be rendered here -->
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="mt-8 pt-4 border-t">
-                            <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">حفظ الإعدادات</button>
-                        </div>
-                    </form>
+                       </div>
                  </div>
             </main>
         </div>
@@ -226,20 +312,39 @@
 
     <!-- Modals -->
     <div id="addEmployeeModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
-        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 transform scale-95">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 transform scale-95">
             <h3 id="employeeModalTitle" class="text-xl font-bold mb-4">إضافة موظف جديد</h3>
             <form id="addEmployeeForm">
                 <input type="hidden" id="employee-edit-id">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div><label for="employeeName" class="block mb-2 text-sm font-medium">الاسم الكامل</label><input type="text" id="employeeName" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
                     <div><label for="employeeId" class="block mb-2 text-sm font-medium">الرقم الوظيفي</label><input type="text" id="employeeId" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
+                    <div><label for="employeeNationalId" class="block mb-2 text-sm font-medium">رقم الهوية/الإقامة</label><input type="text" id="employeeNationalId" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
                     <div><label for="employeePosition" class="block mb-2 text-sm font-medium">المنصب الوظيفي</label><input type="text" id="employeePosition" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
                     <div><label for="employeeDepartment" class="block mb-2 text-sm font-medium">القسم</label><input type="text" id="employeeDepartment" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
                     <div><label for="employeeStartDate" class="block mb-2 text-sm font-medium">تاريخ بدء العمل</label><input type="date" id="employeeStartDate" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
                     <div><label for="employeeSalary" class="block mb-2 text-sm font-medium">الراتب الأساسي (ر.س)</label><input type="number" id="employeeSalary" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
                     <div><label for="employeeNationality" class="block mb-2 text-sm font-medium">الجنسية</label><input type="text" id="employeeNationality" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" placeholder="مثال: سعودي"></div>
                     <div><label for="employeeIBAN" class="block mb-2 text-sm font-medium">رقم الآيبان (IBAN)</label><input type="text" id="employeeIBAN" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" placeholder="SAXXXXXXXXXXXXXXXXXXXXXX"></div>
-                    <div class="md:col-span-2"><label for="employeeStatus" class="block mb-2 text-sm font-medium">حالة الموظف</label><select id="employeeStatus" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required><option value="active">على رأس العمل</option><option value="on_leave">في إجازة</option><option value="terminated">منتهية خدماته</option></select></div>
+                    <div><label for="employeeStatus" class="block mb-2 text-sm font-medium">حالة الموظف</label><select id="employeeStatus" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required><option value="active">على رأس العمل</option><option value="on_leave">في إجازة</option><option value="terminated">منتهية خدماته</option></select></div>
+                    <div><label class="block mb-2 text-sm font-medium">رصيد الإجازة السنوية</label>
+                        <div class="flex items-center space-x-4 rtl:space-x-reverse">
+                           <label class="flex items-center"><input type="radio" name="annualLeaveEntitlement" value="21" class="ml-2 text-violet-600 focus:ring-violet-500" checked> 21 يوم</label>
+                           <label class="flex items-center"><input type="radio" name="annualLeaveEntitlement" value="30" class="ml-2 text-violet-600 focus:ring-violet-500"> 30 يوم</label>
+                        </div>
+                    </div>
+                    <div class="md:col-span-3">
+                        <label class="block mb-2 text-sm font-medium">أيام الراحة الأسبوعية</label>
+                        <div id="employee-weekend-days-container" class="flex items-center flex-wrap gap-x-4 gap-y-2">
+                            <label class="flex items-center"><input type="checkbox" name="employee-weekend" value="Sunday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> الأحد</label>
+                            <label class="flex items-center"><input type="checkbox" name="employee-weekend" value="Monday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> الإثنين</label>
+                            <label class="flex items-center"><input type="checkbox" name="employee-weekend" value="Tuesday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> الثلاثاء</label>
+                            <label class="flex items-center"><input type="checkbox" name="employee-weekend" value="Wednesday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> الأربعاء</label>
+                            <label class="flex items-center"><input type="checkbox" name="employee-weekend" value="Thursday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> الخميس</label>
+                            <label class="flex items-center"><input type="checkbox" name="employee-weekend" value="Friday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> الجمعة</label>
+                            <label class="flex items-center"><input type="checkbox" name="employee-weekend" value="Saturday" class="ml-2 rounded text-violet-600 focus:ring-violet-500"> السبت</label>
+                        </div>
+                    </div>
                 </div>
                 <div class="mt-6 flex justify-end space-x-2 rtl:space-x-reverse">
                     <button type="button" onclick="closeModal('addEmployeeModal')" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">إلغاء</button>
@@ -336,36 +441,110 @@
             </form>
         </div>
     </div>
+    
+    <div id="leaveRequestModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-lg p-6 transform scale-95">
+            <h3 class="text-xl font-bold mb-4">تقديم طلب إجازة</h3>
+            <form id="leaveRequestForm">
+                <div class="space-y-4">
+                    <div>
+                        <label for="leave-employee-id" class="block mb-2 text-sm font-medium">الموظف</label>
+                        <select id="leave-employee-id" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></select>
+                    </div>
+                    <div>
+                        <label for="leave-type" class="block mb-2 text-sm font-medium">نوع الإجازة</label>
+                        <select id="leave-type" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required>
+                            <!-- Options will be populated by JS -->
+                        </select>
+                    </div>
+                    <div id="leave-balance-info" class="hidden bg-slate-100 p-3 rounded-lg text-sm space-y-1 mt-2">
+                        </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="leave-start-date" class="block mb-2 text-sm font-medium">تاريخ البدء</label>
+                            <input type="date" id="leave-start-date" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required>
+                        </div>
+                        <div>
+                            <label for="leave-end-date" class="block mb-2 text-sm font-medium">تاريخ الانتهاء</label>
+                            <input type="date" id="leave-end-date" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="leave-reason" class="block mb-2 text-sm font-medium">السبب / ملاحظات (اختياري)</label>
+                        <textarea id="leave-reason" rows="3" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></textarea>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end space-x-2 rtl:space-x-reverse">
+                    <button type="button" onclick="closeModal('leaveRequestModal')" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">إلغاء</button>
+                    <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">تقديم الطلب</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- NEW: Attendance Upload Modal -->
+    <div id="attendanceUploadModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-lg p-6 transform scale-95">
+            <h3 class="text-xl font-bold mb-4">رفع ملف الحضور لـ <span id="upload-attendance-employee-name"></span></h3>
+            <form id="attendanceUploadForm">
+                <input type="hidden" id="upload-attendance-employee-id">
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="upload-attendance-month" class="block mb-2 text-sm font-medium">الشهر</label>
+                            <select id="upload-attendance-month" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></select>
+                        </div>
+                        <div>
+                            <label for="upload-attendance-year" class="block mb-2 text-sm font-medium">السنة</label>
+                            <input type="number" id="upload-attendance-year" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="attendance-file-input" class="block mb-2 text-sm font-medium">اختر ملف الحضور (CSV)</label>
+                        <input type="file" id="attendance-file-input" accept=".csv" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
+                    </div>
+                    <div id="attendance-upload-summary" class="hidden bg-slate-100 p-4 rounded-lg text-sm space-y-2">
+                        <!-- Summary will be rendered here -->
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end space-x-2 rtl:space-x-reverse">
+                    <button type="button" onclick="closeModal('attendanceUploadModal')" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">إلغاء</button>
+                    <button type="button" id="process-attendance-file-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">معالجة الملف</button>
+                    <button type="submit" id="save-processed-attendance-btn" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors hidden">اعتماد وحفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <div id="alertModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
-        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-sm p-6 transform scale-95 text-center">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center">
             <h3 id="alertModalTitle" class="text-xl font-bold mb-4"></h3>
             <p id="alertModalMessage" class="mb-6"></p>
             <div id="alertModalButtons" class="flex justify-center space-x-2 rtl:space-x-reverse"></div>
         </div>
     </div>
 
-    <!-- This div will hold the content for printing -->
     <div id="printable-payroll"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, onSnapshot, deleteDoc, query, where, getDocs, updateDoc, writeBatch, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        import { getFirestore, collection, doc, addDoc, onSnapshot, deleteDoc, query, where, getDocs, updateDoc, writeBatch, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // --- Global Variables ---
-        let app, auth, db, storage, userId;
-        let employeesUnsubscribe, payrollsUnsubscribe, settingsUnsubscribe;
+        let app, auth, db, userId;
+        let employeesUnsubscribe, payrollsUnsubscribe, settingsUnsubscribe, leavesUnsubscribe, leaveTypesUnsubscribe;
         let allowancesUnsubscribe, deductionsUnsubscribe;
         let state = { 
             employees: [], 
             payrolls: [],
+            leaves: [],
+            leaveTypes: [],
             settings: { 
                 name: 'شركتك', 
-                logoUrl: 'https://placehold.co/150x50/e9d5ff/4c1d95?text=Logo',
                 address: '',
-                crNumber: ''
+                crNumber: '',
             },
             currentEmployee: {
                 allowances: [],
@@ -374,6 +553,24 @@
         };
         let confirmationCallback = null;
         let departmentChart = null;
+        let processedAttendanceData = null; // Global to hold processed data before saving
+
+        const DEFAULT_LEAVE_POLICIES = {
+            annual: { name: 'إجازة سنوية', isStandard: true, paymentType: 'paid_in_advance', recurring: 'annually', days: 0 },
+            sick: { name: 'إجازة مرضية', isStandard: true, paymentType: 'paid', recurring: 'annually', days: 120 },
+            unpaid: { name: 'إجازة بدون أجر', isStandard: true, paymentType: 'unpaid', recurring: 'none', days: 0 },
+            maternity: { name: 'إجازة وضع', days: 70, isStandard: true, paymentType: 'paid', recurring: 'none'},
+            marriage: { name: 'إجازة زواج', days: 5, isStandard: true, paymentType: 'paid', recurring: 'multiple_per_year'},
+            bereavement: { name: 'إجازة وفاة', days: 5, isStandard: true, paymentType: 'paid', recurring: 'multiple_per_year'},
+            hajj: { name: 'إجازة حج', days: 14, isStandard: true, paymentType: 'paid', recurring: 'once'},
+            child_care: { name: 'إجازة رعاية طفل', isStandard: true, paymentType: 'unpaid', recurring: 'none', days: 180},
+            new_born: { name: 'إجازة مولود', days: 3, isStandard: true, paymentType: 'paid', recurring: 'multiple_per_year'},
+            eid_fitr: { name: 'إجازة عيد الفطر', days: 4, isStandard: true, paymentType: 'paid', recurring: 'annually'},
+            eid_adha: { name: 'إجازة عيد الأضحى', days: 4, isStandard: true, paymentType: 'paid', recurring: 'annually'},
+            national_day: { name: 'إجازة اليوم الوطني', days: 1, isStandard: true, paymentType: 'paid', recurring: 'annually'},
+            foundation_day: { name: 'إجازة يوم التأسيس', days: 1, isStandard: true, paymentType: 'paid', recurring: 'annually'},
+        };
+
 
         // --- UI Elements ---
         const ui = {
@@ -383,7 +580,9 @@
             addEmployeeForm: document.getElementById('addEmployeeForm'),
             employeesTableBody: document.getElementById('employees-table-body'),
             attendanceTableBody: document.getElementById('attendance-table-body'),
+            leavesTableBody: document.getElementById('leaves-table-body'),
             hrDashboardStats: document.getElementById('hr-dashboard-stats'),
+            pendingLeavesDashboard: document.getElementById('pending-leaves-dashboard'),
             employeeModalTitle: document.getElementById('employeeModalTitle'),
             employeeModalSubmitButton: document.getElementById('employeeModalSubmitButton'),
             employeeEditIdInput: document.getElementById('employee-edit-id'),
@@ -391,11 +590,14 @@
             payrollDetailsContainer: document.getElementById('payroll-details-container'),
             generatePayrollForm: document.getElementById('generatePayrollForm'),
             attendanceForm: document.getElementById('attendanceForm'),
+            attendanceUploadForm: document.getElementById('attendanceUploadForm'),
+            leaveRequestForm: document.getElementById('leaveRequestForm'),
             settingsForm: document.getElementById('settings-form'),
             companyNameInput: document.getElementById('company-name-input'),
             companyAddressInput: document.getElementById('company-address-input'),
             companyCRInput: document.getElementById('company-cr-input'),
-            logoPreview: document.getElementById('logo-preview'),
+            leaveTypeForm: document.getElementById('leave-type-form'),
+            leaveTypesTableBody: document.getElementById('leave-types-table-body'),
         };
 
         // --- Utility Functions ---
@@ -415,21 +617,62 @@
             return Number(value).toLocaleString('en-US', { useGrouping: false });
         }
 
-        function formatGregorianDate(dateString) {
-            if (!dateString) return '';
-            const date = new Date(dateString);
+        function formatGregorianDate(dateStringOrObject) {
+            if (!dateStringOrObject) return '';
+            const date = dateStringOrObject.toDate ? dateStringOrObject.toDate() : new Date(dateStringOrObject);
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         }
+        
+        function calculateWorkingDays(startDateStr, endDateStr, employeeWeekendDaysArray = []) {
+            let count = 0;
+            const curDate = new Date(startDateStr);
+            const endDate = new Date(endDateStr);
+            const weekendMap = { 'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6 };
+            const weekendDays = (employeeWeekendDaysArray || []).map(day => weekendMap[day]);
+
+            while (curDate <= endDate) {
+                const dayOfWeek = curDate.getDay();
+                if (!weekendDays.includes(dayOfWeek)) {
+                    count++;
+                }
+                curDate.setDate(curDate.getDate() + 1);
+            }
+            return count;
+        }
+
+        function calculateWorkDaysInMonth(year, month, employeeWeekendDaysArray = []) {
+            let workDays = 0;
+            const startDate = new Date(year, month, 1);
+            const endDate = new Date(year, month + 1, 0);
+             const weekendMap = { 'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6 };
+            const weekendDays = (employeeWeekendDaysArray || []).map(day => weekendMap[day]);
+
+            for (let day = 1; day <= endDate.getDate(); day++) {
+                const currentDate = new Date(year, month, day);
+                if (!weekendDays.includes(currentDate.getDay())) {
+                    workDays++;
+                }
+            }
+            return workDays;
+        }
+
 
         // --- Modal & Alert Functions ---
         window.openModal = async (modalId, context = null) => {
             const modal = document.getElementById(modalId);
+            if (!modal) {
+                console.error(`Modal with ID "${modalId}" not found.`);
+                return;
+            }
             if (modalId === 'addEmployeeModal') {
                 ui.addEmployeeForm.reset();
                 ui.employeeEditIdInput.value = '';
+                document.querySelector('input[name="annualLeaveEntitlement"][value="21"]').checked = true; // Reset radio
+                document.querySelectorAll('input[name="employee-weekend"]').forEach(cb => cb.checked = false); // Reset weekend checkboxes
+
 
                 if (context) { // This is an edit operation
                     const employeeId = context;
@@ -440,6 +683,7 @@
                         ui.employeeEditIdInput.value = employee.id;
                         document.getElementById('employeeName').value = employee.name;
                         document.getElementById('employeeId').value = employee.employeeId;
+                        document.getElementById('employeeNationalId').value = employee.nationalId || '';
                         document.getElementById('employeePosition').value = employee.position;
                         document.getElementById('employeeDepartment').value = employee.department;
                         document.getElementById('employeeStartDate').value = employee.startDate;
@@ -447,6 +691,16 @@
                         document.getElementById('employeeStatus').value = employee.status;
                         document.getElementById('employeeNationality').value = employee.nationality || '';
                         document.getElementById('employeeIBAN').value = employee.iban || '';
+                        if (employee.annualLeaveEntitlement) {
+                            const radio = document.querySelector(`input[name="annualLeaveEntitlement"][value="${employee.annualLeaveEntitlement}"]`);
+                            if(radio) radio.checked = true;
+                        }
+                        if (employee.weekendDays && Array.isArray(employee.weekendDays)) {
+                            employee.weekendDays.forEach(day => {
+                                const checkbox = document.querySelector(`input[name="employee-weekend"][value="${day}"]`);
+                                if (checkbox) checkbox.checked = true;
+                            });
+                        }
                     }
                 } else { // This is an add operation
                     ui.employeeModalTitle.textContent = 'إضافة موظف جديد';
@@ -455,38 +709,60 @@
                 }
             } else if (modalId === 'salaryDetailsModal') {
                 openSalaryDetailsModal(context);
-            } else if (modalId === 'generatePayrollModal' || modalId === 'attendanceModal') {
-                const monthSelectId = modalId === 'generatePayrollModal' ? 'payroll-month' : 'attendance-month';
-                const yearInputId = modalId === 'generatePayrollModal' ? 'payroll-year' : 'attendance-year';
-                const monthSelect = document.getElementById(monthSelectId);
-                const yearInput = document.getElementById(yearInputId);
-                const now = new Date();
-                const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-                monthSelect.innerHTML = months.map((m, i) => `<option value="${i}">${m}</option>`).join('');
-                monthSelect.value = now.getMonth();
-                yearInput.value = now.getFullYear();
+            } else if (modalId === 'leaveRequestModal') {
+                ui.leaveRequestForm.reset();
+                const employeeSelect = document.getElementById('leave-employee-id');
+                employeeSelect.innerHTML = state.employees.filter(e => e.status === 'active').map(e => `<option value="${e.id}">${e.name} (${e.employeeId})</option>`).join('');
+                document.getElementById('leave-start-date').valueAsDate = new Date();
+                document.getElementById('leave-end-date').valueAsDate = new Date();
+                document.getElementById('leave-balance-info').classList.add('hidden');
+                populateLeaveTypeDropdown();
+                updateLeaveBalanceDisplay();
+            } else if (modalId === 'attendanceUploadModal') {
+                const employee = state.employees.find(e => e.id === context);
+                if (employee) {
+                    document.getElementById('upload-attendance-employee-name').textContent = employee.name;
+                    document.getElementById('upload-attendance-employee-id').value = employee.id;
+                    
+                    const monthSelect = document.getElementById('upload-attendance-month');
+                    const yearInput = document.getElementById('upload-attendance-year');
+                    const now = new Date();
+                    const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+                    monthSelect.innerHTML = months.map((m, i) => `<option value="${i}">${m}</option>`).join('');
+                    monthSelect.value = now.getMonth();
+                    yearInput.value = now.getFullYear();
 
-                if (modalId === 'attendanceModal') {
-                    const employee = state.employees.find(e => e.id === context);
-                    if (employee) {
-                        ui.attendanceForm.reset();
-                        monthSelect.value = now.getMonth();
-                        yearInput.value = now.getFullYear();
-                        document.getElementById('attendance-employee-name').textContent = employee.name;
-                        document.getElementById('attendance-employee-id').value = employee.id;
-                        updateMonthDaysDisplay(); // Initial calculation
-                        // Load existing data for this month if available
-                        const attendanceId = `${yearInput.value}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-                        const attendanceDocRef = doc(db, "hr-data", userId, "employees", employee.id, "attendance", attendanceId);
-                        const docSnap = await getDoc(attendanceDocRef);
-                        if (docSnap.exists()) {
-                            const data = docSnap.data();
-                            document.getElementById('attended-days').value = data.attendedDays || 0;
-                            document.getElementById('late-hours').value = data.lateHours || 0;
-                            document.getElementById('late-minutes').value = data.lateMinutes || 0;
-                            document.getElementById('overtime-hours').value = data.overtimeHours || 0;
-                            document.getElementById('overtime-minutes').value = data.overtimeMinutes || 0;
-                        }
+                    document.getElementById('attendance-upload-summary').classList.add('hidden');
+                    document.getElementById('save-processed-attendance-btn').classList.add('hidden');
+                    document.getElementById('process-attendance-file-btn').classList.remove('hidden');
+                    ui.attendanceUploadForm.reset();
+                }
+            } else if (modalId === 'attendanceModal') {
+                const employee = state.employees.find(e => e.id === context);
+                if (employee) {
+                    const monthSelect = document.getElementById('attendance-month');
+                    const yearInput = document.getElementById('attendance-year');
+                    const now = new Date();
+                    const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+                    monthSelect.innerHTML = months.map((m, i) => `<option value="${i}">${m}</option>`).join('');
+                    
+                    ui.attendanceForm.reset();
+                    monthSelect.value = now.getMonth();
+                    yearInput.value = now.getFullYear();
+                    document.getElementById('attendance-employee-name').textContent = employee.name;
+                    document.getElementById('attendance-employee-id').value = employee.id;
+                    updateMonthDaysDisplay(); // Initial calculation
+                    // Load existing data for this month if available
+                    const attendanceId = `${yearInput.value}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                    const attendanceDocRef = doc(db, "hr-data", userId, "employees", employee.id, "attendance", attendanceId);
+                    const docSnap = await getDoc(attendanceDocRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        document.getElementById('attended-days').value = data.attendedDays || 0;
+                        document.getElementById('late-hours').value = data.lateHours || 0;
+                        document.getElementById('late-minutes').value = data.lateMinutes || 0;
+                        document.getElementById('overtime-hours').value = data.overtimeHours || 0;
+                        document.getElementById('overtime-minutes').value = data.overtimeMinutes || 0;
                     }
                 }
             }
@@ -550,17 +826,27 @@
         function renderAll() {
             renderHrDashboard();
             renderEmployeesPage();
+            renderLeavesPage();
             renderAttendancePage();
             renderOrUpdateDepartmentChart();
             renderPayrollHistory();
             renderSettingsPage();
+            renderLeaveTypesSettings();
         }
 
-        function renderHrDashboard() {
+        async function renderHrDashboard() {
             const totalEmployees = state.employees.length;
             const activeEmployees = state.employees.filter(e => e.status === 'active').length;
-            const onLeaveEmployees = state.employees.filter(e => e.status === 'on_leave').length;
             
+            const now = new Date();
+            const currentlyOnLeave = state.leaves.filter(l => {
+                const startDate = new Date(l.startDate);
+                const endDate = new Date(l.endDate);
+                return l.status === 'approved' && now >= startDate && now <= endDate;
+            }).length;
+
+            const pendingLeaves = state.leaves.filter(l => l.status === 'pending').length;
+
             ui.hrDashboardStats.innerHTML = `
                 <div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 rtl:space-x-reverse">
                     <div class="bg-violet-100 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
@@ -571,24 +857,57 @@
                     <div><h3 class="text-slate-500">على رأس العمل</h3><p class="text-2xl font-bold">${formatInteger(activeEmployees)}</p></div>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 rtl:space-x-reverse">
+                    <div class="bg-blue-100 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                    <div><h3 class="text-slate-500">في إجازة حالياً</h3><p class="text-2xl font-bold">${formatInteger(currentlyOnLeave)}</p></div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 rtl:space-x-reverse">
                     <div class="bg-amber-100 p-3 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-                    <div><h3 class="text-slate-500">في إجازة</h3><p class="text-2xl font-bold">${formatInteger(onLeaveEmployees)}</p></div>
+                    <div><h3 class="text-slate-500">طلبات معلقة</h3><p class="text-2xl font-bold">${formatInteger(pendingLeaves)}</p></div>
                 </div>
             `;
+            
+            const pendingLeavesList = state.leaves.filter(l => l.status === 'pending');
+            if(pendingLeavesList.length > 0) {
+                ui.pendingLeavesDashboard.innerHTML = pendingLeavesList.map(l => {
+                    const emp = state.employees.find(e => e.id === l.employeeId);
+                    return `<div class="p-2 border-b text-sm">
+                        <p class="font-semibold">${emp ? emp.name : 'موظف غير معروف'}</p>
+                        <p class="text-slate-600">${l.startDate} إلى ${l.endDate}</p>
+                    </div>`
+                }).join('');
+            } else {
+                ui.pendingLeavesDashboard.innerHTML = `<p class="text-center text-slate-500 p-4">لا توجد طلبات إجازة معلقة.</p>`;
+            }
         }
 
-        function renderEmployeesPage() {
+        async function renderEmployeesPage() {
             if (state.employees.length === 0) {
-                ui.employeesTableBody.innerHTML = '<tr class="border-b"><td colspan="5" class="text-center p-4">لا يوجد موظفين مضافين.</td></tr>';
+                ui.employeesTableBody.innerHTML = '<tr class="border-b"><td colspan="6" class="text-center p-4">لا يوجد موظفين مضافين.</td></tr>';
                 return;
             }
-            ui.employeesTableBody.innerHTML = state.employees.sort((a, b) => a.name.localeCompare(b.name)).map(emp => {
+
+            const leavePromises = state.employees.map(async (emp) => {
+                const approvedAnnualLeaves = state.leaves.filter(l => 
+                    l.employeeId === emp.id && 
+                    l.status === 'approved' && 
+                    l.leaveType === 'annual' &&
+                    new Date(l.startDate).getFullYear() === new Date().getFullYear()
+                );
+                const daysTaken = approvedAnnualLeaves.reduce((sum, l) => sum + l.duration, 0);
+                const balance = (emp.annualLeaveEntitlement || 0) - daysTaken;
+                return { ...emp, remainingBalance: balance };
+            });
+
+            const employeesWithBalance = await Promise.all(leavePromises);
+
+            ui.employeesTableBody.innerHTML = employeesWithBalance.sort((a, b) => a.name.localeCompare(b.name)).map(emp => {
                 const statusClasses = { active: 'bg-green-100 text-green-800', on_leave: 'bg-amber-100 text-amber-800', terminated: 'bg-red-100 text-red-800' };
                 const statusText = { active: 'على رأس العمل', on_leave: 'في إجازة', terminated: 'منتهية خدماته' };
                 return `<tr class="bg-white border-b hover:bg-slate-50">
                     <td class="px-6 py-4 font-medium text-slate-900">${emp.name}</td>
                     <td class="px-6 py-4">${emp.employeeId}</td>
                     <td class="px-6 py-4">${emp.position}</td>
+                    <td class="px-6 py-4 font-semibold">${emp.remainingBalance} / ${emp.annualLeaveEntitlement || 0}</td>
                     <td class="px-6 py-4"><span class="px-2 py-1 text-xs font-medium rounded-full ${statusClasses[emp.status] || ''}">${statusText[emp.status] || emp.status}</span></td>
                     <td class="px-6 py-4 text-center">
                         <button onclick="openModal('salaryDetailsModal', '${emp.id}')" class="text-green-600 hover:text-green-800 font-semibold px-2">الراتب</button>
@@ -638,40 +957,24 @@
             ui.companyNameInput.value = state.settings.name || '';
             ui.companyAddressInput.value = state.settings.address || '';
             ui.companyCRInput.value = state.settings.crNumber || '';
-            ui.logoPreview.src = state.settings.logoUrl || 'https://placehold.co/150x50/e9d5ff/4c1d95?text=Logo';
         }
 
         // --- Firebase Functions ---
         
         async function initializeFirebase() {
             try {
-                // =======================================================================
-                // ===================  !!! هام جداً - IMPORTANT !!! =====================
-                //
-                //  لحل مشكلة رفع الشعار، يجب استبدال الكائن التالي بالكامل
-                //  بالكائن الذي نسخته من إعدادات مشروعك في Firebase Console.
-                //
-                // To fix the logo upload issue, you MUST replace the entire object
-                // below with the one you copied from your Firebase Console project settings.
-                //
-                // Project settings > Your apps > Firebase SDK snippet > Config
-                //
-                // =======================================================================
-                const firebaseConfig = { 
-                    apiKey: "AIzaSyDSlxf95W00Ow6LZba8waAKJINptIRPkU8", 
-                    authDomain: "sample-firebase-ai-app-960f4.firebaseapp.com", 
-                    projectId: "sample-firebase-ai-app-960f4", 
-                    storageBucket: "sample-firebase-ai-app-960f4.appspot.com", 
-                    messagingSenderId: "741880884079", 
-                    appId: "1:741880884079:web:8d2f6e233fb65e65e969a" 
+                const firebaseConfig = {
+                    apiKey: "AIzaSyDSlxf95W00Ow6LZba8waAKJINptIRPkU8",
+                    authDomain: "sample-firebase-ai-app-960f4.firebaseapp.com",
+                    projectId: "sample-firebase-ai-app-960f4",
+                    storageBucket: "sample-firebase-ai-app-960f4.appspot.com",
+                    messagingSenderId: "741880884079",
+                    appId: "1:741880884079:web:8d62f6e233fb65e65e969a"
                 };
-                // =======================================================================
-                // =======================================================================
 
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
-                storage = getStorage(app);
 
                 onAuthStateChanged(auth, user => {
                     if (user) {
@@ -718,11 +1021,30 @@
             if (employeesUnsubscribe) employeesUnsubscribe();
             if (payrollsUnsubscribe) payrollsUnsubscribe();
             if (settingsUnsubscribe) settingsUnsubscribe();
+            if (leavesUnsubscribe) leavesUnsubscribe();
+            if (leaveTypesUnsubscribe) leaveTypesUnsubscribe();
+            
             employeesUnsubscribe = null;
             payrollsUnsubscribe = null;
             settingsUnsubscribe = null;
-            state = { employees: [], payrolls: [], settings: { name: 'شركتك', logoUrl: 'https://placehold.co/150x50/e9d5ff/4c1d95?text=Logo', address: '', crNumber: '' }, currentEmployee: { allowances: [], deductions: [] } };
+            leavesUnsubscribe = null;
+            leaveTypesUnsubscribe = null;
+
+            state = { employees: [], payrolls: [], leaves: [], leaveTypes: [], settings: { name: 'شركتك', address: '', crNumber: '' }, currentEmployee: { allowances: [], deductions: [] } };
             renderAll();
+        }
+
+        async function initializeDefaultLeaveTypes() {
+            const leaveTypesRef = collection(db, "hr-data", userId, "leave-types");
+            const snapshot = await getDocs(leaveTypesRef);
+            if (snapshot.empty) {
+                const batch = writeBatch(db);
+                for (const [key, value] of Object.entries(DEFAULT_LEAVE_POLICIES)) {
+                    const docRef = doc(leaveTypesRef, key); // Use the key as the document ID
+                    batch.set(docRef, value);
+                }
+                await batch.commit();
+            }
         }
 
         function setupRealtimeListeners() {
@@ -731,6 +1053,9 @@
                 console.error("Cannot setup listeners: userId is missing.");
                 return;
             };
+
+            initializeDefaultLeaveTypes();
+
             const employeesRef = collection(db, "hr-data", userId, "employees");
             employeesUnsubscribe = onSnapshot(employeesRef, snapshot => {
                 state.employees = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -749,11 +1074,23 @@
             const settingsRef = doc(db, "hr-data", userId, "settings", "companyProfile");
             settingsUnsubscribe = onSnapshot(settingsRef, (doc) => {
                 if (doc.exists()) {
-                    state.settings = doc.data();
+                    state.settings = { ...state.settings, ...doc.data() };
                 } else {
-                    state.settings = { name: 'شركتك', logoUrl: 'https://placehold.co/150x50/e9d5ff/4c1d95?text=Logo', address: '', crNumber: '' };
+                    state.settings = { name: 'شركتك', address: '', crNumber: '' };
                 }
                 renderSettingsPage();
+            });
+
+            const leavesRef = collection(db, "hr-data", userId, "leaves");
+            leavesUnsubscribe = onSnapshot(query(leavesRef), snapshot => {
+                state.leaves = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderAll();
+            });
+
+            const leaveTypesRef = collection(db, "hr-data", userId, "leave-types");
+            leaveTypesUnsubscribe = onSnapshot(leaveTypesRef, snapshot => {
+                state.leaveTypes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderLeaveTypesSettings();
             });
         }
 
@@ -761,9 +1098,13 @@
         const handleEmployeeFormSubmit = async (event) => {
             event.preventDefault();
             const form = event.target;
+            const weekendCheckboxes = form.querySelectorAll('input[name="employee-weekend"]:checked');
+            const selectedWeekends = Array.from(weekendCheckboxes).map(cb => cb.value);
+
             const employeeData = {
                 name: form.employeeName.value.trim(),
                 employeeId: form.employeeId.value.trim(),
+                nationalId: form.employeeNationalId.value.trim(),
                 position: form.employeePosition.value.trim(),
                 department: form.employeeDepartment.value.trim(),
                 startDate: form.employeeStartDate.value,
@@ -771,10 +1112,12 @@
                 status: form.employeeStatus.value,
                 nationality: form.employeeNationality.value.trim(),
                 iban: form.employeeIBAN.value.trim(),
+                annualLeaveEntitlement: Number(form.annualLeaveEntitlement.value),
+                weekendDays: selectedWeekends
             };
 
-            if (!employeeData.name || !employeeData.employeeId) {
-                showAlert("بيانات ناقصة", "يرجى إدخال اسم الموظف ورقمه الوظيفي على الأقل.");
+            if (!employeeData.name || !employeeData.employeeId || !employeeData.nationalId) {
+                showAlert("بيانات ناقصة", "يرجى إدخال اسم الموظف، ورقمه الوظيفي، ورقم الهوية/الإقامة.");
                 return;
             }
             
@@ -813,7 +1156,7 @@
         };
 
         window.deleteEmployee = (docId) => {
-            showConfirmation("تأكيد الحذف", "هل أنت متأكد من حذف هذا الموظف؟", async () => {
+            showConfirmation("تأكيد الحذف", "هل أنت متأكد من حذف هذا الموظف؟ سيتم حذف جميع البيانات المرتبطة به.", async () => {
                 try {
                     if (!db || !userId) {
                         showAlert("خطأ في الاتصال", "لا يمكن الاتصال بقاعدة البيانات.");
@@ -946,6 +1289,240 @@
             
             document.getElementById('net-salary-display').textContent = `${formatNumber(netSalary)} ر.س`;
         };
+        
+        // --- Leave Management Functions ---
+        function renderLeavesPage() {
+            if (ui.leavesTableBody) {
+                if (state.leaves.length === 0) {
+                    ui.leavesTableBody.innerHTML = `<tr class="border-b"><td colspan="7" class="text-center p-4">لا توجد طلبات إجازة.</td></tr>`;
+                    return;
+                }
+
+                const statusClasses = { pending: 'bg-amber-100 text-amber-800', approved: 'bg-green-100 text-green-800', rejected: 'bg-red-100 text-red-800' };
+                const statusText = { pending: 'معلق', approved: 'موافق عليه', rejected: 'مرفوض' };
+                
+                const allLeaveTypes = {};
+                state.leaveTypes.forEach(lt => {
+                    allLeaveTypes[lt.id] = lt;
+                });
+
+
+                ui.leavesTableBody.innerHTML = state.leaves
+                    .sort((a,b) => new Date(b.startDate) - new Date(a.startDate))
+                    .map(l => {
+                        const emp = state.employees.find(e => e.id === l.employeeId);
+                        const leavePolicy = allLeaveTypes[l.leaveType] || { name: l.leaveType };
+
+                        const actions = l.status === 'pending' ?
+                            `<button onclick="approveLeave('${l.id}')" class="text-green-600 hover:text-green-800 font-semibold px-2">موافقة</button>
+                             <button onclick="rejectLeave('${l.id}')" class="text-orange-600 hover:text-orange-800 font-semibold px-2">رفض</button>
+                             <button onclick="deleteLeave('${l.id}')" class="text-red-500 hover:text-red-700 font-semibold px-2">حذف</button>` :
+                            `<button onclick="deleteLeave('${l.id}')" class="text-red-500 hover:text-red-700 font-semibold px-2">حذف</button>`;
+
+                        return `<tr class="bg-white border-b hover:bg-slate-50">
+                            <td class="px-6 py-4 font-medium text-slate-900">${emp ? emp.name : 'غير معروف'}</td>
+                            <td class="px-6 py-4">${leavePolicy.name}</td>
+                            <td class="px-6 py-4">${l.startDate}</td>
+                            <td class="px-6 py-4">${l.endDate}</td>
+                            <td class="px-6 py-4">${l.duration}</td>
+                            <td class="px-6 py-4"><span class="px-2 py-1 text-xs font-medium rounded-full ${statusClasses[l.status] || ''}">${statusText[l.status] || l.status}</span></td>
+                            <td class="px-6 py-4 text-center">${actions}</td>
+                        </tr>`;
+                }).join('');
+            }
+        }
+
+        async function updateLeaveBalanceDisplay() {
+            const employeeId = document.getElementById('leave-employee-id').value;
+            const leaveTypeKey = document.getElementById('leave-type').value;
+            const balanceInfoDiv = document.getElementById('leave-balance-info');
+
+            if (!employeeId || !leaveTypeKey) {
+                balanceInfoDiv.classList.add('hidden');
+                return;
+            }
+
+            const employee = state.employees.find(e => e.id === employeeId);
+            if (!employee) return;
+
+            let policy = state.leaveTypes.find(lt => lt.id === leaveTypeKey);
+            if (!policy) return;
+
+            let totalEntitlement = 0;
+            let daysTaken = 0;
+            let message = '';
+            let showBalance = false;
+            const currentYear = new Date().getFullYear();
+
+            const leavesOfType = state.leaves.filter(l => l.employeeId === employeeId && l.leaveType === leaveTypeKey && l.status === 'approved');
+
+            if (policy.recurring === 'annually') {
+                 if (leaveTypeKey === 'annual') {
+                    totalEntitlement = employee.annualLeaveEntitlement || 0;
+                } else {
+                    totalEntitlement = policy.days;
+                }
+                daysTaken = leavesOfType.filter(l => new Date(l.startDate).getFullYear() === currentYear).reduce((sum, l) => sum + l.duration, 0);
+                showBalance = true;
+            } else if (policy.recurring === 'once') {
+                totalEntitlement = policy.days;
+                daysTaken = leavesOfType.reduce((sum, l) => sum + l.duration, 0);
+                if (daysTaken >= totalEntitlement) {
+                    message = `<p class="text-red-600 font-bold">تم استنفاذ رصيد هذه الإجازة.</p>`;
+                }
+                showBalance = true;
+            } else if (policy.recurring === 'multiple_per_year') {
+                message = `<p>المدة المسموحة: ${policy.days} يوم لكل حالة.</p>`;
+                showBalance = false;
+            } else { // 'none'
+                showBalance = false;
+            }
+
+            if (leaveTypeKey === 'sick') {
+                 const sickLeaveYearStart = employee.firstSickLeaveDate ? new Date(employee.firstSickLeaveDate) : null;
+                let sickLeaveYear = currentYear;
+                if(sickLeaveYearStart && sickLeaveYearStart.getFullYear() < currentYear){
+                    sickLeaveYear = sickLeaveYearStart.getFullYear();
+                }
+                
+                const sickLeavesInYear = state.leaves.filter(l => 
+                    l.employeeId === employeeId && 
+                    l.leaveType === 'sick' && 
+                    l.status === 'approved' &&
+                    new Date(l.startDate).getFullYear() >= sickLeaveYear
+                );
+                daysTaken = sickLeavesInYear.reduce((sum, l) => sum + l.duration, 0);
+                
+                message = `<p>الأيام المأخوذة في السنة المرضية الحالية: ${daysTaken} يوم.</p>`;
+                message += `<p class="text-xs text-slate-500">تحتسب حسب نظام العمل: 30 يوم بأجر كامل، ثم 60 يوم بـ 75% من الأجر، ثم 30 يوم بدون أجر.</p>`;
+                showBalance = false;
+            }
+
+
+            if (showBalance) {
+                const remainingBalance = totalEntitlement - daysTaken;
+                balanceInfoDiv.innerHTML = `
+                    <p><strong>الرصيد الكلي:</strong> ${totalEntitlement} يوم</p>
+                    <p><strong>الأيام المأخوذة:</strong> ${daysTaken} يوم</p>
+                    <p class="font-bold"><strong>الرصيد المتبقي:</strong> <span class="${remainingBalance > 0 ? 'text-green-600' : 'text-red-600'}">${remainingBalance}</span> يوم</p>
+                    ${message}
+                `;
+                balanceInfoDiv.classList.remove('hidden');
+            } else if (message) {
+                balanceInfoDiv.innerHTML = message;
+                balanceInfoDiv.classList.remove('hidden');
+            } else {
+                balanceInfoDiv.classList.add('hidden');
+            }
+        }
+
+
+        const handleLeaveRequestSubmit = async (event) => {
+            event.preventDefault();
+            const form = event.target;
+            const employeeId = form['leave-employee-id'].value;
+            const employee = state.employees.find(e => e.id === employeeId);
+            const startDate = form['leave-start-date'].value;
+            const endDate = form['leave-end-date'].value;
+            const leaveTypeKey = form['leave-type'].value;
+
+            if (!employeeId || !startDate || !endDate || !leaveTypeKey) {
+                showAlert('بيانات ناقصة', 'يرجى ملء جميع الحقول المطلوبة.');
+                return;
+            }
+            if (new Date(endDate) < new Date(startDate)) {
+                showAlert('خطأ في التاريخ', 'تاريخ انتهاء الإجازة يجب أن يكون بعد تاريخ البدء.');
+                return;
+            }
+
+            const duration = calculateWorkingDays(startDate, endDate, employee.weekendDays);
+            if (duration <= 0) {
+                 showAlert('خطأ في المدة', 'مدة الإجازة المحددة تقع بالكامل في عطلة نهاية الأسبوع أو أن المدة صفر.');
+                 return;
+            }
+
+            let policy = state.leaveTypes.find(lt => lt.id === leaveTypeKey);
+            if (!policy) {
+                 showAlert('خطأ', 'نوع الإجازة غير معروف.');
+                 return;
+            }
+
+            const leavesOfType = state.leaves.filter(l => l.employeeId === employeeId && l.leaveType === leaveTypeKey && l.status === 'approved');
+            
+            if (policy.recurring === 'once') {
+                const daysTaken = leavesOfType.reduce((sum, l) => sum + l.duration, 0);
+                if (daysTaken >= policy.days) {
+                    showAlert('رصيد مستنفذ', `سبق للموظف الحصول على إجازة ${policy.name}.`);
+                    return;
+                }
+            } else if (policy.recurring === 'multiple_per_year') {
+                if (duration > policy.days) {
+                    showAlert('المدة تجاوزت الحد', `المدة المسموحة لإجازة ${policy.name} هي ${policy.days} أيام فقط لكل حالة.`);
+                    return;
+                }
+            } else if (policy.recurring === 'annually' && leaveTypeKey === 'annual') {
+                 const currentYear = new Date(startDate).getFullYear();
+                const daysTaken = leavesOfType.filter(l => new Date(l.startDate).getFullYear() === currentYear).reduce((sum, l) => sum + l.duration, 0);
+                const balance = (employee.annualLeaveEntitlement || 0) - daysTaken;
+                if (duration > balance) {
+                    showAlert('رصيد غير كافٍ', `رصيد الإجازات السنوية للموظف هو ${balance} يوم فقط.`);
+                    return;
+                }
+            }
+
+
+            const leaveData = {
+                employeeId,
+                leaveType: leaveTypeKey,
+                startDate,
+                endDate,
+                duration,
+                reason: form['leave-reason'].value.trim(),
+                status: 'pending',
+                submittedAt: serverTimestamp(),
+            };
+
+            try {
+                await addDoc(collection(db, "hr-data", userId, "leaves"), leaveData);
+                showAlert('نجاح', 'تم تقديم طلب الإجازة بنجاح.');
+                closeModal('leaveRequestModal');
+            } catch (e) {
+                console.error("Error submitting leave request:", e);
+                showAlert('خطأ', 'فشل تقديم طلب الإجازة.');
+            }
+        };
+
+        window.approveLeave = async (leaveId) => {
+            try {
+                await updateDoc(doc(db, "hr-data", userId, "leaves", leaveId), { status: 'approved' });
+                showAlert('نجاح', 'تمت الموافقة على طلب الإجازة.');
+            } catch (e) {
+                console.error("Error approving leave:", e);
+                showAlert('خطأ', 'فشلت عملية الموافقة.');
+            }
+        };
+
+        window.rejectLeave = async (leaveId) => {
+            try {
+                await updateDoc(doc(db, "hr-data", userId, "leaves", leaveId), { status: 'rejected' });
+                showAlert('نجاح', 'تم رفض طلب الإجازة.');
+            } catch (e) {
+                console.error("Error rejecting leave:", e);
+                showAlert('خطأ', 'فشلت عملية الرفض.');
+            }
+        };
+
+        window.deleteLeave = (leaveId) => {
+            showConfirmation('تأكيد الحذف', 'هل أنت متأكد من حذف طلب الإجازة هذا؟', async () => {
+                try {
+                    await deleteDoc(doc(db, "hr-data", userId, "leaves", leaveId));
+                    showAlert('نجاح', 'تم حذف طلب الإجازة.');
+                } catch (e) {
+                    console.error("Error deleting leave:", e);
+                    showAlert('خطأ', 'فشلت عملية الحذف.');
+                }
+            });
+        };
 
         // --- Payroll Functions ---
         const handlePayrollGeneration = async (event) => {
@@ -959,27 +1536,39 @@
                 return;
             }
 
-            const activeEmployees = state.employees.filter(e => e.status === 'active');
-            if (activeEmployees.length === 0) {
-                showAlert('لا يوجد موظفين', 'لا يوجد موظفين نشطين لإصدار مسير رواتب لهم.');
+            const activeEmployees = state.employees.filter(e => e.status === 'active' || e.status === 'on_leave');
+            
+            const payrollYear = parseInt(year);
+            const payrollMonth = parseInt(month); 
+
+            const eligibleEmployees = activeEmployees.filter(emp => {
+                if (!emp.startDate) return false; 
+                const employeeStartDate = new Date(emp.startDate);
+                const employeeStartYear = employeeStartDate.getFullYear();
+                const employeeStartMonth = employeeStartDate.getMonth();
+
+                return (employeeStartYear < payrollYear) || (employeeStartYear === payrollYear && employeeStartMonth <= payrollMonth);
+            });
+
+
+            if (eligibleEmployees.length === 0) {
+                showAlert('لا يوجد موظفين', 'لا يوجد موظفين مؤهلين (على رأس العمل وبدأوا العمل قبل أو خلال هذا الشهر) لإصدار مسير رواتب لهم.');
                 return;
             }
 
             const batch = writeBatch(db);
             let totalBaseSalary = 0, totalAllowances = 0, totalDeductions = 0, totalAbsenceDeduction = 0, totalLateDeduction = 0, totalOvertimePay = 0, netPay = 0;
             
-            for (const emp of activeEmployees) {
-                // 1. Get salary components
+            for (const emp of eligibleEmployees) { 
                 const allowancesSnapshot = await getDocs(collection(db, "hr-data", userId, "employees", emp.id, "allowances"));
                 const deductionsSnapshot = await getDocs(collection(db, "hr-data", userId, "employees", emp.id, "deductions"));
                 const allowances = allowancesSnapshot.docs.map(d => ({id: d.id, ...d.data()}));
                 let fixedDeductions = deductionsSnapshot.docs.map(d => ({id: d.id, ...d.data()}));
 
-                // GOSI Calculation (for Saudi nationals)
                 if (emp.nationality && emp.nationality.toLowerCase().includes('سعودي')) {
                     const housingAllowance = allowances.find(a => a.name.includes('سكن'))?.amount || 0;
                     const gosiBase = emp.salary + housingAllowance;
-                    const gosiDeductionAmount = gosiBase * 0.10; // Employee share 10%
+                    const gosiDeductionAmount = gosiBase * 0.10; 
 
                     if (!fixedDeductions.some(d => d.name.includes('التأمينات الاجتماعية'))) {
                         fixedDeductions.push({
@@ -995,27 +1584,56 @@
                 const empTotalFixedDeductions = fixedDeductions.filter(d => d.includedInPayroll).reduce((s, i) => s + i.amount, 0);
                 const grossSalary = emp.salary + empTotalAllowances;
 
-                // 2. Get attendance data for the month
                 const attendanceId = `${year}-${String(parseInt(month) + 1).padStart(2, '0')}`;
                 const attendanceDocRef = doc(db, "hr-data", userId, "employees", emp.id, "attendance", attendanceId);
                 const attendanceSnap = await getDoc(attendanceDocRef);
                 
                 let absenceDeduction = 0, lateDeduction = 0, overtimePay = 0;
                 
+                const workDaysInMonth = calculateWorkDaysInMonth(payrollYear, payrollMonth, emp.weekendDays);
+                const dailyRate = workDaysInMonth > 0 ? (grossSalary / workDaysInMonth) : 0;
+                const hourlyRate = dailyRate / 8; 
+
+                let paidLeaveWorkDaysInMonth = 0;
+                const payrollMonthStartDate = new Date(payrollYear, payrollMonth, 1);
+                const payrollMonthEndDate = new Date(payrollYear, payrollMonth + 1, 0);
+
+                const paidLeaveTypes = state.leaveTypes.filter(lt => lt.paymentType === 'paid' || lt.paymentType === 'paid_in_advance').map(lt => lt.id);
+                
+                const approvedPaidLeavesInMonth = state.leaves.filter(l =>
+                    l.employeeId === emp.id &&
+                    l.status === 'approved' &&
+                    paidLeaveTypes.includes(l.leaveType) &&
+                    new Date(l.startDate) <= payrollMonthEndDate &&
+                    new Date(l.endDate) >= payrollMonthStartDate
+                );
+                
+                approvedPaidLeavesInMonth.forEach(leave => {
+                    const leaveStart = new Date(leave.startDate);
+                    const leaveEnd = new Date(leave.endDate);
+                    const effectiveStart = new Date(Math.max(leaveStart, payrollMonthStartDate));
+                    const effectiveEnd = new Date(Math.min(leaveEnd, payrollMonthEndDate));
+                    paidLeaveWorkDaysInMonth += calculateWorkingDays(effectiveStart, effectiveEnd, emp.weekendDays);
+                });
+
                 if (attendanceSnap.exists()) {
                     const attendanceData = attendanceSnap.data();
-                    const daysInMonth = attendanceData.totalDaysInMonth;
-                    const dailyRate = grossSalary / daysInMonth; 
-                    const hourlyRate = dailyRate / 8;
+                    const attendedDays = attendanceData.attendedDays || 0;
+                    
+                    const unpaidAbsentWorkDays = Math.max(0, workDaysInMonth - attendedDays - paidLeaveWorkDaysInMonth);
 
-                    const absentDays = attendanceData.totalDaysInMonth - attendanceData.attendedDays;
-                    if (absentDays > 0) absenceDeduction = dailyRate * absentDays;
+                    if (unpaidAbsentWorkDays > 0) {
+                        absenceDeduction = dailyRate * unpaidAbsentWorkDays;
+                    }
 
                     const totalLateMinutes = (attendanceData.lateHours * 60) + attendanceData.lateMinutes;
                     if (totalLateMinutes > 0) lateDeduction = (hourlyRate / 60) * totalLateMinutes;
 
                     const totalOvertimeMinutes = (attendanceData.overtimeHours * 60) + attendanceData.overtimeMinutes;
                     if (totalOvertimeMinutes > 0) overtimePay = (hourlyRate * 1.5 / 60) * totalOvertimeMinutes;
+                } else {
+                    const unpaidAbsentWorkDays = Math.max(0, workDaysInMonth - paidLeaveWorkDaysInMonth);
+                    absenceDeduction = dailyRate * unpaidAbsentWorkDays;
                 }
                 
                 const empNet = (grossSalary + overtimePay) - (empTotalFixedDeductions + absenceDeduction + lateDeduction);
@@ -1033,7 +1651,20 @@
             }
 
             const payrollDocRef = doc(db, "hr-data", userId, "payrolls", payrollId);
-            batch.set(payrollDocRef, { createdAt: new Date(), month: parseInt(month), year: parseInt(year), totalBaseSalary, totalAllowances, totalDeductions, totalAbsenceDeduction, totalLateDeduction, totalOvertimePay, netPay, employeeCount: activeEmployees.length });
+            batch.set(payrollDocRef, { 
+                createdAt: new Date(), 
+                month: parseInt(month), 
+                year: parseInt(year), 
+                totalBaseSalary, 
+                totalAllowances, 
+                totalDeductions, 
+                totalAbsenceDeduction, 
+                totalLateDeduction, 
+                totalOvertimePay, 
+                netPay, 
+                employeeCount: eligibleEmployees.length,
+                isApproved: false 
+            });
 
             try {
                 await batch.commit();
@@ -1053,10 +1684,19 @@
             const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
             ui.payrollHistoryContainer.innerHTML = state.payrolls
                 .sort((a,b) => b.createdAt.toMillis() - a.createdAt.toMillis())
-                .map(p => `<div onclick="displayPayrollDetails('${p.id}')" class="p-3 rounded-lg cursor-pointer hover:bg-slate-100 border">
-                    <p class="font-semibold">مسير رواتب ${months[p.month]} ${p.year}</p>
-                    <p class="text-sm text-slate-600">صافي المبلغ: ${formatNumber(p.netPay)} ر.س</p>
-                </div>`).join('');
+                .map(p => {
+                    const approvedBadge = p.isApproved 
+                        ? `<span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">معتمد</span>`
+                        : `<span class="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-1 rounded-full">غير معتمد</span>`;
+                    return `
+                    <div onclick="displayPayrollDetails('${p.id}')" class="p-3 rounded-lg cursor-pointer hover:bg-slate-100 border">
+                        <div class="flex justify-between items-center">
+                            <p class="font-semibold">مسير رواتب ${months[p.month]} ${p.year}</p>
+                            ${approvedBadge}
+                        </div>
+                        <p class="text-sm text-slate-600">صافي المبلغ: ${formatNumber(p.netPay)} ر.س</p>
+                    </div>`
+                }).join('');
         };
 
         window.displayPayrollDetails = async (payrollId) => {
@@ -1068,6 +1708,22 @@
 
             const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
             
+            let actionButtons = '';
+            if (payroll.isApproved) {
+                actionButtons = `
+                <div class="flex justify-between items-center">
+                    <p class="text-sm text-green-600 font-semibold bg-green-100 p-2 rounded-md text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block ml-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                        هذا المسير معتمد
+                    </p>
+                </div>`;
+            } else {
+                actionButtons = `
+                    <button onclick="approvePayroll('${payroll.id}')" class="text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors">اعتماد المسير</button>
+                    <button onclick="deletePayroll('${payroll.id}')" class="text-sm bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition-colors ml-2">حذف المسير</button>
+                `;
+            }
+
             let tableHTML = records.map(r => `
                 <tr class="border-b">
                     <td class="p-2">${r.name}</td>
@@ -1087,9 +1743,12 @@
                     <div class="flex justify-between items-center mb-4">
                          <h3 class="font-bold text-lg">تفاصيل مسير رواتب ${months[payroll.month]} ${payroll.year}</h3>
                          <div>
-                            <button onclick="printAllPayslips('${payrollId}')" class="text-sm bg-violet-100 text-violet-800 px-3 py-1 rounded-md hover:bg-violet-200 ml-2">طباعة كل القسائم</button>
-                            <button onclick="printPayrollSummary('${payrollId}')" class="text-sm bg-slate-200 px-3 py-1 rounded-md hover:bg-slate-300">طباعة الملخص</button>
+                             <button onclick="printAllPayslips('${payrollId}')" class="text-sm bg-violet-100 text-violet-800 px-3 py-1 rounded-md hover:bg-violet-200 ml-2">طباعة كل القسائم</button>
+                             <button onclick="printPayrollSummary('${payrollId}')" class="text-sm bg-slate-200 px-3 py-1 rounded-md hover:bg-slate-300">طباعة الملخص</button>
                          </div>
+                    </div>
+                    <div class="mb-4">
+                        ${actionButtons}
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
@@ -1127,50 +1786,35 @@
             ui.payrollDetailsContainer.classList.remove('hidden');
         };
 
-        // --- Tafqeet Function (Number to Arabic Words) ---
-        function tafqeet(number) {
-            const integer = Math.floor(number);
-            const fraction = Math.round((number - integer) * 100);
-            const ones = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة', 'عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
-            const tens = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
-            const hundreds = ['', 'مائة', 'مئتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة'];
-            const thousands = ['', 'ألف', 'ألفان', 'آلاف'];
-            const millions = ['', 'مليون', 'مليونان', 'ملايين'];
-
-            function convert(num) {
-                if (num === 0) return '';
-                if (num < 20) return ones[num];
-                if (num < 100) return ones[num % 10] + (num % 10 !== 0 ? ' و' : '') + tens[Math.floor(num / 10)];
-                if (num < 1000) return hundreds[Math.floor(num / 100)] + (num % 100 !== 0 ? ' و' : '') + convert(num % 100);
-                if (num < 1000000) {
-                    const t = Math.floor(num / 1000);
-                    const remainder = num % 1000;
-                    let thousandWord = '';
-                    if (t === 1) thousandWord = thousands[1];
-                    else if (t === 2) thousandWord = thousands[2];
-                    else if (t >= 3 && t <= 10) thousandWord = convert(t) + ' ' + thousands[3];
-                    else thousandWord = convert(t) + ' ' + thousands[1];
-                    return thousandWord + (remainder > 0 ? ' و' + convert(remainder) : '');
+        window.approvePayroll = async (payrollId) => {
+            showConfirmation('تأكيد الاعتماد', 'هل أنت متأكد من اعتماد هذا المسير؟ لا يمكن التراجع عن هذا الإجراء.', async () => {
+                try {
+                    await updateDoc(doc(db, "hr-data", userId, "payrolls", payrollId), { isApproved: true });
+                    showAlert('نجاح', 'تم اعتماد مسير الرواتب.');
+                    displayPayrollDetails(payrollId); // Refresh view
+                } catch (e) {
+                    console.error("Error approving payroll:", e);
+                    showAlert('خطأ', 'فشلت عملية الاعتماد.');
                 }
-                const m = Math.floor(num / 1000000);
-                const remainder = num % 1000000;
-                let millionWord = '';
-                if (m === 1) millionWord = millions[1];
-                else if (m === 2) millionWord = millions[2];
-                else if (m >= 3 && m <= 10) millionWord = convert(m) + ' ' + millions[3];
-                else millionWord = convert(m) + ' ' + millions[1];
-                return millionWord + (remainder > 0 ? ' و' + convert(remainder) : '');
-            }
-            let integerWords = convert(integer);
-            if (integerWords === '') integerWords = 'صفر';
-            let result = integerWords + ' ريال سعودي';
-            if (fraction > 0) {
-                result += ' و' + convert(fraction) + ' هللة';
-            }
-            return result.trim() + ' فقط لا غير.';
-        }
+            });
+        };
 
-        // --- NEW CORPORATE PAYSLIP FUNCTION (LANDSCAPE A4) ---
+        window.deletePayroll = async (payrollId) => {
+            showConfirmation('تأكيد الحذف', 'هل أنت متأكد من حذف هذا المسير؟ سيتم حذف جميع سجلات الموظفين فيه.', async () => {
+                try {
+                    // It's complex to delete subcollections in a single client operation without cloud functions.
+                    // For now, we just delete the main doc. A more robust solution would use a cloud function.
+                    await deleteDoc(doc(db, "hr-data", userId, "payrolls", payrollId));
+                    ui.payrollDetailsContainer.classList.add('hidden');
+                    showAlert('نجاح', 'تم حذف مسير الرواتب.');
+                } catch (e) {
+                    console.error("Error deleting payroll:", e);
+                    showAlert('خطأ', 'فشلت عملية الحذف.');
+                }
+            });
+        };
+
+        // --- Printing Functions ---
         function generateCorporatePayslipHTML(record, payroll) {
             const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
             
@@ -1197,21 +1841,16 @@
             const payPeriodEnd = new Date(payroll.year, payroll.month + 1, 0);
 
             return `
-            <div class="payslip-page bg-white text-gray-900" style="width: 29.7cm; height: 21cm; margin: auto; display: flex; flex-direction: column; border: 1px solid #e5e7eb; padding: 1cm; font-size: 9pt;">
+            <div class="payslip-page bg-white text-gray-900" style="width: 100%; height: 100%; margin: auto; display: flex; flex-direction: column; border: 1px solid #e5e7eb; padding: 0.8cm; font-size: 9pt;">
                 
-                <!-- 1. Header -->
-                <header class="flex justify-between items-center pb-2 border-b border-gray-300">
-                    <div>
+                <header class="flex justify-center items-center pb-2 border-b border-gray-300">
+                    <div class="text-center">
                         <h1 class="text-2xl font-bold">${state.settings.name || 'اسم الشركة'}</h1>
                         <p class="text-sm">قسيمة الراتب الشهرية - Monthly Pay Slip</p>
                         <p class="text-sm">الفترة: ${months[payroll.month]} ${payroll.year}</p>
                     </div>
-                    <div class="text-right">
-                        <img src="${state.settings.logoUrl || 'https://placehold.co/120x60/f0f0f0/333?text=Logo'}" alt="شعار الشركة" class="h-12 object-contain">
-                    </div>
                 </header>
 
-                <!-- 2. Employee & Job Information -->
                 <section class="grid grid-cols-4 gap-x-4 py-3 border-b border-gray-200 text-xs">
                     <div><strong class="text-gray-600 block">اسم الموظف:</strong> ${record.name || ''}</div>
                     <div><strong class="text-gray-600 block">الرقم الوظيفي:</strong> ${record.employeeId || ''}</div>
@@ -1221,9 +1860,7 @@
                     <div><strong class="text-gray-600 block">تاريخ الدفع:</strong> ${formatGregorianDate(payPeriodEnd)}</div>
                 </section>
 
-                <!-- 3. & 4. Earnings & Deductions -->
                 <section class="flex-grow grid grid-cols-2 gap-x-6 py-3">
-                    <!-- Earnings -->
                     <div class="bg-gray-50 p-2 rounded">
                         <h3 class="font-bold text-center text-base mb-2 pb-1 border-b">الاستحقاقات / Earnings</h3>
                         <table class="w-full text-xs">
@@ -1234,7 +1871,6 @@
                             </tr>`).join('')}
                         </table>
                     </div>
-                    <!-- Deductions -->
                     <div class="bg-gray-50 p-2 rounded">
                         <h3 class="font-bold text-center text-base mb-2 pb-1 border-b">الاستقطاعات / Deductions</h3>
                         <table class="w-full text-xs">
@@ -1247,7 +1883,6 @@
                     </div>
                 </section>
 
-                <!-- 5. Summary -->
                 <section class="grid grid-cols-2 gap-x-6 py-2 bg-gray-100 rounded">
                     <div class="space-y-1 text-sm">
                         <div class="flex justify-between">
@@ -1268,7 +1903,6 @@
                     </div>
                 </section>
 
-                <!-- 6. Footer -->
                 <footer class="mt-auto pt-4 text-xs">
                     <div class="grid grid-cols-2 gap-8 text-center">
                         <div>
@@ -1307,52 +1941,105 @@
             const records = recordsSnapshot.docs.map(d => d.data());
             const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
 
+            const allAllowances = new Set();
+            const allDeductions = new Set();
+            records.forEach(r => {
+                if(r.allowances) r.allowances.filter(a => a.includedInPayroll).forEach(a => allAllowances.add(a.name));
+                if(r.deductions) r.deductions.filter(d => d.includedInPayroll).forEach(d => allDeductions.add(d.name));
+            });
+            const allowanceHeaders = Array.from(allAllowances);
+            const deductionHeaders = Array.from(allDeductions);
+
+            const headerHTML = `
+                <tr>
+                    <th class="p-2 border border-slate-300">الموظف</th>
+                    <th class="p-2 border border-slate-300">الراتب الأساسي</th>
+                    ${allowanceHeaders.map(name => `<th class="p-2 border border-slate-300">${name}</th>`).join('')}
+                    <th class="p-2 border border-slate-300 bg-yellow-100">إجمالي الاستحقاقات</th>
+                    ${deductionHeaders.map(name => `<th class="p-2 border border-slate-300">${name}</th>`).join('')}
+                    <th class="p-2 border border-slate-300">خصم الغياب</th>
+                    <th class="p-2 border border-slate-300">خصم التأخير</th>
+                    <th class="p-2 border border-slate-300 bg-red-100">إجمالي الخصومات</th>
+                    <th class="p-2 border border-slate-300">إضافي</th>
+                    <th class="p-2 border border-slate-300 bg-green-100">صافي المستحق</th>
+                </tr>
+            `;
+
+            const bodyHTML = records.map(r => {
+                const employeeAllowances = new Map(r.allowances.filter(a => a.includedInPayroll).map(a => [a.name, a.amount]));
+                const employeeDeductions = new Map(r.deductions.filter(d => d.includedInPayroll).map(d => [d.name, d.amount]));
+                
+                const totalAllowancesForEmp = Array.from(employeeAllowances.values()).reduce((s, v) => s + v, 0);
+                const grossSalaryForEmp = r.salary + totalAllowancesForEmp;
+                
+                const totalFixedDeductionsForEmp = Array.from(employeeDeductions.values()).reduce((s, v) => s + v, 0);
+                const totalDeductionsForEmp = totalFixedDeductionsForEmp + (r.absenceDeduction || 0) + (r.lateDeduction || 0);
+
+                const netPayForEmp = (grossSalaryForEmp + (r.overtimePay || 0)) - totalDeductionsForEmp;
+
+                return `
+                    <tr class="border-b">
+                        <td class="p-2 border border-slate-300">${r.name}</td>
+                        <td class="p-2 border border-slate-300">${formatNumber(r.salary)}</td>
+                        ${allowanceHeaders.map(name => `<td class="p-2 border border-slate-300">${formatNumber(employeeAllowances.get(name) || 0)}</td>`).join('')}
+                        <td class="p-2 border border-slate-300 font-bold bg-yellow-100">${formatNumber(grossSalaryForEmp)}</td>
+                        ${deductionHeaders.map(name => `<td class="p-2 border border-slate-300 text-red-600">${formatNumber(employeeDeductions.get(name) || 0)}</td>`).join('')}
+                        <td class="p-2 border border-slate-300 text-red-600">${formatNumber(r.absenceDeduction || 0)}</td>
+                        <td class="p-2 border border-slate-300 text-red-600">${formatNumber(r.lateDeduction || 0)}</td>
+                        <td class="p-2 border border-slate-300 font-bold bg-red-100">${formatNumber(totalDeductionsForEmp)}</td>
+                        <td class="p-2 border border-slate-300 text-green-600">${formatNumber(r.overtimePay || 0)}</td>
+                        <td class="p-2 border border-slate-300 font-bold bg-green-100">${formatNumber(netPayForEmp)}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            const totalBaseSalary = records.reduce((sum, r) => sum + r.salary, 0);
+            const allowanceTotals = allowanceHeaders.map(name => records.reduce((sum, r) => sum + (r.allowances.find(a => a.name === name && a.includedInPayroll)?.amount || 0), 0));
+            const deductionTotals = deductionHeaders.map(name => records.reduce((sum, r) => sum + (r.deductions.find(d => d.name === name && d.includedInPayroll)?.amount || 0), 0));
+            const totalGross = totalBaseSalary + allowanceTotals.reduce((s, t) => s + t, 0);
+            const totalAbsence = records.reduce((s, r) => s + (r.absenceDeduction || 0), 0);
+            const totalLate = records.reduce((s, r) => s + (r.lateDeduction || 0), 0);
+            const totalFixedDeductions = deductionTotals.reduce((s, t) => s + t, 0);
+            const totalDeductions = totalFixedDeductions + totalAbsence + totalLate;
+            const totalOvertime = records.reduce((s, r) => s + (r.overtimePay || 0), 0);
+            const totalNet = totalGross + totalOvertime - totalDeductions;
+
+            const footerHTML = `
+                <tr class="font-bold bg-slate-200">
+                    <td class="p-2 border border-slate-300">الإجمالي</td>
+                    <td class="p-2 border border-slate-300">${formatNumber(totalBaseSalary)}</td>
+                    ${allowanceTotals.map(total => `<td class="p-2 border border-slate-300">${formatNumber(total)}</td>`).join('')}
+                    <td class="p-2 border border-slate-300 bg-yellow-200">${formatNumber(totalGross)}</td>
+                    ${deductionTotals.map(total => `<td class="p-2 border border-slate-300 text-red-600">${formatNumber(total)}</td>`).join('')}
+                    <td class="p-2 border border-slate-300 text-red-600">${formatNumber(totalAbsence)}</td>
+                    <td class="p-2 border border-slate-300 text-red-600">${formatNumber(totalLate)}</td>
+                    <td class="p-2 border border-slate-300 bg-red-200">${formatNumber(totalDeductions)}</td>
+                    <td class="p-2 border border-slate-300 text-green-600">${formatNumber(totalOvertime)}</td>
+                    <td class="p-2 border border-slate-300 bg-green-200">${formatNumber(totalNet)}</td>
+                </tr>
+            `;
+
             const printableDiv = document.getElementById('printable-payroll');
             printableDiv.innerHTML = `
-                <div class="p-8">
-                    <header class="flex justify-between items-center mb-6">
-                        <img src="${state.settings.logoUrl || ''}" alt="Logo" class="h-20 object-contain">
-                        <h1 class="text-3xl font-bold">${state.settings.name || 'ملخص الرواتب'}</h1>
+                <div class="p-4">
+                    <header class="text-center mb-6">
+                        <h1 class="text-2xl font-bold">${state.settings.name || 'ملخص الرواتب'}</h1>
+                        <h2 class="text-xl font-semibold">مسير رواتب شهر ${months[payroll.month]} ${payroll.year}</h2>
+                        <p class="text-sm text-gray-500">تاريخ الطباعة: ${formatGregorianDate(new Date())}</p>
                     </header>
-                    <h2 class="text-2xl font-bold text-center mb-2">مسير رواتب شهر ${months[payroll.month]} ${payroll.year}</h2>
-                    <p class="text-center text-sm mb-6">تاريخ الطباعة: ${formatGregorianDate(new Date())}</p>
-                    <table class="w-full text-sm border-collapse border border-slate-400">
-                        <thead class="bg-slate-200">
-                            <tr>
-                                <th class="p-2 border border-slate-300">الموظف</th>
-                                <th class="p-2 border border-slate-300">إجمالي الراتب</th>
-                                <th class="p-2 border border-slate-300">خصم الغياب</th>
-                                <th class="p-2 border border-slate-300">خصم التأخير</th>
-                                <th class="p-2 border border-slate-300">إضافي</th>
-                                <th class="p-2 border border-slate-300">خصومات أخرى</th>
-                                <th class="p-2 border border-slate-300">صافي المستحق</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${records.map(r => `
-                                <tr class="border-b">
-                                    <td class="p-2 border border-slate-300">${r.name}</td>
-                                    <td class="p-2 border border-slate-300">${formatNumber(r.grossSalary || 0)}</td>
-                                    <td class="p-2 border border-slate-300">-${formatNumber(r.absenceDeduction || 0)}</td>
-                                    <td class="p-2 border border-slate-300">-${formatNumber(r.lateDeduction || 0)}</td>
-                                    <td class="p-2 border border-slate-300">+${formatNumber(r.overtimePay || 0)}</td>
-                                    <td class="p-2 border border-slate-300">-${formatNumber(r.deductions.filter(d=>d.includedInPayroll).reduce((s, i) => s + i.amount, 0))}</td>
-                                    <td class="p-2 border border-slate-300 font-bold">${formatNumber(r.netPay)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                        <tfoot class="font-bold bg-slate-200">
-                            <tr>
-                                <td class="p-2 border border-slate-300">الإجمالي (ر.س)</td>
-                                <td class="p-2 border border-slate-300">${formatNumber(payroll.totalBaseSalary + payroll.totalAllowances)}</td>
-                                <td class="p-2 border border-slate-300">-${formatNumber(payroll.totalAbsenceDeduction || 0)}</td>
-                                <td class="p-2 border border-slate-300">-${formatNumber(payroll.totalLateDeduction || 0)}</td>
-                                <td class="p-2 border border-slate-300">+${formatNumber(payroll.totalOvertimePay || 0)}</td>
-                                <td class="p-2 border border-slate-300">-${formatNumber(payroll.totalDeductions)}</td>
-                                <td class="p-2 border border-slate-300">${formatNumber(payroll.netPay)}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs border-collapse border border-slate-400">
+                            <thead class="bg-slate-200">
+                                ${headerHTML}
+                            </thead>
+                            <tbody>
+                                ${bodyHTML}
+                            </tbody>
+                            <tfoot>
+                                ${footerHTML}
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             `;
             window.print();
@@ -1375,6 +2062,38 @@
         };
 
         // --- Attendance Functions ---
+        
+        /**
+         * FIX: Added this function to handle the template download.
+         * It creates a CSV file in memory and triggers a download.
+         */
+        window.downloadAttendanceTemplate = () => {
+            const headers = ['Date', 'CheckIn', 'CheckOut', 'Notes'];
+            const csvHeader = headers.join(',');
+            
+            // Example rows for clarity in the template
+            const exampleRow1 = 'YYYY-MM-DD,HH:MM,HH:MM,Your notes here';
+            const exampleRow2 = '2024-07-01,09:00,17:00,Normal Day';
+
+            const csvContent = `${csvHeader}\n${exampleRow1}\n${exampleRow2}`;
+
+            // Using Blob to create the file
+            const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' }); // \uFEFF (BOM) is important for Excel to open UTF-8 CSVs correctly
+            const link = document.createElement("a");
+
+            if (link.download !== undefined) { // Check browser support
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", "attendance_template.csv");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                showAlert('خطأ', 'متصفحك لا يدعم تحميل الملفات مباشرة. يرجى محاولة استخدام متصفح أحدث.');
+            }
+        };
+
         const handleAttendanceFormSubmit = async (event) => {
             event.preventDefault();
             const form = event.target;
@@ -1420,7 +2139,8 @@
                     <td class="px-6 py-4 font-medium text-slate-900">${emp.name}</td>
                     <td class="px-6 py-4">${emp.position}</td>
                     <td class="px-6 py-4 text-center">
-                        <button onclick="openModal('attendanceModal', '${emp.id}')" class="bg-violet-100 text-violet-800 font-semibold px-4 py-1 rounded-full hover:bg-violet-200">تسجيل الحضور</button>
+                        <button onclick="openModal('attendanceUploadModal', '${emp.id}')" class="bg-blue-100 text-blue-800 font-semibold px-4 py-1 rounded-full hover:bg-blue-200">رفع ملف</button>
+                        <button onclick="openModal('attendanceModal', '${emp.id}')" class="bg-violet-100 text-violet-800 font-semibold px-4 py-1 rounded-full hover:bg-violet-200 ml-2">تسجيل يدوي</button>
                     </td>
                 </tr>`;
             }).join("");
@@ -1448,14 +2168,14 @@
                 </svg>
                 جاري الحفظ...
             `;
+            
+            const settingsData = {
+                name: ui.companyNameInput.value.trim(),
+                address: ui.companyAddressInput.value.trim(),
+                crNumber: ui.companyCRInput.value.trim(),
+            };
 
-            const companyName = ui.companyNameInput.value.trim();
-            const companyAddress = ui.companyAddressInput.value.trim();
-            const companyCR = ui.companyCRInput.value.trim();
-            const logoFile = document.getElementById('logo-upload-input').files[0];
-            let logoUrl = state.settings.logoUrl;
-
-            if (!db || !storage || !userId) {
+            if (!db || !userId) {
                 showAlert('خطأ في الاتصال', 'فقد الاتصال بالخدمة. يرجى تسجيل الدخول مرة أخرى.');
                 submitButton.disabled = false;
                 submitButton.innerHTML = originalButtonText;
@@ -1463,46 +2183,113 @@
             }
             
             try {
-                if (logoFile) {
-                    const storageRef = ref(storage, `logos/${userId}/${logoFile.name}`);
-                    await uploadBytes(storageRef, logoFile);
-                    logoUrl = await getDownloadURL(storageRef);
-                }
-
-                const settingsData = {
-                    name: companyName,
-                    address: companyAddress,
-                    crNumber: companyCR,
-                    logoUrl: logoUrl
-                };
-
                 const settingsRef = doc(db, "hr-data", userId, "settings", "companyProfile");
                 await setDoc(settingsRef, settingsData, { merge: true });
                 showAlert('نجاح', 'تم حفظ الإعدادات بنجاح.');
             } catch (e) {
                 console.error("Error saving settings: ", e);
-                let errorMessage = 'فشل حفظ الإعدادات.';
-                if (e.code) {
-                    switch (e.code) {
-                        case 'storage/unauthorized':
-                            errorMessage = 'فشل رفع الشعار: ليس لديك الصلاحية للكتابة في هذا المسار. يرجى مراجعة قواعد الأمان (Security Rules) في Firebase Storage.';
-                            break;
-                        case 'storage/object-not-found':
-                             errorMessage = 'فشل الحصول على رابط الشعار بعد رفعه. يرجى المحاولة مرة أخرى.';
-                            break;
-                        case 'permission-denied':
-                             errorMessage = 'فشل حفظ الإعدادات: ليس لديك الصلاحية للكتابة في قاعدة البيانات. يرجى مراجعة قواعد الأمان (Security Rules) في Firestore.';
-                             break;
-                        default:
-                            errorMessage = `حدث خطأ غير متوقع: ${e.message}`;
-                    }
-                }
-                showAlert('خطأ', errorMessage);
+                showAlert('خطأ', `فشل حفظ الإعدادات: ${e.message}`);
             } finally {
                 submitButton.disabled = false;
                 submitButton.innerHTML = originalButtonText;
             }
         };
+
+        const handleLeaveTypeFormSubmit = async (event) => {
+            event.preventDefault();
+            const form = event.target;
+            const leaveData = {
+                name: form['leave-type-name'].value.trim(),
+                days: Number(form['leave-type-days'].value),
+                paymentType: form['leave-type-payment'].value,
+                recurring: form['leave-type-recurring'].value,
+            };
+
+            if (!leaveData.name || isNaN(leaveData.days)) {
+                showAlert('بيانات ناقصة', 'يرجى إدخال اسم الإجازة وعدد الأيام بشكل صحيح.');
+                return;
+            }
+
+            const editId = form['leave-type-edit-id'].value;
+
+            try {
+                if (editId) {
+                    const docRef = doc(db, "hr-data", userId, "leave-types", editId);
+                    await updateDoc(docRef, leaveData);
+                    showAlert('نجاح', 'تم تعديل نوع الإجازة بنجاح.');
+                } else {
+                    leaveData.isStandard = false; // Ensure new types are marked as custom
+                    await addDoc(collection(db, "hr-data", userId, "leave-types"), leaveData);
+                    showAlert('نجاح', 'تمت إضافة نوع الإجازة المخصص بنجاح.');
+                }
+                form.reset();
+                form['leave-type-edit-id'].value = '';
+                ui.leaveTypeForm.querySelector('button[type="submit"]').textContent = 'إضافة نوع';
+
+            } catch (e) {
+                console.error("Error handling leave type form:", e);
+                showAlert('خطأ', 'فشل حفظ نوع الإجازة.');
+            }
+        };
+
+        function renderLeaveTypesSettings() {
+            if (!ui.leaveTypesTableBody) return;
+            
+            ui.leaveTypesTableBody.innerHTML = state.leaveTypes.map(lt => {
+                const paymentText = { paid: 'مدفوعة', unpaid: 'بدون أجر', paid_in_advance: 'مدفوعة مقدماً' };
+                const recurringText = { annually: 'سنوي', once: 'مرة واحدة طوال الخدمة', 'multiple_per_year': 'متعددة سنوياً', none: 'غير متكرر' };
+                return `
+                    <tr class="border-b">
+                        <td class="px-6 py-4">${lt.name}</td>
+                        <td class="px-6 py-4">${lt.days}</td>
+                        <td class="px-6 py-4">${paymentText[lt.paymentType] || lt.paymentType}</td>
+                        <td class="px-6 py-4">${recurringText[lt.recurring] || lt.recurring}</td>
+                        <td class="px-6 py-4">
+                            <button onclick="editLeaveType('${lt.id}')" class="text-blue-600 hover:text-blue-800 font-semibold px-2">تعديل</button>
+                            <button onclick="deleteLeaveType('${lt.id}')" class="text-red-500 hover:text-red-700 font-semibold px-2">حذف</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        window.editLeaveType = (id) => {
+            const leaveType = state.leaveTypes.find(lt => lt.id === id);
+            if (!leaveType) return;
+
+            const form = ui.leaveTypeForm;
+            form['leave-type-edit-id'].value = id;
+            form['leave-type-name'].value = leaveType.name;
+            form['leave-type-days'].value = leaveType.days;
+            form['leave-type-payment'].value = leaveType.paymentType;
+            form['leave-type-recurring'].value = leaveType.recurring;
+            form.querySelector('button[type="submit"]').textContent = 'حفظ التعديلات';
+            form['leave-type-name'].focus();
+        };
+
+        window.deleteLeaveType = (id) => {
+            showConfirmation('تأكيد الحذف', 'هل أنت متأكد من حذف نوع الإجازة هذا؟', async () => {
+                try {
+                    await deleteDoc(doc(db, "hr-data", userId, "leave-types", id));
+                    showAlert('نجاح', 'تم حذف نوع الإجازة.');
+                } catch (e) {
+                    console.error("Error deleting leave type:", e);
+                    showAlert('خطأ', 'فشلت عملية الحذف.');
+                }
+            });
+        };
+
+        function populateLeaveTypeDropdown() {
+            const select = document.getElementById('leave-type');
+            select.innerHTML = ''; // Clear existing
+            
+            state.leaveTypes.sort((a,b) => a.name.localeCompare(b.name)).forEach(lt => {
+                const option = document.createElement('option');
+                option.value = lt.id;
+                option.textContent = lt.name;
+                select.appendChild(option);
+            });
+        }
 
 
         // --- Initial Application Load ---
@@ -1510,14 +2297,13 @@
         ui.generatePayrollForm.addEventListener('submit', handlePayrollGeneration);
         ui.attendanceForm.addEventListener('submit', handleAttendanceFormSubmit);
         ui.settingsForm.addEventListener('submit', handleSettingsSubmit);
+        ui.leaveRequestForm.addEventListener('submit', handleLeaveRequestSubmit);
+        ui.leaveTypeForm.addEventListener('submit', handleLeaveTypeFormSubmit);
+
         document.getElementById('attendance-month').addEventListener('change', updateMonthDaysDisplay);
         document.getElementById('attendance-year').addEventListener('change', updateMonthDaysDisplay);
-        document.getElementById('logo-upload-input').addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                ui.logoPreview.src = URL.createObjectURL(file);
-            }
-        });
+        document.getElementById('leave-employee-id').addEventListener('change', updateLeaveBalanceDisplay);
+        document.getElementById('leave-type').addEventListener('change', updateLeaveBalanceDisplay);
 
         initializeFirebase();
 
