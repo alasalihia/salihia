@@ -142,6 +142,15 @@
                     <h2 class="text-3xl font-bold text-slate-800">إدارة الموظفين</h2>
                     <button onclick="openModal('addEmployeeModal')" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">إضافة موظف جديد</button>
                 </div>
+                <!-- NEW: Search Input -->
+                <div class="mb-6">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                        <input type="text" id="employee-search-input" placeholder="ابحث بالاسم، الرقم الوظيفي، أو المنصب..." class="w-full p-3 pr-10 border border-slate-300 rounded-lg focus:ring-violet-500 focus:border-violet-500 transition">
+                    </div>
+                </div>
                 <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-slate-500">
@@ -1000,12 +1009,24 @@
         }
 
         async function renderEmployeesPage() {
+            const searchTerm = document.getElementById('employee-search-input')?.value.toLowerCase() || '';
+            const filteredEmployees = state.employees.filter(emp => 
+                emp.name.toLowerCase().includes(searchTerm) ||
+                emp.employeeId.toLowerCase().includes(searchTerm) ||
+                emp.position.toLowerCase().includes(searchTerm)
+            );
+
             if (state.employees.length === 0) {
                 ui.employeesTableBody.innerHTML = '<tr class="border-b"><td colspan="6" class="text-center p-4">لا يوجد موظفين مضافين.</td></tr>';
                 return;
             }
+            
+            if (filteredEmployees.length === 0) {
+                ui.employeesTableBody.innerHTML = '<tr class="border-b"><td colspan="6" class="text-center p-4">لا يوجد موظفون يطابقون معايير البحث.</td></tr>';
+                return;
+            }
 
-            const leavePromises = state.employees.map(async (emp) => {
+            const leavePromises = filteredEmployees.map(async (emp) => {
                 const approvedAnnualLeaves = state.leaves.filter(l => 
                     l.employeeId === emp.id && 
                     l.status === 'approved' && 
@@ -2573,6 +2594,7 @@
         document.getElementById('attendance-year').addEventListener('change', updateMonthDaysDisplay);
         document.getElementById('leave-employee-id').addEventListener('change', updateLeaveBalanceDisplay);
         document.getElementById('leave-type').addEventListener('change', updateLeaveBalanceDisplay);
+        document.getElementById('employee-search-input').addEventListener('input', renderEmployeesPage);
 
         initializeFirebase();
 
