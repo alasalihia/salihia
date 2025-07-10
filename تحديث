@@ -14,10 +14,12 @@
         body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; }
         .modal { transition: opacity 0.3s ease; }
         .modal-content { transition: transform 0.3s ease; }
-        .module-container, #login-screen, #main-menu-screen { display: none; } /* Hidden by default */
-        #login-screen.active { display: flex; } /* Show login screen */
-        .page { display: none; } /* Pages are hidden by default */
-        .page.active { display: block; } /* Active page is shown */
+        /* Pages and sections are hidden by default, JS will show them. */
+        .page { display: none; }
+        .page.active { display: block; }
+        .settings-page-section { display: none; }
+        .settings-page-section.active { display: block; }
+        
         .chart-container { position: relative; height: 350px; width: 100%; }
         .sidebar-link { display: flex; align-items: center; padding: 0.75rem 1rem; border-radius: 0.5rem; transition: background-color 0.2s, color 0.2s; }
         .sidebar-link.active, .sidebar-link:hover { background-color: #8b5cf6; color: white; } /* Violet color for HR */
@@ -27,9 +29,7 @@
         /* Toggle Switch Styles */
         .toggle-checkbox:checked { right: 0; border-color: #8b5cf6; }
         .toggle-checkbox:checked + .toggle-label { background-color: #8b5cf6; }
-        /* NEW: Styles for settings sections */
-        .settings-page-section { display: none; }
-        .settings-page-section.active { display: block; }
+        
         @media print {
             @page {
                 size: A4 landscape;
@@ -49,7 +49,6 @@
 </head>
 <body class="bg-slate-100 text-slate-800">
 
-    <!-- شاشة تسجيل الدخول -->
     <div id="login-screen" class="flex flex-col items-center justify-center p-8 min-h-screen">
         <div class="text-center bg-white p-12 rounded-2xl shadow-xl max-w-lg w-full">
             <h1 class="text-3xl md:text-4xl font-bold text-violet-700 mb-4">منصة إدارة شؤون الموظفين</h1>
@@ -61,8 +60,7 @@
         </div>
     </div>
 
-    <!-- شاشة اختيار الأنظمة الرئيسية -->
-    <div id="main-menu-screen" class="min-h-screen p-8">
+    <div id="main-menu-screen" class="min-h-screen p-8" style="display: none;">
         <header class="flex justify-between items-center mb-12">
             <h1 class="text-3xl font-bold text-slate-800">القائمة الرئيسية</h1>
             <div id="main-menu-user-info" class="flex items-center">
@@ -81,8 +79,7 @@
         </div>
     </div>
     
-    <!-- MODULE: HR System -->
-    <div id="hr-module-container" class="module-container flex min-h-screen w-full">
+    <div id="hr-module-container" class="flex min-h-screen w-full" style="display: none;">
         <aside class="w-64 bg-white shadow-lg flex flex-col p-4">
             <h2 class="text-xl font-bold text-violet-700 text-center mb-4 mt-4">شؤون الموظفين</h2>
             <button onclick="showModule('main-menu-screen')" class="mb-4 text-sm text-blue-600 hover:underline"> &larr; العودة للقائمة الرئيسية</button>
@@ -108,17 +105,15 @@
                     <span>الحضور والانصراف</span>
                 </a>
                 <a href="#" onclick="showPage('page-hr-settings')" class="sidebar-link">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0 3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0 3.35a1.724 1.724 0 001.066 2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                     <span>الإعدادات</span>
                 </a>
             </nav>
         </aside>
         <div class="flex-grow p-4 md:p-8 bg-slate-100">
-            <!-- PAGE: HR Dashboard -->
             <main id="page-hr-dashboard" class="page active">
                 <h2 class="text-3xl font-bold text-slate-800 mb-6">لوحة تحكم الموظفين</h2>
                 <div id="hr-dashboard-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <!-- Stats will be rendered here by JS -->
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white p-6 rounded-xl shadow-lg">
@@ -130,19 +125,16 @@
                      <div class="bg-white p-6 rounded-xl shadow-lg">
                         <h3 class="text-xl font-bold text-violet-700 mb-4">طلبات الإجازة المعلقة</h3>
                         <div id="pending-leaves-dashboard" class="space-y-3 max-h-80 overflow-y-auto">
-                           <!-- Pending leaves will be rendered here -->
                         </div>
                     </div>
                 </div>
             </main>
 
-            <!-- PAGE: HR Employees -->
             <main id="page-hr-employees" class="page">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold text-slate-800">إدارة الموظفين</h2>
                     <button onclick="openModal('addEmployeeModal')" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">إضافة موظف جديد</button>
                 </div>
-                <!-- NEW: Search Input -->
                 <div class="mb-6">
                     <div class="relative">
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -165,42 +157,55 @@
                                 </tr>
                             </thead>
                             <tbody id="employees-table-body">
-                                <!-- Employee rows will be rendered here by JS -->
                             </tbody>
                         </table>
                     </div>
                 </div>
             </main>
 
-            <!-- PAGE: HR Leaves -->
             <main id="page-hr-leaves" class="page">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-3xl font-bold text-slate-800">إدارة الإجازات</h2>
+                    <h2 class="text-3xl font-bold text-slate-800">إدارة الإجازات - اختر موظفاً</h2>
                     <button onclick="openModal('leaveRequestModal')" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">تقديم طلب إجازة</button>
                 </div>
+                <div id="leaves-employee-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                </div>
+            </main>
+
+            <main id="page-employee-leave-profile" class="page">
+                <button onclick="showPage('page-hr-leaves')" class="mb-6 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">&larr; العودة لقائمة الموظفين</button>
+
+                <div id="leave-profile-header" class="bg-white p-6 rounded-xl shadow-lg mb-6">
+                    <h2 class="text-3xl font-bold text-slate-800" id="leave-profile-employee-name"></h2>
+                    <div id="leave-profile-stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 text-center">
+                    </div>
+                </div>
+
                 <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-violet-700">سجل الإجازات</h3>
+                        <button id="filter-entitlements-btn" onclick="toggleLeaveEntitlementFilter()" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">تصفية مستحقات الإجازة</button>
+                    </div>
+                    <div id="leave-entitlement-summary" class="hidden bg-teal-50 p-4 rounded-lg mb-4 text-center"></div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-slate-500">
                             <thead class="text-xs text-slate-700 uppercase bg-slate-100">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3">اسم الموظف</th>
                                     <th scope="col" class="px-6 py-3">نوع الإجازة</th>
                                     <th scope="col" class="px-6 py-3">من تاريخ</th>
                                     <th scope="col" class="px-6 py-3">إلى تاريخ</th>
-                                    <th scope="col" class="px-6 py-3">المدة (أيام عمل)</th>
+                                    <th scope="col" class="px-6 py-3">المدة (أيام)</th>
                                     <th scope="col" class="px-6 py-3">الحالة</th>
-                                    <th scope="col" class="px-6 py-3 text-center">إجراءات</th>
+                                    <th class="px-6 py-3 text-center">إجراءات</th>
                                 </tr>
                             </thead>
-                            <tbody id="leaves-table-body">
-                                <!-- Leave requests will be rendered here -->
+                            <tbody id="employee-leaves-history-table-body">
                             </tbody>
                         </table>
                     </div>
                 </div>
             </main>
             
-            <!-- PAGE: HR Salaries -->
             <main id="page-hr-salaries" class="page">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold text-slate-800">مسير الرواتب</h2>
@@ -210,16 +215,13 @@
                     <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg">
                         <h3 class="font-bold text-lg mb-4">سجل مسيرات الرواتب</h3>
                         <div id="payroll-history-container" class="space-y-2 max-h-96 overflow-y-auto">
-                            <!-- Payroll history will be loaded here -->
                         </div>
                     </div>
                     <div id="payroll-details-container" class="lg:col-span-2 hidden">
-                        <!-- Payroll details will be shown here -->
                     </div>
                 </div>
             </main>
 
-            <!-- PAGE: HR Attendance -->
             <main id="page-hr-attendance" class="page">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold text-slate-800">سجل الحضور والانصراف</h2>
@@ -236,21 +238,17 @@
                                 </tr>
                             </thead>
                             <tbody id="attendance-table-body">
-                                <!-- Attendance employee list will be rendered here by JS -->
                             </tbody>
                         </table>
                     </div>
                 </div>
             </main>
 
-            <!-- PAGE: HR Settings -->
             <main id="page-hr-settings" class="page">
                 <h2 class="text-3xl font-bold text-slate-800 mb-6">الإعدادات</h2>
 
-                <!-- Settings Menu (Visible by default) -->
                 <div id="settings-menu-container" class="settings-page-section">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- Company Settings Card -->
                         <div onclick="showSettingsSection('company-settings-section')" class="module-card bg-white p-8 rounded-2xl shadow-lg text-center cursor-pointer flex flex-col items-center justify-center h-48">
                              <div class="bg-violet-100 text-violet-600 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-4">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -259,7 +257,6 @@
                              </div>
                              <h3 class="text-xl font-bold text-slate-800">إعدادات الشركة</h3>
                         </div>
-                        <!-- Leave Types Settings Card -->
                         <div onclick="showSettingsSection('leave-types-section')" class="module-card bg-white p-8 rounded-2xl shadow-lg text-center cursor-pointer flex flex-col items-center justify-center h-48">
                             <div class="bg-blue-100 text-blue-600 rounded-full h-20 w-20 flex items-center justify-center mx-auto mb-4">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -271,7 +268,6 @@
                     </div>
                 </div>
 
-                <!-- Company Settings Section (Hidden by default) -->
                 <div id="company-settings-section" class="settings-page-section">
                     <button onclick="showSettingsSection('settings-menu-container')" class="mb-6 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">&larr; العودة إلى قائمة الإعدادات</button>
                     <div class="bg-white p-6 rounded-xl shadow-lg">
@@ -307,7 +303,6 @@
                     </div>
                 </div>
 
-                <!-- Leave Types Settings Section (Hidden by default) -->
                 <div id="leave-types-section" class="settings-page-section">
                     <button onclick="showSettingsSection('settings-menu-container')" class="mb-6 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">&larr; العودة إلى قائمة الإعدادات</button>
                     <div class="bg-white p-6 rounded-xl shadow-lg">
@@ -358,7 +353,6 @@
                                     </tr>
                                 </thead>
                                 <tbody id="leave-types-table-body">
-                                    <!-- Leave types will be rendered here -->
                                 </tbody>
                             </table>
                         </div>
@@ -368,7 +362,6 @@
         </div>
     </div>
 
-    <!-- Modals -->
     <div id="addEmployeeModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0 overflow-y-auto">
         <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 transform scale-95 my-8">
             <h3 id="employeeModalTitle" class="text-xl font-bold mb-4">إضافة موظف جديد</h3>
@@ -384,6 +377,10 @@
                     <div><label for="employeeSalary" class="block mb-2 text-sm font-medium">الراتب الأساسي (ر.س)</label><input type="number" id="employeeSalary" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
                     <div><label for="employeeNationality" class="block mb-2 text-sm font-medium">الجنسية</label><input type="text" id="employeeNationality" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" placeholder="مثال: سعودي"></div>
                     <div><label for="employeeIBAN" class="block mb-2 text-sm font-medium">رقم الآيبان (IBAN)</label><input type="text" id="employeeIBAN" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" placeholder="SAXXXXXXXXXXXXXXXXXXXXXX"></div>
+                    <div>
+                        <label for="employeeFlightAllowance" class="block mb-2 text-sm font-medium">بدل طيران الإجازة (ر.س)</label>
+                        <input type="number" id="employeeFlightAllowance" min="0" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
+                    </div>
                     <div><label for="employeeStatus" class="block mb-2 text-sm font-medium">حالة الموظف</label><select id="employeeStatus" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required><option value="active">على رأس العمل</option><option value="on_leave">في إجازة</option><option value="terminated">منتهية خدماته</option></select></div>
                     <div><label class="block mb-2 text-sm font-medium">رصيد الإجازة السنوية</label>
                         <div class="flex items-center space-x-4 rtl:space-x-reverse">
@@ -404,7 +401,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- NEW: Tardiness Rules Section -->
                 <div class="mt-6 pt-4 border-t">
                     <h3 class="text-lg font-bold mb-3">قواعد حسم التأخير</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
@@ -500,7 +496,6 @@
                         <p class="text-sm">عدد أيام الشهر: <span id="month-days-display" class="font-bold">0</span> يوم</p>
                     </div>
                     <div><label for="attended-days" class="block mb-2 text-sm font-medium">أيام الحضور الفعلية</label><input type="number" id="attended-days" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required></div>
-                    <!-- NEW: Late Incidents Manual Input -->
                     <div><label for="late-incidents-over-grace" class="block mb-2 text-sm font-medium">عدد مخالفات التأخير</label><input type="number" id="late-incidents-over-grace" min="0" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
                     <div class="md:col-span-2 grid grid-cols-2 gap-4">
                         <div><label for="late-hours" class="block mb-2 text-sm font-medium">إجمالي ساعات التأخير</label><input type="number" id="late-hours" min="0" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
@@ -531,7 +526,6 @@
                     <div>
                         <label for="leave-type" class="block mb-2 text-sm font-medium">نوع الإجازة</label>
                         <select id="leave-type" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required>
-                            <!-- Options will be populated by JS -->
                         </select>
                     </div>
                     <div id="leave-balance-info" class="hidden bg-slate-100 p-3 rounded-lg text-sm space-y-1 mt-2">
@@ -559,7 +553,6 @@
         </div>
     </div>
 
-    <!-- NEW: Attendance Upload Modal -->
     <div id="attendanceUploadModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
         <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-lg p-6 transform scale-95">
             <h3 class="text-xl font-bold mb-4">رفع ملف الحضور لـ <span id="upload-attendance-employee-name"></span></h3>
@@ -580,11 +573,8 @@
                         <label for="attendance-file-input" class="block mb-2 text-sm font-medium">اختر ملف الحضور (CSV)</label>
                         <input type="file" id="attendance-file-input" accept=".csv" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
                     </div>
-                    <!-- Summary of processed file (read-only) -->
                     <div id="attendance-upload-summary" class="hidden bg-slate-100 p-4 rounded-lg text-sm space-y-2">
-                        <!-- Summary will be rendered here by JS -->
                     </div>
-                    <!-- EDITABLE FIELDS -->
                     <div id="attendance-upload-edit-fields" class="hidden mt-4 space-y-4 border-t pt-4">
                         <h4 class="font-bold">تعديل البيانات المستخرجة</h4>
                         <div class="grid grid-cols-2 gap-4">
@@ -653,7 +643,7 @@
                 name: 'شركتك', 
                 address: '',
                 crNumber: '',
-                startTime: '09:00', // NEW: Default start time
+                startTime: '09:00',
             },
             currentEmployee: {
                 allowances: [],
@@ -662,6 +652,9 @@
         };
         let confirmationCallback = null;
         let departmentChart = null;
+        // State for leave profile page
+        let currentLeaveProfileEmployeeId = null;
+        let isEntitlementFilterActive = false;
         
         const DEFAULT_LEAVE_POLICIES = {
             annual: { name: 'إجازة سنوية', isStandard: true, paymentType: 'paid_in_advance', recurring: 'annually', days: 0 },
@@ -684,6 +677,7 @@
         const ui = {
             loginScreen: document.getElementById('login-screen'),
             mainMenuScreen: document.getElementById('main-menu-screen'),
+            hrModuleContainer: document.getElementById('hr-module-container'),
             userDisplayName: document.getElementById('main-menu-user-display-name'),
             addEmployeeForm: document.getElementById('addEmployeeForm'),
             employeesTableBody: document.getElementById('employees-table-body'),
@@ -704,7 +698,7 @@
             companyNameInput: document.getElementById('company-name-input'),
             companyAddressInput: document.getElementById('company-address-input'),
             companyCRInput: document.getElementById('company-cr-input'),
-            companyStartTimeInput: document.getElementById('company-start-time-input'), // NEW
+            companyStartTimeInput: document.getElementById('company-start-time-input'),
             leaveTypeForm: document.getElementById('leave-type-form'),
             leaveTypesTableBody: document.getElementById('leave-types-table-body'),
         };
@@ -752,20 +746,18 @@
             return count;
         }
 
-        function calculateWorkDaysInMonth(year, month, employeeWeekendDaysArray = []) {
-            let workDays = 0;
-            const startDate = new Date(year, month, 1);
-            const endDate = new Date(year, month + 1, 0);
-             const weekendMap = { 'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6 };
-            const weekendDays = (employeeWeekendDaysArray || []).map(day => weekendMap[day]);
-
-            for (let day = 1; day <= endDate.getDate(); day++) {
-                const currentDate = new Date(year, month, day);
-                if (!weekendDays.includes(currentDate.getDay())) {
-                    workDays++;
-                }
+        // NEW: Function to calculate calendar days
+        function calculateCalendarDays(startDateStr, endDateStr) {
+            const startDate = new Date(startDateStr);
+            const endDate = new Date(endDateStr);
+            if (endDate < startDate) {
+                return 0;
             }
-            return workDays;
+            // Calculate the difference in time
+            const diffTime = endDate.getTime() - startDate.getTime();
+            // Calculate the difference in days, add 1 to be inclusive
+            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            return diffDays;
         }
 
 
@@ -779,9 +771,10 @@
             if (modalId === 'addEmployeeModal') {
                 ui.addEmployeeForm.reset();
                 ui.employeeEditIdInput.value = '';
-                document.querySelector('input[name="annualLeaveEntitlement"][value="21"]').checked = true; // Reset radio
-                document.querySelectorAll('input[name="employee-weekend"]').forEach(cb => cb.checked = false); // Reset weekend checkboxes
+                document.querySelector('input[name="annualLeaveEntitlement"][value="21"]').checked = true;
+                document.querySelectorAll('input[name="employee-weekend"]').forEach(cb => cb.checked = false);
                 document.getElementById('enableTardinessRule').checked = false;
+                document.getElementById('employeeFlightAllowance').value = 0;
 
 
                 if (context) { // This is an edit operation
@@ -801,6 +794,7 @@
                         document.getElementById('employeeStatus').value = employee.status;
                         document.getElementById('employeeNationality').value = employee.nationality || '';
                         document.getElementById('employeeIBAN').value = employee.iban || '';
+                        document.getElementById('employeeFlightAllowance').value = employee.flightAllowance || 0;
                         if (employee.annualLeaveEntitlement) {
                             const radio = document.querySelector(`input[name="annualLeaveEntitlement"][value="${employee.annualLeaveEntitlement}"]`);
                             if(radio) radio.checked = true;
@@ -811,7 +805,6 @@
                                 if (checkbox) checkbox.checked = true;
                             });
                         }
-                        // Load tardiness rules
                         if (employee.tardinessRule) {
                             document.getElementById('enableTardinessRule').checked = employee.tardinessRule.enabled || false;
                             document.getElementById('gracePeriodMinutes').value = employee.tardinessRule.gracePeriodMinutes || '';
@@ -849,7 +842,7 @@
                     yearInput.value = now.getFullYear();
 
                     document.getElementById('attendance-upload-summary').classList.add('hidden');
-                    document.getElementById('attendance-upload-edit-fields').classList.add('hidden'); // Hide edit fields initially
+                    document.getElementById('attendance-upload-edit-fields').classList.add('hidden');
                     document.getElementById('save-processed-attendance-btn').classList.add('hidden');
                     document.getElementById('process-attendance-file-btn').classList.remove('hidden');
                     ui.attendanceUploadForm.reset();
@@ -868,8 +861,7 @@
                     yearInput.value = now.getFullYear();
                     document.getElementById('attendance-employee-name').textContent = employee.name;
                     document.getElementById('attendance-employee-id').value = employee.id;
-                    updateMonthDaysDisplay(); // Initial calculation
-                    // Load existing data for this month if available
+                    updateMonthDaysDisplay();
                     const attendanceId = `${yearInput.value}-${String(now.getMonth() + 1).padStart(2, '0')}`;
                     const attendanceDocRef = doc(db, "hr-data", userId, "employees", employee.id, "attendance", attendanceId);
                     const docSnap = await getDoc(attendanceDocRef);
@@ -919,11 +911,12 @@
 
         // --- Navigation Functions ---
         window.showModule = (moduleId) => {
-            document.querySelectorAll('.module-container, #main-menu-screen').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('#main-menu-screen, #hr-module-container').forEach(el => el.style.display = 'none');
             const targetModule = document.getElementById(moduleId);
             if (targetModule) {
-                targetModule.style.display = moduleId === 'main-menu-screen' ? 'block' : 'flex';
+                targetModule.style.display = 'block';
                 if (moduleId === 'hr-module-container') {
+                    targetModule.style.display = 'flex';
                     showPage('page-hr-dashboard');
                 }
             }
@@ -941,6 +934,9 @@
             if (pageId === 'page-hr-settings') {
                 showSettingsSection('settings-menu-container');
             }
+            if (pageId === 'page-hr-leaves') {
+                renderLeaveEmployeeList();
+            }
         };
 
         window.showSettingsSection = (sectionId) => {
@@ -954,7 +950,6 @@
         function renderAll() {
             renderHrDashboard();
             renderEmployeesPage();
-            renderLeavesPage();
             renderAttendancePage();
             renderOrUpdateDepartmentChart();
             renderPayrollHistory();
@@ -1097,7 +1092,7 @@
             ui.companyNameInput.value = state.settings.name || '';
             ui.companyAddressInput.value = state.settings.address || '';
             ui.companyCRInput.value = state.settings.crNumber || '';
-            ui.companyStartTimeInput.value = state.settings.startTime || '09:00'; // NEW
+            ui.companyStartTimeInput.value = state.settings.startTime || '09:00';
         }
 
         // --- Firebase Functions ---
@@ -1120,13 +1115,14 @@
                 onAuthStateChanged(auth, user => {
                     if (user) {
                         userId = user.uid;
-                        ui.loginScreen.classList.remove('active');
-                        ui.mainMenuScreen.style.display = "block";
+                        ui.loginScreen.style.display = 'none';
+                        ui.mainMenuScreen.style.display = 'block';
                         ui.userDisplayName.textContent = user.displayName || `مستخدم: ${user.uid.substring(0,6)}…`;
                         setupRealtimeListeners();
                     } else {
-                        ui.loginScreen.classList.add('active');
-                        ui.mainMenuScreen.style.display = "none";
+                        ui.loginScreen.style.display = 'flex';
+                        ui.mainMenuScreen.style.display = 'none';
+                        ui.hrModuleContainer.style.display = 'none';
                         clearDataAndListeners();
                     }
                 });
@@ -1181,7 +1177,7 @@
             if (snapshot.empty) {
                 const batch = writeBatch(db);
                 for (const [key, value] of Object.entries(DEFAULT_LEAVE_POLICIES)) {
-                    const docRef = doc(leaveTypesRef, key); // Use the key as the document ID
+                    const docRef = doc(leaveTypesRef, key);
                     batch.set(docRef, value);
                 }
                 await batch.commit();
@@ -1254,8 +1250,8 @@
                 nationality: form.employeeNationality.value.trim(),
                 iban: form.employeeIBAN.value.trim(),
                 annualLeaveEntitlement: Number(form.annualLeaveEntitlement.value),
+                flightAllowance: Number(form.employeeFlightAllowance.value) || 0,
                 weekendDays: selectedWeekends,
-                // NEW: Save tardiness rules
                 tardinessRule: {
                     enabled: form.enableTardinessRule.checked,
                     gracePeriodMinutes: Number(form.gracePeriodMinutes.value) || 0,
@@ -1392,7 +1388,7 @@
 
             try {
                 const collectionRef = collection(db, "hr-data", userId, "employees", employeeId, type);
-                await addDoc(collectionRef, { name, amount, includedInPayroll: true }); // Default to true
+                await addDoc(collectionRef, { name, amount, includedInPayroll: true });
             } catch (e) {
                 console.error(`Error saving ${type}:`, e);
                 showAlert('خطأ', 'فشل حفظ البند.');
@@ -1438,46 +1434,150 @@
         };
         
         // --- Leave Management Functions ---
-        function renderLeavesPage() {
-            if (ui.leavesTableBody) {
-                if (state.leaves.length === 0) {
-                    ui.leavesTableBody.innerHTML = `<tr class="border-b"><td colspan="7" class="text-center p-4">لا توجد طلبات إجازة.</td></tr>`;
-                    return;
-                }
 
+        function renderLeaveEmployeeList() {
+            const container = document.getElementById('leaves-employee-list');
+            if (!container) return; 
+
+            if (state.employees.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-500 col-span-full p-4">لا يوجد موظفين مضافين بعد.</p>`;
+                return;
+            }
+
+            container.innerHTML = state.employees
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map(emp => `
+                <div onclick="showEmployeeLeaveProfile('${emp.id}')" class="module-card bg-white p-4 rounded-xl shadow-lg cursor-pointer flex items-center space-x-4 rtl:space-x-reverse">
+                    <div class="bg-violet-100 text-violet-600 rounded-full h-12 w-12 flex items-center justify-center flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                    </div>
+                    <div>
+                        <p class="font-bold text-slate-800">${emp.name}</p>
+                        <p class="text-sm text-slate-500">${emp.position}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.showEmployeeLeaveProfile = (employeeId) => {
+            const employee = state.employees.find(e => e.id === employeeId);
+            if (!employee) {
+                showAlert('خطأ', 'لم يتم العثور على الموظف.');
+                return;
+            }
+            
+            currentLeaveProfileEmployeeId = employeeId;
+            isEntitlementFilterActive = false; // Reset filter on profile view
+
+            document.getElementById('leave-profile-employee-name').textContent = `سجل إجازات: ${employee.name}`;
+
+            const approvedAnnualLeaves = state.leaves.filter(l =>
+                l.employeeId === employee.id &&
+                l.status === 'approved' &&
+                l.leaveType === 'annual' &&
+                new Date(l.startDate).getFullYear() === new Date().getFullYear()
+            );
+            const daysTaken = approvedAnnualLeaves.reduce((sum, l) => sum + l.duration, 0);
+            const totalEntitlement = employee.annualLeaveEntitlement || 0;
+            const balance = totalEntitlement - daysTaken;
+            const pendingRequests = state.leaves.filter(l => l.employeeId === employee.id && l.status === 'pending').length;
+
+            const statsContainer = document.getElementById('leave-profile-stats');
+            statsContainer.innerHTML = `
+                <div><div class="text-slate-500 text-sm">الرصيد السنوي</div><div class="text-2xl font-bold">${totalEntitlement}</div></div>
+                <div><div class="text-slate-500 text-sm">المأخوذ هذا العام</div><div class="text-2xl font-bold text-orange-600">${daysTaken}</div></div>
+                <div><div class="text-slate-500 text-sm">المتبقي</div><div class="text-2xl font-bold text-green-600">${balance}</div></div>
+                <div><div class="text-slate-500 text-sm">طلبات معلقة</div><div class="text-2xl font-bold text-amber-600">${pendingRequests}</div></div>
+            `;
+
+            renderEmployeeLeaveHistory(employeeId);
+            showPage('page-employee-leave-profile');
+        }
+
+        window.toggleLeaveEntitlementFilter = () => {
+            isEntitlementFilterActive = !isEntitlementFilterActive;
+            renderEmployeeLeaveHistory(currentLeaveProfileEmployeeId);
+        }
+
+        async function renderEmployeeLeaveHistory(employeeId) {
+            const employee = state.employees.find(e => e.id === employeeId);
+            if (!employee) return;
+
+            const tableBody = document.getElementById('employee-leaves-history-table-body');
+            const summaryDiv = document.getElementById('leave-entitlement-summary');
+            const filterBtn = document.getElementById('filter-entitlements-btn');
+            const tableHeader = document.querySelector('#page-employee-leave-profile th:nth-child(4)');
+
+
+            let leavesToDisplay = state.leaves.filter(l => l.employeeId === employee.id);
+
+            if (isEntitlementFilterActive) {
+                tableHeader.textContent = 'المدة (أيام)';
+                leavesToDisplay = leavesToDisplay.filter(l => l.leaveType === 'annual' && l.status === 'approved');
+                
+                // Calculate entitlement value
+                const allowancesSnapshot = await getDocs(collection(db, "hr-data", userId, "employees", employee.id, "allowances"));
+                const allowances = allowancesSnapshot.docs.map(d => d.data());
+                const totalAllowances = allowances.filter(a => a.includedInPayroll).reduce((s, i) => s + i.amount, 0);
+                const grossSalary = (employee.salary || 0) + totalAllowances;
+                const dailyRate = grossSalary / 30;
+
+                const leaveDaysValue = leavesToDisplay.reduce((sum, l) => sum + (l.duration * dailyRate), 0);
+                const flightAllowance = employee.flightAllowance || 0;
+                const totalValue = leaveDaysValue + flightAllowance;
+
+                summaryDiv.innerHTML = `
+                    <h4 class="font-bold text-lg text-teal-800">ملخص مستحقات الإجازة السنوية</h4>
+                    <p class="text-sm">قيمة أيام الإجازة المستحقة: <span class="font-bold">${formatNumber(leaveDaysValue)} ر.س</span></p>
+                    <p class="text-sm">بدل الطيران: <span class="font-bold">${formatNumber(flightAllowance)} ر.س</span></p>
+                    <p class="text-md font-bold mt-2 border-t pt-2">الإجمالي: <span class="text-teal-700">${formatNumber(totalValue)} ر.س</span></p>
+                `;
+                summaryDiv.classList.remove('hidden');
+                filterBtn.textContent = 'إظهار كل السجلات';
+                filterBtn.classList.replace('bg-teal-500', 'bg-gray-500');
+                filterBtn.classList.replace('hover:bg-teal-600', 'hover:bg-gray-600');
+
+            } else {
+                tableHeader.textContent = 'المدة (أيام)';
+                summaryDiv.classList.add('hidden');
+                summaryDiv.innerHTML = '';
+                filterBtn.textContent = 'تصفية مستحقات الإجازة';
+                filterBtn.classList.replace('bg-gray-500', 'bg-teal-500');
+                filterBtn.classList.replace('hover:bg-gray-600', 'hover:bg-teal-600');
+            }
+
+            leavesToDisplay.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+
+            if (leavesToDisplay.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center p-4">${isEntitlementFilterActive ? 'لا توجد مستحقات إجازة سنوية معتمدة.' : 'لا يوجد سجل إجازات لهذا الموظف.'}</td></tr>`;
+            } else {
                 const statusClasses = { pending: 'bg-amber-100 text-amber-800', approved: 'bg-green-100 text-green-800', rejected: 'bg-red-100 text-red-800' };
                 const statusText = { pending: 'معلق', approved: 'موافق عليه', rejected: 'مرفوض' };
-                
                 const allLeaveTypes = {};
-                state.leaveTypes.forEach(lt => {
-                    allLeaveTypes[lt.id] = lt;
-                });
+                state.leaveTypes.forEach(lt => { allLeaveTypes[lt.id] = lt; });
 
+                tableBody.innerHTML = leavesToDisplay.map(l => {
+                    const leavePolicy = allLeaveTypes[l.leaveType] || { name: l.leaveType };
+                    const actions = l.status === 'pending' ?
+                        `<button onclick="approveLeave('${l.id}')" class="text-green-600 hover:text-green-800 font-semibold px-2">موافقة</button>
+                         <button onclick="rejectLeave('${l.id}')" class="text-orange-600 hover:text-orange-800 font-semibold px-2">رفض</button>
+                         <button onclick="deleteLeave('${l.id}')" class="text-red-500 hover:text-red-700 font-semibold px-2">حذف</button>` :
+                        `<button onclick="deleteLeave('${l.id}')" class="text-red-500 hover:text-red-700 font-semibold px-2">حذف</button>`;
 
-                ui.leavesTableBody.innerHTML = state.leaves
-                    .sort((a,b) => new Date(b.startDate) - new Date(a.startDate))
-                    .map(l => {
-                        const emp = state.employees.find(e => e.id === l.employeeId);
-                        const leavePolicy = allLeaveTypes[l.leaveType] || { name: l.leaveType };
-
-                        const actions = l.status === 'pending' ?
-                            `<button onclick="approveLeave('${l.id}')" class="text-green-600 hover:text-green-800 font-semibold px-2">موافقة</button>
-                             <button onclick="rejectLeave('${l.id}')" class="text-orange-600 hover:text-orange-800 font-semibold px-2">رفض</button>
-                             <button onclick="deleteLeave('${l.id}')" class="text-red-500 hover:text-red-700 font-semibold px-2">حذف</button>` :
-                            `<button onclick="deleteLeave('${l.id}')" class="text-red-500 hover:text-red-700 font-semibold px-2">حذف</button>`;
-
-                        return `<tr class="bg-white border-b hover:bg-slate-50">
-                            <td class="px-6 py-4 font-medium text-slate-900">${emp ? emp.name : 'غير معروف'}</td>
+                    return `
+                        <tr class="bg-white border-b hover:bg-slate-50">
                             <td class="px-6 py-4">${leavePolicy.name}</td>
                             <td class="px-6 py-4">${l.startDate}</td>
                             <td class="px-6 py-4">${l.endDate}</td>
                             <td class="px-6 py-4">${l.duration}</td>
                             <td class="px-6 py-4"><span class="px-2 py-1 text-xs font-medium rounded-full ${statusClasses[l.status] || ''}">${statusText[l.status] || l.status}</span></td>
                             <td class="px-6 py-4 text-center">${actions}</td>
-                        </tr>`;
+                        </tr>
+                    `;
                 }).join('');
             }
         }
+
 
         async function updateLeaveBalanceDisplay() {
             const employeeId = document.getElementById('leave-employee-id').value;
@@ -1521,7 +1621,7 @@
             } else if (policy.recurring === 'multiple_per_year') {
                 message = `<p>المدة المسموحة: ${policy.days} يوم لكل حالة.</p>`;
                 showBalance = false;
-            } else { // 'none'
+            } else {
                 showBalance = false;
             }
 
@@ -1569,22 +1669,47 @@
             const form = event.target;
             const employeeId = form['leave-employee-id'].value;
             const employee = state.employees.find(e => e.id === employeeId);
-            const startDate = form['leave-start-date'].value;
-            const endDate = form['leave-end-date'].value;
+            const startDateStr = form['leave-start-date'].value;
+            const endDateStr = form['leave-end-date'].value;
             const leaveTypeKey = form['leave-type'].value;
 
-            if (!employeeId || !startDate || !endDate || !leaveTypeKey) {
+            if (!employeeId || !startDateStr || !endDateStr || !leaveTypeKey) {
                 showAlert('بيانات ناقصة', 'يرجى ملء جميع الحقول المطلوبة.');
                 return;
             }
-            if (new Date(endDate) < new Date(startDate)) {
+            
+            const newLeaveStart = new Date(startDateStr);
+            const newLeaveEnd = new Date(endDateStr);
+
+            if (newLeaveEnd < newLeaveStart) {
                 showAlert('خطأ في التاريخ', 'تاريخ انتهاء الإجازة يجب أن يكون بعد تاريخ البدء.');
                 return;
             }
 
-            const duration = calculateWorkingDays(startDate, endDate, employee.weekendDays);
+            // --- NEW: Overlap Check Logic ---
+            const existingLeaves = state.leaves.filter(l => l.employeeId === employeeId && l.status === 'approved');
+            
+            for (const existingLeave of existingLeaves) {
+                const existingStart = new Date(existingLeave.startDate);
+                const existingEnd = new Date(existingLeave.endDate);
+
+                // Check for overlap: (StartA <= EndB) and (StartB <= EndA)
+                if (newLeaveStart <= existingEnd && existingStart <= newLeaveEnd) {
+                    showAlert('طلب مرفوض', `يوجد تداخل في التواريخ مع إجازة قائمة من ${existingLeave.startDate} إلى ${existingLeave.endDate}.`);
+                    return; // Stop the submission
+                }
+            }
+            // --- END of Overlap Check Logic ---
+
+            let duration;
+            if (leaveTypeKey === 'annual') {
+                duration = calculateCalendarDays(startDateStr, endDateStr);
+            } else {
+                duration = calculateWorkingDays(startDateStr, endDateStr, employee.weekendDays);
+            }
+            
             if (duration <= 0) {
-                 showAlert('خطأ في المدة', 'مدة الإجازة المحددة تقع بالكامل في عطلة نهاية الأسبوع أو أن المدة صفر.');
+                 showAlert('خطأ في المدة', 'مدة الإجازة المحددة هي صفر أو أقل. يرجى التحقق من التواريخ.');
                  return;
             }
 
@@ -1608,7 +1733,7 @@
                     return;
                 }
             } else if (policy.recurring === 'annually' && leaveTypeKey === 'annual') {
-                 const currentYear = new Date(startDate).getFullYear();
+                 const currentYear = new Date(startDateStr).getFullYear();
                 const daysTaken = leavesOfType.filter(l => new Date(l.startDate).getFullYear() === currentYear).reduce((sum, l) => sum + l.duration, 0);
                 const balance = (employee.annualLeaveEntitlement || 0) - daysTaken;
                 if (duration > balance) {
@@ -1621,8 +1746,8 @@
             const leaveData = {
                 employeeId,
                 leaveType: leaveTypeKey,
-                startDate,
-                endDate,
+                startDate: startDateStr,
+                endDate: endDateStr,
                 duration,
                 reason: form['leave-reason'].value.trim(),
                 status: 'pending',
@@ -1727,6 +1852,35 @@
                     }
                 }
 
+                // --- NEW: Flight Allowance Logic ---
+                let empFlightAllowancePay = 0;
+                const payrollMonthStartDate = new Date(payrollYear, payrollMonth, 1);
+                const payrollMonthEndDate = new Date(payrollYear, payrollMonth + 1, 0);
+
+                const annualLeaveInMonth = state.leaves.find(l =>
+                    l.employeeId === emp.id &&
+                    l.status === 'approved' &&
+                    l.leaveType === 'annual' &&
+                    new Date(l.startDate) <= payrollMonthEndDate &&
+                    new Date(l.endDate) >= payrollMonthStartDate
+                );
+
+                if (annualLeaveInMonth && emp.flightAllowance > 0) {
+                    const leaveStartDate = new Date(annualLeaveInMonth.startDate);
+                    if (leaveStartDate.getFullYear() === payrollYear && leaveStartDate.getMonth() === payrollMonth) {
+                        empFlightAllowancePay = emp.flightAllowance;
+                        // Add to allowances array for the payslip record
+                        allowances.push({
+                            name: 'بدل طيران إجازة',
+                            amount: empFlightAllowancePay,
+                            includedInPayroll: true,
+                            isAuto: true
+                        });
+                    }
+                }
+                // --- End of Flight Allowance Logic ---
+
+
                 const empTotalAllowances = allowances.filter(a => a.includedInPayroll).reduce((s, i) => s + i.amount, 0);
                 const empTotalFixedDeductions = fixedDeductions.filter(d => d.includedInPayroll).reduce((s, i) => s + i.amount, 0);
                 const grossSalary = emp.salary + empTotalAllowances;
@@ -1742,9 +1896,7 @@
                 const hourlyRate = dailyRate / 8; 
 
                 let paidLeaveWorkDaysInMonth = 0;
-                const payrollMonthStartDate = new Date(payrollYear, payrollMonth, 1);
-                const payrollMonthEndDate = new Date(payrollYear, payrollMonth + 1, 0);
-
+                
                 const paidLeaveTypes = state.leaveTypes.filter(lt => lt.paymentType === 'paid' || lt.paymentType === 'paid_in_advance').map(lt => lt.id);
                 
                 const approvedPaidLeavesInMonth = state.leaves.filter(l =>
@@ -1773,7 +1925,6 @@
                         absenceDeduction = dailyRate * unpaidAbsentWorkDays;
                     }
 
-                    // UPDATED: Late Deduction Logic
                     if (emp.tardinessRule?.enabled && emp.tardinessRule.deductionHours > 0) {
                         const incidents = attendanceData.lateIncidentsOverGrace || 0;
                         lateDeduction = incidents * emp.tardinessRule.deductionHours * hourlyRate;
@@ -1944,7 +2095,7 @@
                 try {
                     await updateDoc(doc(db, "hr-data", userId, "payrolls", payrollId), { isApproved: true });
                     showAlert('نجاح', 'تم اعتماد مسير الرواتب.');
-                    displayPayrollDetails(payrollId); // Refresh view
+                    displayPayrollDetails(payrollId);
                 } catch (e) {
                     console.error("Error approving payroll:", e);
                     showAlert('خطأ', 'فشلت عملية الاعتماد.');
@@ -1955,8 +2106,6 @@
         window.deletePayroll = async (payrollId) => {
             showConfirmation('تأكيد الحذف', 'هل أنت متأكد من حذف هذا المسير؟ سيتم حذف جميع سجلات الموظفين فيه.', async () => {
                 try {
-                    // It's complex to delete subcollections in a single client operation without cloud functions.
-                    // For now, we just delete the main doc. A more robust solution would use a cloud function.
                     await deleteDoc(doc(db, "hr-data", userId, "payrolls", payrollId));
                     ui.payrollDetailsContainer.classList.add('hidden');
                     showAlert('نجاح', 'تم حذف مسير الرواتب.');
@@ -2269,7 +2418,7 @@
                     let attendedDays = 0;
                     let totalLateMinutes = 0;
                     let totalOvertimeMinutes = 0;
-                    let lateIncidentsOverGrace = 0; // NEW: Counter for incidents
+                    let lateIncidentsOverGrace = 0;
                     const standardWorkHours = 8;
                     const companyStartTime = state.settings.startTime || '09:00';
                     const [startHour, startMinute] = companyStartTime.split(':').map(Number);
@@ -2284,22 +2433,18 @@
                             const checkInTime = new Date(`1970-01-01T${checkIn}:00`);
                             const checkOutTime = new Date(`1970-01-01T${checkOut}:00`);
                             
-                            // Check for lateness
                             const [checkInHour, checkInMinute] = checkIn.split(':').map(Number);
                             const dailyLateMinutes = (checkInHour - startHour) * 60 + (checkInMinute - startMinute);
                             if (dailyLateMinutes > 0) {
                                 totalLateMinutes += dailyLateMinutes;
-                                // Check if this incident violates the grace period rule
                                 if (tardinessRule?.enabled && dailyLateMinutes > (tardinessRule.gracePeriodMinutes || 0)) {
                                     lateIncidentsOverGrace++;
                                 }
                             }
                             
-                            // Calculate total work duration in hours
                             const durationMs = checkOutTime - checkInTime;
                             const durationHours = durationMs / (1000 * 60 * 60);
 
-                            // Calculate overtime
                             if (durationHours > standardWorkHours) {
                                 totalOvertimeMinutes += (durationHours - standardWorkHours) * 60;
                             }
@@ -2315,7 +2460,6 @@
                         lateIncidentsOverGrace: lateIncidentsOverGrace,
                     };
 
-                    // Show the summary (as a reference)
                     const summaryDiv = document.getElementById('attendance-upload-summary');
                     summaryDiv.innerHTML = `
                         <h4 class="font-bold mb-2">البيانات المستخرجة من الملف:</h4>
@@ -2326,7 +2470,6 @@
                     `;
                     summaryDiv.classList.remove('hidden');
 
-                    // Populate the editable fields
                     document.getElementById('upload-attended-days').value = calculatedData.attendedDays;
                     document.getElementById('upload-late-incidents').value = calculatedData.lateIncidentsOverGrace;
                     document.getElementById('upload-late-hours').value = calculatedData.lateHours;
@@ -2334,7 +2477,6 @@
                     document.getElementById('upload-overtime-hours').value = calculatedData.overtimeHours;
                     document.getElementById('upload-overtime-minutes').value = calculatedData.overtimeMinutes;
 
-                    // Show the editable fields and the save button
                     document.getElementById('attendance-upload-edit-fields').classList.remove('hidden');
                     document.getElementById('process-attendance-file-btn').classList.add('hidden');
                     document.getElementById('save-processed-attendance-btn').classList.remove('hidden');
@@ -2394,7 +2536,7 @@
                 lateMinutes: Number(form['late-minutes'].value) || 0,
                 overtimeHours: Number(form['overtime-hours'].value) || 0,
                 overtimeMinutes: Number(form['overtime-minutes'].value) || 0,
-                lateIncidentsOverGrace: Number(form['late-incidents-over-grace'].value) || 0, // NEW
+                lateIncidentsOverGrace: Number(form['late-incidents-over-grace'].value) || 0,
             };
 
             if (isNaN(attendanceData.attendedDays)) {
@@ -2445,19 +2587,13 @@
             const submitButton = ui.settingsForm.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.innerHTML;
             submitButton.disabled = true;
-            submitButton.innerHTML = `
-                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                جاري الحفظ...
-            `;
+            submitButton.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> جاري الحفظ...`;
             
             const settingsData = {
                 name: ui.companyNameInput.value.trim(),
                 address: ui.companyAddressInput.value.trim(),
                 crNumber: ui.companyCRInput.value.trim(),
-                startTime: ui.companyStartTimeInput.value, // NEW
+                startTime: ui.companyStartTimeInput.value,
             };
 
             if (!db || !userId) {
@@ -2503,7 +2639,7 @@
                     await updateDoc(docRef, leaveData);
                     showAlert('نجاح', 'تم تعديل نوع الإجازة بنجاح.');
                 } else {
-                    leaveData.isStandard = false; // Ensure new types are marked as custom
+                    leaveData.isStandard = false;
                     await addDoc(collection(db, "hr-data", userId, "leave-types"), leaveData);
                     showAlert('نجاح', 'تمت إضافة نوع الإجازة المخصص بنجاح.');
                 }
@@ -2566,7 +2702,7 @@
 
         function populateLeaveTypeDropdown() {
             const select = document.getElementById('leave-type');
-            select.innerHTML = ''; // Clear existing
+            select.innerHTML = '';
             
             state.leaveTypes.sort((a,b) => a.name.localeCompare(b.name)).forEach(lt => {
                 const option = document.createElement('option');
@@ -2585,7 +2721,6 @@
         ui.leaveRequestForm.addEventListener('submit', handleLeaveRequestSubmit);
         ui.leaveTypeForm.addEventListener('submit', handleLeaveTypeFormSubmit);
         
-        // FIX: Added event listeners for the new upload functionality
         document.getElementById('process-attendance-file-btn').addEventListener('click', handleProcessAttendanceFile);
         ui.attendanceUploadForm.addEventListener('submit', handleAttendanceUploadFormSubmit);
 
