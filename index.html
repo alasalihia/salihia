@@ -1,4 +1,4 @@
-       <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -1700,7 +1700,7 @@
                 return;
             }
 
-            // --- NEW: Overlap Check Logic ---
+            // --- Overlap Check Logic ---
             const existingLeaves = state.leaves.filter(l => l.employeeId === employeeId && l.status === 'approved');
             
             for (const existingLeave of existingLeaves) {
@@ -1899,11 +1899,7 @@
                     const hourlyRate = dailyRate / 8; 
 
                     let paidLeaveWorkDaysInMonth = 0;
-                    // MODIFICATION: Exclude 'annual' leave from the types considered as paid leave within the payroll calculation.
-                    const paidLeaveTypes = state.leaveTypes
-                        .filter(lt => (lt.paymentType === 'paid' || lt.paymentType === 'paid_in_advance') && lt.id !== 'annual')
-                        .map(lt => lt.id);
-
+                    const paidLeaveTypes = state.leaveTypes.filter(lt => lt.paymentType === 'paid' || lt.paymentType === 'paid_in_advance').map(lt => lt.id);
                     const approvedPaidLeavesInMonth = state.leaves.filter(l => l.employeeId === emp.id && l.status === 'approved' && paidLeaveTypes.includes(l.leaveType) && new Date(l.startDate) <= payrollMonthEndDate && new Date(l.endDate) >= payrollMonthStartDate);
                     
                     approvedPaidLeavesInMonth.forEach(leave => {
@@ -2099,14 +2095,28 @@
         };
 
         window.deletePayroll = async (payrollId) => {
-            showConfirmation('تأكيد الحذف', 'هل أنت متأكد من حذف هذا المسير؟ سيتم حذف جميع سجلات الموظفين فيه.', async () => {
+            showConfirmation('تأكيد الحذف', 'هل أنت متأكد من حذف هذا المسير؟ سيتم حذف جميع سجلات الموظفين فيه بشكل نهائي.', async () => {
+                const payrollDocRef = doc(db, "hr-data", userId, "payrolls", payrollId);
+                const recordsCollectionRef = collection(payrollDocRef, "records");
+
                 try {
-                    await deleteDoc(doc(db, "hr-data", userId, "payrolls", payrollId));
+                    const recordsSnapshot = await getDocs(recordsCollectionRef);
+                    const batch = writeBatch(db);
+
+                    recordsSnapshot.forEach(recordDoc => {
+                        batch.delete(recordDoc.ref);
+                    });
+
+                    batch.delete(payrollDocRef);
+
+                    await batch.commit();
+
                     ui.payrollDetailsContainer.classList.add('hidden');
-                    showAlert('نجاح', 'تم حذف مسير الرواتب.');
+                    showAlert('نجاح', 'تم حذف مسير الرواتب وجميع سجلاته بنجاح.');
+
                 } catch (e) {
-                    console.error("Error deleting payroll:", e);
-                    showAlert('خطأ', 'فشلت عملية الحذف.');
+                    console.error("Error deleting payroll and its records:", e);
+                    showAlert('خطأ', 'فشلت عملية الحذف الكامل للمسير.');
                 }
             });
         };
@@ -2729,4 +2739,5 @@
         initializeFirebase();
 
     </script>
-</body>
+</body> 
+</html>
