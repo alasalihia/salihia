@@ -1538,7 +1538,7 @@
                 filterBtn.classList.replace('hover:bg-teal-600', 'hover:bg-gray-600');
 
             } else {
-                tableHeader.textContent = 'المدة (أيام عمل)';
+                tableHeader.textContent = 'المدة (أيام)';
                 summaryDiv.classList.add('hidden');
                 summaryDiv.innerHTML = '';
                 filterBtn.textContent = 'تصفية مستحقات الإجازة';
@@ -1669,32 +1669,49 @@
             const form = event.target;
             const employeeId = form['leave-employee-id'].value;
             const employee = state.employees.find(e => e.id === employeeId);
-            const startDate = form['leave-start-date'].value;
-            const endDate = form['leave-end-date'].value;
+            const startDateStr = form['leave-start-date'].value;
+            const endDateStr = form['leave-end-date'].value;
             const leaveTypeKey = form['leave-type'].value;
 
-            if (!employeeId || !startDate || !endDate || !leaveTypeKey) {
+            if (!employeeId || !startDateStr || !endDateStr || !leaveTypeKey) {
                 showAlert('بيانات ناقصة', 'يرجى ملء جميع الحقول المطلوبة.');
                 return;
             }
-            if (new Date(endDate) < new Date(startDate)) {
+            
+            const newLeaveStart = new Date(startDateStr);
+            const newLeaveEnd = new Date(endDateStr);
+
+            if (newLeaveEnd < newLeaveStart) {
                 showAlert('خطأ في التاريخ', 'تاريخ انتهاء الإجازة يجب أن يكون بعد تاريخ البدء.');
                 return;
             }
 
-            // --- MODIFICATION: Use calendar days for annual leave, working days for others ---
+            // --- NEW: Overlap Check Logic ---
+            const existingLeaves = state.leaves.filter(l => l.employeeId === employeeId && l.status === 'approved');
+            
+            for (const existingLeave of existingLeaves) {
+                const existingStart = new Date(existingLeave.startDate);
+                const existingEnd = new Date(existingLeave.endDate);
+
+                // Check for overlap: (StartA <= EndB) and (StartB <= EndA)
+                if (newLeaveStart <= existingEnd && existingStart <= newLeaveEnd) {
+                    showAlert('طلب مرفوض', `يوجد تداخل في التواريخ مع إجازة قائمة من ${existingLeave.startDate} إلى ${existingLeave.endDate}.`);
+                    return; // Stop the submission
+                }
+            }
+            // --- END of Overlap Check Logic ---
+
             let duration;
             if (leaveTypeKey === 'annual') {
-                duration = calculateCalendarDays(startDate, endDate);
+                duration = calculateCalendarDays(startDateStr, endDateStr);
             } else {
-                duration = calculateWorkingDays(startDate, endDate, employee.weekendDays);
+                duration = calculateWorkingDays(startDateStr, endDateStr, employee.weekendDays);
             }
             
             if (duration <= 0) {
                  showAlert('خطأ في المدة', 'مدة الإجازة المحددة هي صفر أو أقل. يرجى التحقق من التواريخ.');
                  return;
             }
-            // --- END OF MODIFICATION ---
 
             let policy = state.leaveTypes.find(lt => lt.id === leaveTypeKey);
             if (!policy) {
@@ -1716,7 +1733,7 @@
                     return;
                 }
             } else if (policy.recurring === 'annually' && leaveTypeKey === 'annual') {
-                 const currentYear = new Date(startDate).getFullYear();
+                 const currentYear = new Date(startDateStr).getFullYear();
                 const daysTaken = leavesOfType.filter(l => new Date(l.startDate).getFullYear() === currentYear).reduce((sum, l) => sum + l.duration, 0);
                 const balance = (employee.annualLeaveEntitlement || 0) - daysTaken;
                 if (duration > balance) {
@@ -1729,8 +1746,8 @@
             const leaveData = {
                 employeeId,
                 leaveType: leaveTypeKey,
-                startDate,
-                endDate,
+                startDate: startDateStr,
+                endDate: endDateStr,
                 duration,
                 reason: form['leave-reason'].value.trim(),
                 status: 'pending',
