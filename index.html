@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+       <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -1899,7 +1899,11 @@
                     const hourlyRate = dailyRate / 8; 
 
                     let paidLeaveWorkDaysInMonth = 0;
-                    const paidLeaveTypes = state.leaveTypes.filter(lt => lt.paymentType === 'paid' || lt.paymentType === 'paid_in_advance').map(lt => lt.id);
+                    // MODIFICATION: Exclude 'annual' leave from the types considered as paid leave within the payroll calculation.
+                    const paidLeaveTypes = state.leaveTypes
+                        .filter(lt => (lt.paymentType === 'paid' || lt.paymentType === 'paid_in_advance') && lt.id !== 'annual')
+                        .map(lt => lt.id);
+
                     const approvedPaidLeavesInMonth = state.leaves.filter(l => l.employeeId === emp.id && l.status === 'approved' && paidLeaveTypes.includes(l.leaveType) && new Date(l.startDate) <= payrollMonthEndDate && new Date(l.endDate) >= payrollMonthStartDate);
                     
                     approvedPaidLeavesInMonth.forEach(leave => {
@@ -2726,4 +2730,3 @@
 
     </script>
 </body>
-</html>
