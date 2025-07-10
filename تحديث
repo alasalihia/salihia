@@ -875,6 +875,20 @@
                         document.getElementById('late-incidents-over-grace').value = data.lateIncidentsOverGrace || 0;
                     }
                 }
+            } else if (modalId === 'generatePayrollModal') {
+                const monthSelect = document.getElementById('payroll-month');
+                const yearInput = document.getElementById('payroll-year');
+                const now = new Date();
+                const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+                monthSelect.innerHTML = months.map((m, i) => `<option value="${i}">${m}</option>`).join('');
+
+                // Default to the previous month, as payroll is usually run for the month that just ended.
+                const lastMonth = new Date(now.getFullYear(), now.getMonth(), 0); // Day 0 of current month gives last day of previous month
+                
+                ui.generatePayrollForm.reset(); // Reset form first
+                
+                monthSelect.value = lastMonth.getMonth();
+                yearInput.value = lastMonth.getFullYear();
             }
             modal.classList.remove('hidden');
             setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('.modal-content').classList.remove('scale-95'); }, 10);
