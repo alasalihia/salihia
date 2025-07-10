@@ -1887,18 +1887,21 @@
                     const empTotalAllowances = allowances.filter(a => a.includedInPayroll).reduce((s, i) => s + i.amount, 0);
                     const empTotalFixedDeductions = fixedDeductions.filter(d => d.includedInPayroll).reduce((s, i) => s + i.amount, 0);
                     const grossSalary = emp.salary + empTotalAllowances;
-                    const workDaysInMonth = calculateWorkingDays(payrollYear, payrollMonth, emp.weekendDays);
-                    const dailyRate = workDaysInMonth > 0 ? (grossSalary / workDaysInMonth) : 0;
-                    const hourlyRate = dailyRate / 8;
-
+                    
                     let absenceDeduction = 0, lateDeduction = 0, overtimePay = 0;
                     const attendanceId = `${year}-${String(parseInt(month) + 1).padStart(2, '0')}`;
                     const attendanceDocRef = doc(db, "hr-data", userId, "employees", emp.id, "attendance", attendanceId);
                     const attendanceSnap = await getDoc(attendanceDocRef);
+                    
+                    // --- UPDATED PAYROLL CALCULATION LOGIC ---
+                    const workDaysInMonth = calculateWorkingDays(payrollYear, payrollMonth, emp.weekendDays);
+                    const dailyRate = workDaysInMonth > 0 ? (grossSalary / workDaysInMonth) : 0;
+                    const hourlyRate = dailyRate / 8; 
 
                     let paidLeaveWorkDaysInMonth = 0;
                     const paidLeaveTypes = state.leaveTypes.filter(lt => lt.paymentType === 'paid' || lt.paymentType === 'paid_in_advance').map(lt => lt.id);
                     const approvedPaidLeavesInMonth = state.leaves.filter(l => l.employeeId === emp.id && l.status === 'approved' && paidLeaveTypes.includes(l.leaveType) && new Date(l.startDate) <= payrollMonthEndDate && new Date(l.endDate) >= payrollMonthStartDate);
+                    
                     approvedPaidLeavesInMonth.forEach(leave => {
                         const leaveStart = new Date(leave.startDate);
                         const leaveEnd = new Date(leave.endDate);
@@ -1910,23 +1913,35 @@
                     if (attendanceSnap.exists()) {
                         const attendanceData = attendanceSnap.data();
                         const attendedDays = attendanceData.attendedDays || 0;
+                        
                         const unpaidAbsentWorkDays = Math.max(0, workDaysInMonth - attendedDays - paidLeaveWorkDaysInMonth);
                         if (unpaidAbsentWorkDays > 0) {
                             absenceDeduction = dailyRate * unpaidAbsentWorkDays;
                         }
+
+                        const overtimeWorkDays = Math.max(0, attendedDays - (workDaysInMonth - paidLeaveWorkDaysInMonth));
+                        if(overtimeWorkDays > 0) {
+                            overtimePay += overtimeWorkDays * dailyRate * 1.5; // Daily overtime
+                        }
+
                         if (emp.tardinessRule?.enabled && emp.tardinessRule.deductionHours > 0) {
                             const incidents = attendanceData.lateIncidentsOverGrace || 0;
                             lateDeduction = incidents * emp.tardinessRule.deductionHours * hourlyRate;
                         } else {
-                            const totalLateMinutes = (attendanceData.lateHours * 60) + attendanceData.lateMinutes;
+                            const totalLateMinutes = (attendanceData.lateHours || 0) * 60 + (attendanceData.lateMinutes || 0);
                             if (totalLateMinutes > 0) lateDeduction = (hourlyRate / 60) * totalLateMinutes;
                         }
-                        const totalOvertimeMinutes = (attendanceData.overtimeHours * 60) + attendanceData.overtimeMinutes;
-                        if (totalOvertimeMinutes > 0) overtimePay = (hourlyRate * 1.5 / 60) * totalOvertimeMinutes;
+                        
+                        const totalOvertimeMinutes = (attendanceData.overtimeHours || 0) * 60 + (attendanceData.overtimeMinutes || 0);
+                        if (totalOvertimeMinutes > 0) {
+                             overtimePay += (hourlyRate * 1.5 / 60) * totalOvertimeMinutes; // Hourly overtime
+                        }
+
                     } else {
                         const unpaidAbsentWorkDays = Math.max(0, workDaysInMonth - paidLeaveWorkDaysInMonth);
                         absenceDeduction = dailyRate * unpaidAbsentWorkDays;
                     }
+                    // --- END OF UPDATED LOGIC ---
 
                     const empNet = (grossSalary + overtimePay) - (empTotalFixedDeductions + absenceDeduction + lateDeduction);
                     const payrollRecordRef = doc(db, "hr-data", userId, "payrolls", payrollId, "records", emp.id);
