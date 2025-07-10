@@ -194,7 +194,7 @@
                                     <th scope="col" class="px-6 py-3">نوع الإجازة</th>
                                     <th scope="col" class="px-6 py-3">من تاريخ</th>
                                     <th scope="col" class="px-6 py-3">إلى تاريخ</th>
-                                    <th scope="col" class="px-6 py-3">المدة (أيام عمل)</th>
+                                    <th scope="col" class="px-6 py-3">المدة (أيام)</th>
                                     <th scope="col" class="px-6 py-3">الحالة</th>
                                     <th class="px-6 py-3 text-center">إجراءات</th>
                                 </tr>
@@ -652,7 +652,7 @@
         };
         let confirmationCallback = null;
         let departmentChart = null;
-        // NEW: State for leave profile page
+        // State for leave profile page
         let currentLeaveProfileEmployeeId = null;
         let isEntitlementFilterActive = false;
         
@@ -746,20 +746,18 @@
             return count;
         }
 
-        function calculateWorkDaysInMonth(year, month, employeeWeekendDaysArray = []) {
-            let workDays = 0;
-            const startDate = new Date(year, month, 1);
-            const endDate = new Date(year, month + 1, 0);
-             const weekendMap = { 'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6 };
-            const weekendDays = (employeeWeekendDaysArray || []).map(day => weekendMap[day]);
-
-            for (let day = 1; day <= endDate.getDate(); day++) {
-                const currentDate = new Date(year, month, day);
-                if (!weekendDays.includes(currentDate.getDay())) {
-                    workDays++;
-                }
+        // NEW: Function to calculate calendar days
+        function calculateCalendarDays(startDateStr, endDateStr) {
+            const startDate = new Date(startDateStr);
+            const endDate = new Date(endDateStr);
+            if (endDate < startDate) {
+                return 0;
             }
-            return workDays;
+            // Calculate the difference in time
+            const diffTime = endDate.getTime() - startDate.getTime();
+            // Calculate the difference in days, add 1 to be inclusive
+            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            return diffDays;
         }
 
 
@@ -1508,10 +1506,13 @@
             const tableBody = document.getElementById('employee-leaves-history-table-body');
             const summaryDiv = document.getElementById('leave-entitlement-summary');
             const filterBtn = document.getElementById('filter-entitlements-btn');
+            const tableHeader = document.querySelector('#page-employee-leave-profile th:nth-child(4)');
+
 
             let leavesToDisplay = state.leaves.filter(l => l.employeeId === employee.id);
 
             if (isEntitlementFilterActive) {
+                tableHeader.textContent = 'المدة (أيام)';
                 leavesToDisplay = leavesToDisplay.filter(l => l.leaveType === 'annual' && l.status === 'approved');
                 
                 // Calculate entitlement value
@@ -1537,6 +1538,7 @@
                 filterBtn.classList.replace('hover:bg-teal-600', 'hover:bg-gray-600');
 
             } else {
+                tableHeader.textContent = 'المدة (أيام عمل)';
                 summaryDiv.classList.add('hidden');
                 summaryDiv.innerHTML = '';
                 filterBtn.textContent = 'تصفية مستحقات الإجازة';
@@ -1680,11 +1682,19 @@
                 return;
             }
 
-            const duration = calculateWorkingDays(startDate, endDate, employee.weekendDays);
+            // --- MODIFICATION: Use calendar days for annual leave, working days for others ---
+            let duration;
+            if (leaveTypeKey === 'annual') {
+                duration = calculateCalendarDays(startDate, endDate);
+            } else {
+                duration = calculateWorkingDays(startDate, endDate, employee.weekendDays);
+            }
+            
             if (duration <= 0) {
-                 showAlert('خطأ في المدة', 'مدة الإجازة المحددة تقع بالكامل في عطلة نهاية الأسبوع أو أن المدة صفر.');
+                 showAlert('خطأ في المدة', 'مدة الإجازة المحددة هي صفر أو أقل. يرجى التحقق من التواريخ.');
                  return;
             }
+            // --- END OF MODIFICATION ---
 
             let policy = state.leaveTypes.find(lt => lt.id === leaveTypeKey);
             if (!policy) {
