@@ -295,7 +295,11 @@
                                     <label for="company-start-time-input" class="block mb-2 text-sm font-medium text-gray-900">وقت بدء الدوام الرسمي</label>
                                     <input type="time" id="company-start-time-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5">
                                 </div>
-                            </div>
+                                <div>
+                                    <label for="weekend-overtime-multiplier-input" class="block mb-2 text-sm font-medium text-gray-900">معامل أجر الإضافي في أيام الراحة (مثال: 2 لضعف الأجر)</label>
+                                    <input type="number" step="0.1" id="weekend-overtime-multiplier-input" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5" placeholder="e.g., 2">
+                                </div>
+                                </div>
                             <div class="mt-8 pt-4 border-t">
                                 <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">حفظ إعدادات الشركة</button>
                             </div>
@@ -506,11 +510,19 @@
                         <div><label for="late-hours" class="block mb-2 text-sm font-medium">إجمالي ساعات التأخير</label><input type="number" id="late-hours" min="0" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
                         <div><label for="late-minutes" class="block mb-2 text-sm font-medium">إجمالي دقائق التأخير</label><input type="number" id="late-minutes" min="0" max="59" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
                     </div>
-                     <div class="md:col-span-2 grid grid-cols-2 gap-4">
-                        <div><label for="overtime-hours" class="block mb-2 text-sm font-medium">ساعات الإضافي</label><input type="number" id="overtime-hours" min="0" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
-                        <div><label for="overtime-minutes" class="block mb-2 text-sm font-medium">دقائق الإضافي</label><input type="number" id="overtime-minutes" min="0" max="59" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
+                    <div class="md:col-span-2 border-t pt-4 mt-4">
+                        <p class="font-semibold mb-2">ساعات العمل الإضافي</p>
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-2">
+                            <label class="block text-sm font-medium col-span-2">أيام العمل العادية (x1.5)</label>
+                            <div><label for="weekday-overtime-hours" class="block mb-1 text-xs">ساعات</label><input type="number" id="weekday-overtime-hours" min="0" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
+                            <div><label for="weekday-overtime-minutes" class="block mb-1 text-xs">دقائق</label><input type="number" id="weekday-overtime-minutes" min="0" max="59" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
+
+                            <label id="weekend-overtime-label" class="block text-sm font-medium col-span-2 mt-2">أيام الراحة الأسبوعية</label>
+                            <div><label for="weekend-overtime-hours" class="block mb-1 text-xs">ساعات</label><input type="number" id="weekend-overtime-hours" min="0" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
+                            <div><label for="weekend-overtime-minutes" class="block mb-1 text-xs">دقائق</label><input type="number" id="weekend-overtime-minutes" min="0" max="59" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5"></div>
+                        </div>
                     </div>
-                </div>
+                    </div>
                 <div class="mt-6 flex justify-end space-x-2 rtl:space-x-reverse">
                     <button type="button" onclick="closeModal('attendanceModal')" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors">إلغاء</button>
                     <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">حفظ</button>
@@ -599,15 +611,25 @@
                                 <label for="upload-late-minutes" class="block mb-2 text-sm font-medium">إجمالي دقائق التأخير</label>
                                 <input type="number" id="upload-late-minutes" min="0" max="59" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
                             </div>
+                            <label class="block text-sm font-medium col-span-2 mt-2">إضافي أيام العمل (x1.5)</label>
                             <div>
-                                <label for="upload-overtime-hours" class="block mb-2 text-sm font-medium">ساعات الإضافي</label>
-                                <input type="number" id="upload-overtime-hours" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
+                                <label for="upload-weekday-overtime-hours" class="block mb-1 text-xs">ساعات</label>
+                                <input type="number" id="upload-weekday-overtime-hours" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
                             </div>
                             <div>
-                                <label for="upload-overtime-minutes" class="block mb-2 text-sm font-medium">دقائق الإضافي</label>
-                                <input type="number" id="upload-overtime-minutes" min="0" max="59" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
+                                <label for="upload-weekday-overtime-minutes" class="block mb-1 text-xs">دقائق</label>
+                                <input type="number" id="upload-weekday-overtime-minutes" min="0" max="59" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
                             </div>
-                        </div>
+                            <label id="upload-weekend-overtime-label" class="block text-sm font-medium col-span-2 mt-2">إضافي أيام الراحة</label>
+                            <div>
+                                <label for="upload-weekend-overtime-hours" class="block mb-1 text-xs">ساعات</label>
+                                <input type="number" id="upload-weekend-overtime-hours" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
+                            </div>
+                            <div>
+                                <label for="upload-weekend-overtime-minutes" class="block mb-1 text-xs">دقائق</label>
+                                <input type="number" id="upload-weekend-overtime-minutes" min="0" max="59" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
+                            </div>
+                            </div>
                     </div>
                 </div>
                 <div class="mt-6 flex justify-end space-x-2 rtl:space-x-reverse">
@@ -649,6 +671,7 @@
                 address: '',
                 crNumber: '',
                 startTime: '09:00',
+                weekendOvertimeMultiplier: 2, // MODIFICATION: Added default value
             },
             currentEmployee: {
                 allowances: [],
@@ -751,16 +774,13 @@
             return count;
         }
 
-        // NEW: Function to calculate calendar days
         function calculateCalendarDays(startDateStr, endDateStr) {
             const startDate = new Date(startDateStr);
             const endDate = new Date(endDateStr);
             if (endDate < startDate) {
                 return 0;
             }
-            // Calculate the difference in time
             const diffTime = endDate.getTime() - startDate.getTime();
-            // Calculate the difference in days, add 1 to be inclusive
             const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
             return diffDays;
         }
@@ -780,9 +800,7 @@
                 document.querySelectorAll('input[name="employee-weekend"]').forEach(cb => cb.checked = false);
                 document.getElementById('enableTardinessRule').checked = false;
                 document.getElementById('employeeFlightAllowance').value = 0;
-                // MODIFICATION START: Reset daily work hours on opening modal for a new employee
                 document.getElementById('dailyWorkHours').value = 8;
-                // MODIFICATION END
 
                 if (context) { // This is an edit operation
                     const employeeId = context;
@@ -802,10 +820,7 @@
                         document.getElementById('employeeNationality').value = employee.nationality || '';
                         document.getElementById('employeeIBAN').value = employee.iban || '';
                         document.getElementById('employeeFlightAllowance').value = employee.flightAllowance || 0;
-                        // MODIFICATION START: Populate daily work hours for editing
                         document.getElementById('dailyWorkHours').value = employee.dailyWorkHours || 8;
-                        // MODIFICATION END
-
                         if (employee.annualLeaveEntitlement) {
                             const radio = document.querySelector(`input[name="annualLeaveEntitlement"][value="${employee.annualLeaveEntitlement}"]`);
                             if(radio) radio.checked = true;
@@ -843,6 +858,8 @@
                 if (employee) {
                     document.getElementById('upload-attendance-employee-name').textContent = employee.name;
                     document.getElementById('upload-attendance-employee-id').value = employee.id;
+                    const weekendMultiplierLabel = document.getElementById('upload-weekend-overtime-label');
+                    weekendMultiplierLabel.textContent = `إضافي أيام الراحة (x${state.settings.weekendOvertimeMultiplier || 2})`;
 
                     const monthSelect = document.getElementById('upload-attendance-month');
                     const yearInput = document.getElementById('upload-attendance-year');
@@ -872,6 +889,10 @@
                     yearInput.value = now.getFullYear();
                     document.getElementById('attendance-employee-name').textContent = employee.name;
                     document.getElementById('attendance-employee-id').value = employee.id;
+                    // MODIFICATION START: Update weekend overtime label with multiplier
+                    const weekendMultiplierLabel = document.getElementById('weekend-overtime-label');
+                    weekendMultiplierLabel.textContent = `أيام الراحة الأسبوعية (x${state.settings.weekendOvertimeMultiplier || 2})`;
+                    // MODIFICATION END
                     updateMonthDaysDisplay();
                     const attendanceId = `${yearInput.value}-${String(now.getMonth() + 1).padStart(2, '0')}`;
                     const attendanceDocRef = doc(db, "hr-data", userId, "employees", employee.id, "attendance", attendanceId);
@@ -881,9 +902,15 @@
                         document.getElementById('attended-days').value = data.attendedDays || 0;
                         document.getElementById('late-hours').value = data.lateHours || 0;
                         document.getElementById('late-minutes').value = data.lateMinutes || 0;
-                        document.getElementById('overtime-hours').value = data.overtimeHours || 0;
-                        document.getElementById('overtime-minutes').value = data.overtimeMinutes || 0;
                         document.getElementById('late-incidents-over-grace').value = data.lateIncidentsOverGrace || 0;
+                        // MODIFICATION START: Populate new overtime fields from saved minutes
+                        const wdayMins = data.weekdayOvertimeMinutes || 0;
+                        const wendMins = data.weekendOvertimeMinutes || 0;
+                        document.getElementById('weekday-overtime-hours').value = Math.floor(wdayMins / 60);
+                        document.getElementById('weekday-overtime-minutes').value = wdayMins % 60;
+                        document.getElementById('weekend-overtime-hours').value = Math.floor(wendMins / 60);
+                        document.getElementById('weekend-overtime-minutes').value = wendMins % 60;
+                        // MODIFICATION END
                     }
                 }
             } else if (modalId === 'generatePayrollModal') {
@@ -892,12 +919,8 @@
                 const now = new Date();
                 const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
                 monthSelect.innerHTML = months.map((m, i) => `<option value="${i}">${m}</option>`).join('');
-
-                // Default to the previous month, as payroll is usually run for the month that just ended.
-                const lastMonth = new Date(now.getFullYear(), now.getMonth(), 0); // Day 0 of current month gives last day of previous month
-
-                ui.generatePayrollForm.reset(); // Reset form first
-
+                const lastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+                ui.generatePayrollForm.reset();
                 monthSelect.value = lastMonth.getMonth();
                 yearInput.value = lastMonth.getFullYear();
             }
@@ -1118,6 +1141,8 @@
             ui.companyAddressInput.value = state.settings.address || '';
             ui.companyCRInput.value = state.settings.crNumber || '';
             ui.companyStartTimeInput.value = state.settings.startTime || '09:00';
+            // MODIFICATION: Render weekend overtime multiplier
+            document.getElementById('weekend-overtime-multiplier-input').value = state.settings.weekendOvertimeMultiplier || 2;
         }
 
         // --- Firebase Functions ---
@@ -1192,7 +1217,7 @@
             leavesUnsubscribe = null;
             leaveTypesUnsubscribe = null;
 
-            state = { employees: [], payrolls: [], leaves: [], leaveTypes: [], settings: { name: 'شركتك', address: '', crNumber: '', startTime: '09:00' }, currentEmployee: { allowances: [], deductions: [] } };
+            state = { employees: [], payrolls: [], leaves: [], leaveTypes: [], settings: { name: 'شركتك', address: '', crNumber: '', startTime: '09:00', weekendOvertimeMultiplier: 2 }, currentEmployee: { allowances: [], deductions: [] } };
             renderAll();
         }
 
@@ -1238,7 +1263,7 @@
                 if (doc.exists()) {
                     state.settings = { ...state.settings, ...doc.data() };
                 } else {
-                    state.settings = { name: 'شركتك', address: '', crNumber: '', startTime: '09:00' };
+                    state.settings = { name: 'شركتك', address: '', crNumber: '', startTime: '09:00', weekendOvertimeMultiplier: 2 };
                 }
                 renderSettingsPage();
             });
@@ -1263,7 +1288,6 @@
             const weekendCheckboxes = form.querySelectorAll('input[name="employee-weekend"]:checked');
             const selectedWeekends = Array.from(weekendCheckboxes).map(cb => cb.value);
 
-            // MODIFICATION START: Capture daily work hours
             const employeeData = {
                 name: form.employeeName.value.trim(),
                 employeeId: form.employeeId.value.trim(),
@@ -1273,7 +1297,7 @@
                 startDate: form.employeeStartDate.value,
                 salary: Number(form.employeeSalary.value),
                 status: form.employeeStatus.value,
-                dailyWorkHours: Number(form.dailyWorkHours.value) || 8, // Added this field
+                dailyWorkHours: Number(form.dailyWorkHours.value) || 8,
                 nationality: form.employeeNationality.value.trim(),
                 iban: form.employeeIBAN.value.trim(),
                 annualLeaveEntitlement: Number(form.annualLeaveEntitlement.value),
@@ -1285,7 +1309,6 @@
                     deductionHours: Number(form.deductionHours.value) || 0,
                 }
             };
-            // MODIFICATION END
 
             if (!employeeData.name || !employeeData.employeeId || !employeeData.nationalId) {
                 showAlert("بيانات ناقصة", "يرجى إدخال اسم الموظف، ورقمه الوظيفي، ورقم الهوية/الإقامة.");
@@ -1543,7 +1566,6 @@
                 tableHeader.textContent = 'المدة (أيام)';
                 leavesToDisplay = leavesToDisplay.filter(l => l.leaveType === 'annual' && l.status === 'approved');
 
-                // Calculate entitlement value
                 const allowancesSnapshot = await getDocs(collection(db, "hr-data", userId, "employees", employee.id, "allowances"));
                 const allowances = allowancesSnapshot.docs.map(d => d.data());
                 const totalAllowances = allowances.filter(a => a.includedInPayroll).reduce((s, i) => s + i.amount, 0);
@@ -1714,20 +1736,17 @@
                 return;
             }
 
-            // --- Overlap Check Logic ---
             const existingLeaves = state.leaves.filter(l => l.employeeId === employeeId && l.status === 'approved');
 
             for (const existingLeave of existingLeaves) {
                 const existingStart = new Date(existingLeave.startDate);
                 const existingEnd = new Date(existingLeave.endDate);
 
-                // Check for overlap: (StartA <= EndB) and (StartB <= EndA)
                 if (newLeaveStart <= existingEnd && existingStart <= newLeaveEnd) {
                     showAlert('طلب مرفوض', `يوجد تداخل في التواريخ مع إجازة قائمة من ${existingLeave.startDate} إلى ${existingLeave.endDate}.`);
-                    return; // Stop the submission
+                    return;
                 }
             }
-            // --- END of Overlap Check Logic ---
 
             let duration;
             if (leaveTypeKey === 'annual') {
@@ -1907,13 +1926,10 @@
                     const attendanceDocRef = doc(db, "hr-data", userId, "employees", emp.id, "attendance", attendanceId);
                     const attendanceSnap = await getDoc(attendanceDocRef);
 
-                    // --- CORRECTED & MODIFIED PAYROLL CALCULATION LOGIC ---
                     const workDaysInMonth = calculateWorkingDays(payrollMonthStartDate, payrollMonthEndDate, emp.weekendDays || []);
                     const dailyRate = workDaysInMonth > 0 ? (grossSalary / workDaysInMonth) : 0;
-                    // MODIFICATION START: Use employee-specific daily hours
-                    const dailyHours = emp.dailyWorkHours || 8; // Get employee's daily hours, default to 8
+                    const dailyHours = emp.dailyWorkHours || 8;
                     const hourlyRate = dailyRate / dailyHours;
-                    // MODIFICATION END
 
                     let paidLeaveWorkDaysInMonth = 0;
                     const paidLeaveTypes = state.leaveTypes.filter(lt => lt.paymentType === 'paid' || lt.paymentType === 'paid_in_advance').map(lt => lt.id);
@@ -1936,11 +1952,6 @@
                             absenceDeduction = dailyRate * unpaidAbsentWorkDays;
                         }
 
-                        const overtimeWorkDays = Math.max(0, attendedDays - (workDaysInMonth - paidLeaveWorkDaysInMonth));
-                        if(overtimeWorkDays > 0) {
-                            overtimePay += overtimeWorkDays * dailyRate * 1.5; // Daily overtime
-                        }
-
                         if (emp.tardinessRule?.enabled && emp.tardinessRule.deductionHours > 0) {
                             const incidents = attendanceData.lateIncidentsOverGrace || 0;
                             lateDeduction = incidents * emp.tardinessRule.deductionHours * hourlyRate;
@@ -1949,17 +1960,20 @@
                             if (totalLateMinutes > 0) lateDeduction = (hourlyRate / 60) * totalLateMinutes;
                         }
 
-                        const totalOvertimeMinutes = (attendanceData.overtimeHours || 0) * 60 + (attendanceData.overtimeMinutes || 0);
-                        if (totalOvertimeMinutes > 0) {
-                             overtimePay += (hourlyRate * 1.5 / 60) * totalOvertimeMinutes; // Hourly overtime
-                        }
+                        // MODIFICATION START: New overtime calculation based on differentiated minutes
+                        const weekdayOvertimeMins = attendanceData.weekdayOvertimeMinutes || 0;
+                        const weekendOvertimeMins = attendanceData.weekendOvertimeMinutes || 0;
+
+                        const weekdayOvertimePay = (weekdayOvertimeMins / 60) * hourlyRate * 1.5;
+                        const weekendOvertimePay = (weekendOvertimeMins / 60) * hourlyRate * (state.settings.weekendOvertimeMultiplier || 2);
+
+                        overtimePay = weekdayOvertimePay + weekendOvertimePay;
+                        // MODIFICATION END
 
                     } else {
-                        // No attendance record found, so all work days (minus paid leave) are considered absent.
                         const unpaidAbsentWorkDays = Math.max(0, workDaysInMonth - paidLeaveWorkDaysInMonth);
                         absenceDeduction = dailyRate * unpaidAbsentWorkDays;
                     }
-                    // --- END OF CORRECTED & MODIFIED LOGIC ---
 
                     const empNet = (grossSalary + overtimePay) - (empTotalFixedDeductions + absenceDeduction + lateDeduction);
                     const payrollRecordRef = doc(db, "hr-data", userId, "payrolls", payrollId, "records", emp.id);
