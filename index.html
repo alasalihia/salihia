@@ -102,7 +102,7 @@
                 </a>
                 <a href="#" onclick="showPage('page-hr-attendance')" class="sidebar-link">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                    <span>الحاضر والانصراف</span>
+                    <span>الحضور والانصراف</span>
                 </a>
                 <a href="#" onclick="showPage('page-hr-settings')" class="sidebar-link">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0 3.35a1.724 1.724 0 001.066 2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
@@ -417,10 +417,12 @@
                             <label for="gracePeriodMinutes" class="block mb-2 text-sm font-medium">فترة السماح (دقائق)</label>
                             <input type="number" id="gracePeriodMinutes" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" placeholder="e.g., 15">
                         </div>
+                        <!-- MODIFICATION START: Changed from hours to minutes as per user request -->
                         <div>
-                            <label for="deductionHours" class="block mb-2 text-sm font-medium">ساعات الخصم للمخالفة</label>
-                            <input type="number" id="deductionHours" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" placeholder="e.g., 1">
+                            <label for="deductionPenaltyMinutes" class="block mb-2 text-sm font-medium">مقدار الخصم للمخالفة (دقائق)</label>
+                            <input type="number" id="deductionPenaltyMinutes" min="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" placeholder="e.g., 60">
                         </div>
+                        <!-- MODIFICATION END -->
                     </div>
                 </div>
                 <div class="mt-6 flex justify-end space-x-2 rtl:space-x-reverse">
@@ -780,9 +782,7 @@
                 document.querySelectorAll('input[name="employee-weekend"]').forEach(cb => cb.checked = false);
                 document.getElementById('enableTardinessRule').checked = false;
                 document.getElementById('employeeFlightAllowance').value = 0;
-                // MODIFICATION START: Reset daily work hours on opening modal for a new employee
                 document.getElementById('dailyWorkHours').value = 8;
-                // MODIFICATION END
 
                 if (context) { // This is an edit operation
                     const employeeId = context;
@@ -802,9 +802,7 @@
                         document.getElementById('employeeNationality').value = employee.nationality || '';
                         document.getElementById('employeeIBAN').value = employee.iban || '';
                         document.getElementById('employeeFlightAllowance').value = employee.flightAllowance || 0;
-                        // MODIFICATION START: Populate daily work hours for editing
                         document.getElementById('dailyWorkHours').value = employee.dailyWorkHours || 8;
-                        // MODIFICATION END
 
                         if (employee.annualLeaveEntitlement) {
                             const radio = document.querySelector(`input[name="annualLeaveEntitlement"][value="${employee.annualLeaveEntitlement}"]`);
@@ -819,7 +817,9 @@
                         if (employee.tardinessRule) {
                             document.getElementById('enableTardinessRule').checked = employee.tardinessRule.enabled || false;
                             document.getElementById('gracePeriodMinutes').value = employee.tardinessRule.gracePeriodMinutes || '';
-                            document.getElementById('deductionHours').value = employee.tardinessRule.deductionHours || '';
+                            // MODIFICATION START: Populate the new minutes field
+                            document.getElementById('deductionPenaltyMinutes').value = employee.tardinessRule.deductionPenaltyMinutes || '';
+                            // MODIFICATION END
                         }
                     }
                 } else { // This is an add operation
@@ -1263,7 +1263,7 @@
             const weekendCheckboxes = form.querySelectorAll('input[name="employee-weekend"]:checked');
             const selectedWeekends = Array.from(weekendCheckboxes).map(cb => cb.value);
 
-            // MODIFICATION START: Capture daily work hours
+            // MODIFICATION START: Changed tardiness rule to use minutes
             const employeeData = {
                 name: form.employeeName.value.trim(),
                 employeeId: form.employeeId.value.trim(),
@@ -1273,7 +1273,7 @@
                 startDate: form.employeeStartDate.value,
                 salary: Number(form.employeeSalary.value),
                 status: form.employeeStatus.value,
-                dailyWorkHours: Number(form.dailyWorkHours.value) || 8, // Added this field
+                dailyWorkHours: Number(form.dailyWorkHours.value) || 8,
                 nationality: form.employeeNationality.value.trim(),
                 iban: form.employeeIBAN.value.trim(),
                 annualLeaveEntitlement: Number(form.annualLeaveEntitlement.value),
@@ -1282,7 +1282,7 @@
                 tardinessRule: {
                     enabled: form.enableTardinessRule.checked,
                     gracePeriodMinutes: Number(form.gracePeriodMinutes.value) || 0,
-                    deductionHours: Number(form.deductionHours.value) || 0,
+                    deductionPenaltyMinutes: Number(form.deductionPenaltyMinutes.value) || 0,
                 }
             };
             // MODIFICATION END
@@ -1907,13 +1907,10 @@
                     const attendanceDocRef = doc(db, "hr-data", userId, "employees", emp.id, "attendance", attendanceId);
                     const attendanceSnap = await getDoc(attendanceDocRef);
 
-                    // --- CORRECTED & MODIFIED PAYROLL CALCULATION LOGIC ---
                     const workDaysInMonth = calculateWorkingDays(payrollMonthStartDate, payrollMonthEndDate, emp.weekendDays || []);
                     const dailyRate = workDaysInMonth > 0 ? (grossSalary / workDaysInMonth) : 0;
-                    // MODIFICATION START: Use employee-specific daily hours
-                    const dailyHours = emp.dailyWorkHours || 8; // Get employee's daily hours, default to 8
+                    const dailyHours = emp.dailyWorkHours || 8;
                     const hourlyRate = dailyRate / dailyHours;
-                    // MODIFICATION END
 
                     let paidLeaveWorkDaysInMonth = 0;
                     const paidLeaveTypes = state.leaveTypes.filter(lt => lt.paymentType === 'paid' || lt.paymentType === 'paid_in_advance').map(lt => lt.id);
@@ -1941,13 +1938,24 @@
                             overtimePay += overtimeWorkDays * dailyRate * 1.5; // Daily overtime
                         }
 
-                        if (emp.tardinessRule?.enabled && emp.tardinessRule.deductionHours > 0) {
+                        // MODIFICATION START: New Lateness Deduction Logic
+                        const totalLateMinutes = (attendanceData.lateHours || 0) * 60 + (attendanceData.lateMinutes || 0);
+                        let totalDeductionMinutes = 0;
+
+                        // Step 1: The base deduction is the total actual minutes of lateness
+                        totalDeductionMinutes += totalLateMinutes;
+
+                        // Step 2: Add the penalty for each incident that exceeded the grace period
+                        if (emp.tardinessRule?.enabled && emp.tardinessRule.deductionPenaltyMinutes > 0) {
                             const incidents = attendanceData.lateIncidentsOverGrace || 0;
-                            lateDeduction = incidents * emp.tardinessRule.deductionHours * hourlyRate;
-                        } else {
-                            const totalLateMinutes = (attendanceData.lateHours || 0) * 60 + (attendanceData.lateMinutes || 0);
-                            if (totalLateMinutes > 0) lateDeduction = (hourlyRate / 60) * totalLateMinutes;
+                            const penaltyPerIncident = emp.tardinessRule.deductionPenaltyMinutes;
+                            const totalPenaltyMinutes = incidents * penaltyPerIncident;
+                            totalDeductionMinutes += totalPenaltyMinutes;
                         }
+
+                        // Step 3: Convert total deduction minutes to monetary value
+                        lateDeduction = (hourlyRate / 60) * totalDeductionMinutes;
+                        // MODIFICATION END
 
                         const totalOvertimeMinutes = (attendanceData.overtimeHours || 0) * 60 + (attendanceData.overtimeMinutes || 0);
                         if (totalOvertimeMinutes > 0) {
@@ -1959,7 +1967,6 @@
                         const unpaidAbsentWorkDays = Math.max(0, workDaysInMonth - paidLeaveWorkDaysInMonth);
                         absenceDeduction = dailyRate * unpaidAbsentWorkDays;
                     }
-                    // --- END OF CORRECTED & MODIFIED LOGIC ---
 
                     const empNet = (grossSalary + overtimePay) - (empTotalFixedDeductions + absenceDeduction + lateDeduction);
                     const payrollRecordRef = doc(db, "hr-data", userId, "payrolls", payrollId, "records", emp.id);
