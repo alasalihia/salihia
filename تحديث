@@ -19,7 +19,7 @@
         .page.active { display: block; }
         .settings-page-section { display: none; }
         .settings-page-section.active { display: block; }
-        
+
         .chart-container { position: relative; height: 350px; width: 100%; }
         .sidebar-link { display: flex; align-items: center; padding: 0.75rem 1rem; border-radius: 0.5rem; transition: background-color 0.2s, color 0.2s; }
         .sidebar-link.active, .sidebar-link:hover { background-color: #8b5cf6; color: white; } /* Violet color for HR */
@@ -29,7 +29,7 @@
         /* Toggle Switch Styles */
         .toggle-checkbox:checked { right: 0; border-color: #8b5cf6; }
         .toggle-checkbox:checked + .toggle-label { background-color: #8b5cf6; }
-        
+
         @media print {
             @page {
                 size: A4 landscape;
@@ -78,7 +78,7 @@
             </div>
         </div>
     </div>
-    
+
     <div id="hr-module-container" class="flex min-h-screen w-full" style="display: none;">
         <aside class="w-64 bg-white shadow-lg flex flex-col p-4">
             <h2 class="text-xl font-bold text-violet-700 text-center mb-4 mt-4">شؤون الموظفين</h2>
@@ -205,7 +205,7 @@
                     </div>
                 </div>
             </main>
-            
+
             <main id="page-hr-salaries" class="page">
                  <div class="flex justify-between items-center mb-6">
                     <h2 class="text-3xl font-bold text-slate-800">مسير الرواتب</h2>
@@ -381,8 +381,13 @@
                         <label for="employeeFlightAllowance" class="block mb-2 text-sm font-medium">بدل طيران الإجازة (ر.س)</label>
                         <input type="number" id="employeeFlightAllowance" min="0" value="0" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
                     </div>
+                    <div>
+                        <label for="dailyWorkHours" class="block mb-2 text-sm font-medium">ساعات العمل اليومية</label>
+                        <input type="number" id="dailyWorkHours" min="1" value="8" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5">
+                    </div>
                     <div><label for="employeeStatus" class="block mb-2 text-sm font-medium">حالة الموظف</label><select id="employeeStatus" class="bg-slate-50 border border-slate-300 text-sm rounded-lg block w-full p-2.5" required><option value="active">على رأس العمل</option><option value="on_leave">في إجازة</option><option value="terminated">منتهية خدماته</option></select></div>
-                    <div><label class="block mb-2 text-sm font-medium">رصيد الإجازة السنوية</label>
+                    <div class="md:col-span-3">
+                        <label class="block mb-2 text-sm font-medium">رصيد الإجازة السنوية</label>
                         <div class="flex items-center space-x-4 rtl:space-x-reverse">
                            <label class="flex items-center"><input type="radio" name="annualLeaveEntitlement" value="21" class="ml-2 text-violet-600 focus:ring-violet-500" checked> 21 يوم</label>
                            <label class="flex items-center"><input type="radio" name="annualLeaveEntitlement" value="30" class="ml-2 text-violet-600 focus:ring-violet-500"> 30 يوم</label>
@@ -425,7 +430,7 @@
             </form>
         </div>
     </div>
-    
+
     <div id="salaryDetailsModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
         <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 transform scale-95">
             <h3 class="text-xl font-bold mb-4">تفاصيل راتب: <span id="salary-details-employee-name"></span></h3>
@@ -513,7 +518,7 @@
             </form>
         </div>
     </div>
-    
+
     <div id="leaveRequestModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden opacity-0">
         <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-lg p-6 transform scale-95">
             <h3 class="text-xl font-bold mb-4">تقديم طلب إجازة</h3>
@@ -629,18 +634,18 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, addDoc, onSnapshot, deleteDoc, query, where, getDocs, updateDoc, writeBatch, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
+
         // --- Global Variables ---
         let app, auth, db, userId;
         let employeesUnsubscribe, payrollsUnsubscribe, settingsUnsubscribe, leavesUnsubscribe, leaveTypesUnsubscribe;
         let allowancesUnsubscribe, deductionsUnsubscribe;
-        let state = { 
-            employees: [], 
+        let state = {
+            employees: [],
             payrolls: [],
             leaves: [],
             leaveTypes: [],
-            settings: { 
-                name: 'شركتك', 
+            settings: {
+                name: 'شركتك',
                 address: '',
                 crNumber: '',
                 startTime: '09:00',
@@ -655,7 +660,7 @@
         // State for leave profile page
         let currentLeaveProfileEmployeeId = null;
         let isEntitlementFilterActive = false;
-        
+
         const DEFAULT_LEAVE_POLICIES = {
             annual: { name: 'إجازة سنوية', isStandard: true, paymentType: 'paid_in_advance', recurring: 'annually', days: 0 },
             sick: { name: 'إجازة مرضية', isStandard: true, paymentType: 'paid', recurring: 'annually', days: 120 },
@@ -728,7 +733,7 @@
             const day = String(date.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         }
-        
+
         function calculateWorkingDays(startDateStr, endDateStr, employeeWeekendDaysArray = []) {
             let count = 0;
             const curDate = new Date(startDateStr);
@@ -775,7 +780,9 @@
                 document.querySelectorAll('input[name="employee-weekend"]').forEach(cb => cb.checked = false);
                 document.getElementById('enableTardinessRule').checked = false;
                 document.getElementById('employeeFlightAllowance').value = 0;
-
+                // MODIFICATION START: Reset daily work hours on opening modal for a new employee
+                document.getElementById('dailyWorkHours').value = 8;
+                // MODIFICATION END
 
                 if (context) { // This is an edit operation
                     const employeeId = context;
@@ -795,6 +802,10 @@
                         document.getElementById('employeeNationality').value = employee.nationality || '';
                         document.getElementById('employeeIBAN').value = employee.iban || '';
                         document.getElementById('employeeFlightAllowance').value = employee.flightAllowance || 0;
+                        // MODIFICATION START: Populate daily work hours for editing
+                        document.getElementById('dailyWorkHours').value = employee.dailyWorkHours || 8;
+                        // MODIFICATION END
+
                         if (employee.annualLeaveEntitlement) {
                             const radio = document.querySelector(`input[name="annualLeaveEntitlement"][value="${employee.annualLeaveEntitlement}"]`);
                             if(radio) radio.checked = true;
@@ -832,7 +843,7 @@
                 if (employee) {
                     document.getElementById('upload-attendance-employee-name').textContent = employee.name;
                     document.getElementById('upload-attendance-employee-id').value = employee.id;
-                    
+
                     const monthSelect = document.getElementById('upload-attendance-month');
                     const yearInput = document.getElementById('upload-attendance-year');
                     const now = new Date();
@@ -855,7 +866,7 @@
                     const now = new Date();
                     const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
                     monthSelect.innerHTML = months.map((m, i) => `<option value="${i}">${m}</option>`).join('');
-                    
+
                     ui.attendanceForm.reset();
                     monthSelect.value = now.getMonth();
                     yearInput.value = now.getFullYear();
@@ -884,9 +895,9 @@
 
                 // Default to the previous month, as payroll is usually run for the month that just ended.
                 const lastMonth = new Date(now.getFullYear(), now.getMonth(), 0); // Day 0 of current month gives last day of previous month
-                
+
                 ui.generatePayrollForm.reset(); // Reset form first
-                
+
                 monthSelect.value = lastMonth.getMonth();
                 yearInput.value = lastMonth.getFullYear();
             }
@@ -974,7 +985,7 @@
         async function renderHrDashboard() {
             const totalEmployees = state.employees.length;
             const activeEmployees = state.employees.filter(e => e.status === 'active').length;
-            
+
             const now = new Date();
             const currentlyOnLeave = state.leaves.filter(l => {
                 const startDate = new Date(l.startDate);
@@ -1002,7 +1013,7 @@
                     <div><h3 class="text-slate-500">طلبات معلقة</h3><p class="text-2xl font-bold">${formatInteger(pendingLeaves)}</p></div>
                 </div>
             `;
-            
+
             const pendingLeavesList = state.leaves.filter(l => l.status === 'pending');
             if(pendingLeavesList.length > 0) {
                 ui.pendingLeavesDashboard.innerHTML = pendingLeavesList.map(l => {
@@ -1019,7 +1030,7 @@
 
         async function renderEmployeesPage() {
             const searchTerm = document.getElementById('employee-search-input')?.value.toLowerCase() || '';
-            const filteredEmployees = state.employees.filter(emp => 
+            const filteredEmployees = state.employees.filter(emp =>
                 emp.name.toLowerCase().includes(searchTerm) ||
                 emp.employeeId.toLowerCase().includes(searchTerm) ||
                 emp.position.toLowerCase().includes(searchTerm)
@@ -1029,16 +1040,16 @@
                 ui.employeesTableBody.innerHTML = '<tr class="border-b"><td colspan="6" class="text-center p-4">لا يوجد موظفين مضافين.</td></tr>';
                 return;
             }
-            
+
             if (filteredEmployees.length === 0) {
                 ui.employeesTableBody.innerHTML = '<tr class="border-b"><td colspan="6" class="text-center p-4">لا يوجد موظفون يطابقون معايير البحث.</td></tr>';
                 return;
             }
 
             const leavePromises = filteredEmployees.map(async (emp) => {
-                const approvedAnnualLeaves = state.leaves.filter(l => 
-                    l.employeeId === emp.id && 
-                    l.status === 'approved' && 
+                const approvedAnnualLeaves = state.leaves.filter(l =>
+                    l.employeeId === emp.id &&
+                    l.status === 'approved' &&
                     l.leaveType === 'annual' &&
                     new Date(l.startDate).getFullYear() === new Date().getFullYear()
                 );
@@ -1066,7 +1077,7 @@
                 </tr>`;
             }).join("");
         }
-        
+
         function renderOrUpdateDepartmentChart() {
             const ctx = document.getElementById('department-chart').getContext('2d');
             if (state.employees.length === 0) {
@@ -1076,7 +1087,7 @@
                 ctx.fillText("لا توجد بيانات كافية لعرض الرسم البياني", ctx.canvas.width / 2, ctx.canvas.height / 2);
                 return;
             }
-            
+
             const departmentCounts = state.employees.reduce((acc, emp) => {
                 acc[emp.department] = (acc[emp.department] || 0) + 1;
                 return acc;
@@ -1092,16 +1103,16 @@
                 }]
             };
 
-            if (departmentChart) { 
-                departmentChart.data = chartData; 
+            if (departmentChart) {
+                departmentChart.data = chartData;
                 departmentChart.update();
-            } else { 
-                departmentChart = new Chart(ctx, { 
-                    type: 'pie', data: chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { font: { family: 'Cairo' } } }, tooltip: { bodyFont: { family: 'Cairo' }, titleFont: { family: 'Cairo' } } } } 
-                }); 
+            } else {
+                departmentChart = new Chart(ctx, {
+                    type: 'pie', data: chartData, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { font: { family: 'Cairo' } } }, tooltip: { bodyFont: { family: 'Cairo' }, titleFont: { family: 'Cairo' } } } }
+                });
             }
         }
-        
+
         function renderSettingsPage() {
             ui.companyNameInput.value = state.settings.name || '';
             ui.companyAddressInput.value = state.settings.address || '';
@@ -1110,7 +1121,7 @@
         }
 
         // --- Firebase Functions ---
-        
+
         async function initializeFirebase() {
             try {
                 const firebaseConfig = {
@@ -1146,26 +1157,26 @@
             }
         }
 
-        window.signInWithGoogle = async () => { 
+        window.signInWithGoogle = async () => {
             if (!auth) {
                 showAlert('خطأ', 'لم يتم تهيئة المصادقة. يرجى التحقق من إعدادات Firebase.');
                 return;
             }
             const provider = new GoogleAuthProvider();
-            try { 
-                await signInWithPopup(auth, provider); 
-            } catch (e) { 
-                showAlert("فشل تسجيل الدخول", "لم نتمكن من تسجيل دخولك باستخدام جوجل. يرجى المحاولة مرة أخرى."); 
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (e) {
+                showAlert("فشل تسجيل الدخول", "لم نتمكن من تسجيل دخولك باستخدام جوجل. يرجى المحاولة مرة أخرى.");
                 console.error("Google Sign-In Error:", e);
             }
         };
 
-        window.signOutUser = async () => { 
+        window.signOutUser = async () => {
             try {
                 await signOut(auth);
-            } catch (e) { 
-                showAlert("خطأ", "فشلت عملية تسجيل الخروج."); 
-            } 
+            } catch (e) {
+                showAlert("خطأ", "فشلت عملية تسجيل الخروج.");
+            }
         };
 
         function clearDataAndListeners() {
@@ -1174,7 +1185,7 @@
             if (settingsUnsubscribe) settingsUnsubscribe();
             if (leavesUnsubscribe) leavesUnsubscribe();
             if (leaveTypesUnsubscribe) leaveTypesUnsubscribe();
-            
+
             employeesUnsubscribe = null;
             payrollsUnsubscribe = null;
             settingsUnsubscribe = null;
@@ -1221,7 +1232,7 @@
                 state.payrolls = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderPayrollHistory();
             });
-            
+
             const settingsRef = doc(db, "hr-data", userId, "settings", "companyProfile");
             settingsUnsubscribe = onSnapshot(settingsRef, (doc) => {
                 if (doc.exists()) {
@@ -1252,6 +1263,7 @@
             const weekendCheckboxes = form.querySelectorAll('input[name="employee-weekend"]:checked');
             const selectedWeekends = Array.from(weekendCheckboxes).map(cb => cb.value);
 
+            // MODIFICATION START: Capture daily work hours
             const employeeData = {
                 name: form.employeeName.value.trim(),
                 employeeId: form.employeeId.value.trim(),
@@ -1261,6 +1273,7 @@
                 startDate: form.employeeStartDate.value,
                 salary: Number(form.employeeSalary.value),
                 status: form.employeeStatus.value,
+                dailyWorkHours: Number(form.dailyWorkHours.value) || 8, // Added this field
                 nationality: form.employeeNationality.value.trim(),
                 iban: form.employeeIBAN.value.trim(),
                 annualLeaveEntitlement: Number(form.annualLeaveEntitlement.value),
@@ -1272,12 +1285,13 @@
                     deductionHours: Number(form.deductionHours.value) || 0,
                 }
             };
+            // MODIFICATION END
 
             if (!employeeData.name || !employeeData.employeeId || !employeeData.nationalId) {
                 showAlert("بيانات ناقصة", "يرجى إدخال اسم الموظف، ورقمه الوظيفي، ورقم الهوية/الإقامة.");
                 return;
             }
-            
+
             try {
                 if (!db || !userId) {
                     showAlert("خطأ في الاتصال", "لا يمكن الاتصال بقاعدة البيانات. يرجى تسجيل الدخول أولاً.");
@@ -1294,7 +1308,7 @@
                 } else {
                     const q = query(employeesCollectionRef, where("employeeId", "==", employeeData.employeeId));
                     const querySnapshot = await getDocs(q);
-                    
+
                     if (!querySnapshot.empty) {
                         showAlert("خطأ", "الرقم الوظيفي المدخل موجود بالفعل لموظف آخر.");
                         return;
@@ -1303,7 +1317,7 @@
                     await addDoc(employeesCollectionRef, employeeData);
                     showAlert("نجاح", "تمت إضافة الموظف بنجاح.");
                 }
-                
+
                 closeModal("addEmployeeModal");
 
             } catch (err) {
@@ -1408,7 +1422,7 @@
                 showAlert('خطأ', 'فشل حفظ البند.');
             }
         };
-        
+
         window.deleteSalaryAdjustment = async (type, docId) => {
             const employeeId = document.getElementById('salary-details-employee-id').value;
             try {
@@ -1418,7 +1432,7 @@
                 showAlert('خطأ', 'فشل حذف البند.');
             }
         };
-        
+
         window.toggleInclusion = async (type, docId, isIncluded) => {
             const employeeId = document.getElementById('salary-details-employee-id').value;
              try {
@@ -1443,15 +1457,15 @@
                 .filter(d => d.includedInPayroll)
                 .reduce((sum, item) => sum + Number(item.amount), 0);
             const netSalary = baseSalary + totalAllowances - totalDeductions;
-            
+
             document.getElementById('net-salary-display').textContent = `${formatNumber(netSalary)} ر.س`;
         };
-        
+
         // --- Leave Management Functions ---
 
         function renderLeaveEmployeeList() {
             const container = document.getElementById('leaves-employee-list');
-            if (!container) return; 
+            if (!container) return;
 
             if (state.employees.length === 0) {
                 container.innerHTML = `<p class="text-center text-slate-500 col-span-full p-4">لا يوجد موظفين مضافين بعد.</p>`;
@@ -1479,7 +1493,7 @@
                 showAlert('خطأ', 'لم يتم العثور على الموظف.');
                 return;
             }
-            
+
             currentLeaveProfileEmployeeId = employeeId;
             isEntitlementFilterActive = false; // Reset filter on profile view
 
@@ -1528,7 +1542,7 @@
             if (isEntitlementFilterActive) {
                 tableHeader.textContent = 'المدة (أيام)';
                 leavesToDisplay = leavesToDisplay.filter(l => l.leaveType === 'annual' && l.status === 'approved');
-                
+
                 // Calculate entitlement value
                 const allowancesSnapshot = await getDocs(collection(db, "hr-data", userId, "employees", employee.id, "allowances"));
                 const allowances = allowancesSnapshot.docs.map(d => d.data());
@@ -1645,15 +1659,15 @@
                 if(sickLeaveYearStart && sickLeaveYearStart.getFullYear() < currentYear){
                     sickLeaveYear = sickLeaveYearStart.getFullYear();
                 }
-                
-                const sickLeavesInYear = state.leaves.filter(l => 
-                    l.employeeId === employeeId && 
-                    l.leaveType === 'sick' && 
+
+                const sickLeavesInYear = state.leaves.filter(l =>
+                    l.employeeId === employeeId &&
+                    l.leaveType === 'sick' &&
                     l.status === 'approved' &&
                     new Date(l.startDate).getFullYear() >= sickLeaveYear
                 );
                 daysTaken = sickLeavesInYear.reduce((sum, l) => sum + l.duration, 0);
-                
+
                 message = `<p>الأيام المأخوذة في السنة المرضية الحالية: ${daysTaken} يوم.</p>`;
                 message += `<p class="text-xs text-slate-500">تحتسب حسب نظام العمل: 30 يوم بأجر كامل، ثم 60 يوم بـ 75% من الأجر، ثم 30 يوم بدون أجر.</p>`;
                 showBalance = false;
@@ -1691,7 +1705,7 @@
                 showAlert('بيانات ناقصة', 'يرجى ملء جميع الحقول المطلوبة.');
                 return;
             }
-            
+
             const newLeaveStart = new Date(startDateStr);
             const newLeaveEnd = new Date(endDateStr);
 
@@ -1702,7 +1716,7 @@
 
             // --- Overlap Check Logic ---
             const existingLeaves = state.leaves.filter(l => l.employeeId === employeeId && l.status === 'approved');
-            
+
             for (const existingLeave of existingLeaves) {
                 const existingStart = new Date(existingLeave.startDate);
                 const existingEnd = new Date(existingLeave.endDate);
@@ -1721,7 +1735,7 @@
             } else {
                 duration = calculateWorkingDays(startDateStr, endDateStr, employee.weekendDays);
             }
-            
+
             if (duration <= 0) {
                  showAlert('خطأ في المدة', 'مدة الإجازة المحددة هي صفر أو أقل. يرجى التحقق من التواريخ.');
                  return;
@@ -1734,7 +1748,7 @@
             }
 
             const leavesOfType = state.leaves.filter(l => l.employeeId === employeeId && l.leaveType === leaveTypeKey && l.status === 'approved');
-            
+
             if (policy.recurring === 'once') {
                 const daysTaken = leavesOfType.reduce((sum, l) => sum + l.duration, 0);
                 if (daysTaken >= policy.days) {
@@ -1887,21 +1901,24 @@
                     const empTotalAllowances = allowances.filter(a => a.includedInPayroll).reduce((s, i) => s + i.amount, 0);
                     const empTotalFixedDeductions = fixedDeductions.filter(d => d.includedInPayroll).reduce((s, i) => s + i.amount, 0);
                     const grossSalary = emp.salary + empTotalAllowances;
-                    
+
                     let absenceDeduction = 0, lateDeduction = 0, overtimePay = 0;
                     const attendanceId = `${year}-${String(parseInt(month) + 1).padStart(2, '0')}`;
                     const attendanceDocRef = doc(db, "hr-data", userId, "employees", emp.id, "attendance", attendanceId);
                     const attendanceSnap = await getDoc(attendanceDocRef);
-                    
-                    // --- CORRECTED PAYROLL CALCULATION LOGIC ---
+
+                    // --- CORRECTED & MODIFIED PAYROLL CALCULATION LOGIC ---
                     const workDaysInMonth = calculateWorkingDays(payrollMonthStartDate, payrollMonthEndDate, emp.weekendDays || []);
                     const dailyRate = workDaysInMonth > 0 ? (grossSalary / workDaysInMonth) : 0;
-                    const hourlyRate = dailyRate / 8; 
+                    // MODIFICATION START: Use employee-specific daily hours
+                    const dailyHours = emp.dailyWorkHours || 8; // Get employee's daily hours, default to 8
+                    const hourlyRate = dailyRate / dailyHours;
+                    // MODIFICATION END
 
                     let paidLeaveWorkDaysInMonth = 0;
                     const paidLeaveTypes = state.leaveTypes.filter(lt => lt.paymentType === 'paid' || lt.paymentType === 'paid_in_advance').map(lt => lt.id);
                     const approvedPaidLeavesInMonth = state.leaves.filter(l => l.employeeId === emp.id && l.status === 'approved' && paidLeaveTypes.includes(l.leaveType) && new Date(l.startDate) <= payrollMonthEndDate && new Date(l.endDate) >= payrollMonthStartDate);
-                    
+
                     approvedPaidLeavesInMonth.forEach(leave => {
                         const leaveStart = new Date(leave.startDate);
                         const leaveEnd = new Date(leave.endDate);
@@ -1913,7 +1930,7 @@
                     if (attendanceSnap.exists()) {
                         const attendanceData = attendanceSnap.data();
                         const attendedDays = attendanceData.attendedDays || 0;
-                        
+
                         const unpaidAbsentWorkDays = Math.max(0, workDaysInMonth - attendedDays - paidLeaveWorkDaysInMonth);
                         if (unpaidAbsentWorkDays > 0) {
                             absenceDeduction = dailyRate * unpaidAbsentWorkDays;
@@ -1931,7 +1948,7 @@
                             const totalLateMinutes = (attendanceData.lateHours || 0) * 60 + (attendanceData.lateMinutes || 0);
                             if (totalLateMinutes > 0) lateDeduction = (hourlyRate / 60) * totalLateMinutes;
                         }
-                        
+
                         const totalOvertimeMinutes = (attendanceData.overtimeHours || 0) * 60 + (attendanceData.overtimeMinutes || 0);
                         if (totalOvertimeMinutes > 0) {
                              overtimePay += (hourlyRate * 1.5 / 60) * totalOvertimeMinutes; // Hourly overtime
@@ -1942,7 +1959,7 @@
                         const unpaidAbsentWorkDays = Math.max(0, workDaysInMonth - paidLeaveWorkDaysInMonth);
                         absenceDeduction = dailyRate * unpaidAbsentWorkDays;
                     }
-                    // --- END OF CORRECTED LOGIC ---
+                    // --- END OF CORRECTED & MODIFIED LOGIC ---
 
                     const empNet = (grossSalary + overtimePay) - (empTotalFixedDeductions + absenceDeduction + lateDeduction);
                     const payrollRecordRef = doc(db, "hr-data", userId, "payrolls", payrollId, "records", emp.id);
@@ -1981,7 +1998,7 @@
             ui.payrollHistoryContainer.innerHTML = state.payrolls
                 .sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0))
                 .map(p => {
-                    const approvedBadge = p.isApproved 
+                    const approvedBadge = p.isApproved
                         ? `<span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">معتمد</span>`
                         : `<span class="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-1 rounded-full">غير معتمد</span>`;
                     return `
@@ -2003,7 +2020,7 @@
             const records = recordsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
 
             const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-            
+
             let actionButtons = '';
             if (payroll.isApproved) {
                 actionButtons = `
@@ -2125,7 +2142,7 @@
         // --- Printing Functions ---
         function generateCorporatePayslipHTML(record, payroll) {
             const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-            
+
             const earnings = [
                 { name: 'الراتب الأساسي', amount: record.salary },
                 ...record.allowances.filter(a => a.includedInPayroll).map(a => ({ name: a.name, amount: a.amount })),
@@ -2150,7 +2167,7 @@
 
             return `
             <div class="payslip-page bg-white text-gray-900" style="width: 100%; height: 100%; margin: auto; display: flex; flex-direction: column; border: 1px solid #e5e7eb; padding: 0.8cm; font-size: 9pt;">
-                
+
                 <header class="flex justify-center items-center pb-2 border-b border-gray-300">
                     <div class="text-center">
                         <h1 class="text-2xl font-bold">${state.settings.name || 'اسم الشركة'}</h1>
@@ -2276,10 +2293,10 @@
             const bodyHTML = records.map(r => {
                 const employeeAllowances = new Map(r.allowances.filter(a => a.includedInPayroll).map(a => [a.name, a.amount]));
                 const employeeDeductions = new Map(r.deductions.filter(d => d.includedInPayroll).map(d => [d.name, d.amount]));
-                
+
                 const totalAllowancesForEmp = Array.from(employeeAllowances.values()).reduce((s, v) => s + v, 0);
                 const grossSalaryForEmp = r.salary + totalAllowancesForEmp;
-                
+
                 const totalFixedDeductionsForEmp = Array.from(employeeDeductions.values()).reduce((s, v) => s + v, 0);
                 const totalDeductionsForEmp = totalFixedDeductionsForEmp + (r.absenceDeduction || 0) + (r.lateDeduction || 0);
 
@@ -2300,7 +2317,7 @@
                     </tr>
                 `;
             }).join('');
-            
+
             const totalBaseSalary = records.reduce((sum, r) => sum + r.salary, 0);
             const allowanceTotals = allowanceHeaders.map(name => records.reduce((sum, r) => sum + (r.allowances.find(a => a.name === name && a.includedInPayroll)?.amount || 0), 0));
             const deductionTotals = deductionHeaders.map(name => records.reduce((sum, r) => sum + (r.deductions.find(d => d.name === name && d.includedInPayroll)?.amount || 0), 0));
@@ -2353,7 +2370,7 @@
             window.print();
             printableDiv.innerHTML = '';
         };
-        
+
         window.printEmployeePayslip = async (payrollId, recordId) => {
             const recordDoc = await getDoc(doc(db, "hr-data", userId, "payrolls", payrollId, "records", recordId));
             if (!recordDoc.exists()) {
@@ -2362,7 +2379,7 @@
             }
             const record = recordDoc.data();
             const payroll = state.payrolls.find(p => p.id === payrollId);
-            
+
             const printableDiv = document.getElementById('printable-payroll');
             printableDiv.innerHTML = generateCorporatePayslipHTML(record, payroll);
             window.print();
@@ -2370,11 +2387,11 @@
         };
 
         // --- Attendance Functions ---
-        
+
         window.downloadAttendanceTemplate = () => {
             const headers = ['Date', 'CheckIn', 'CheckOut', 'Notes'];
             const csvHeader = headers.join(',');
-            
+
             const exampleRow1 = 'YYYY-MM-DD,HH:MM,HH:MM,Your notes here';
             const exampleRow2 = '2024-07-01,09:00,17:00,Normal Day';
 
@@ -2420,12 +2437,14 @@
                         console.error("CSV Parsing Errors:", results.errors);
                         return;
                     }
-                    
+
                     let attendedDays = 0;
                     let totalLateMinutes = 0;
                     let totalOvertimeMinutes = 0;
                     let lateIncidentsOverGrace = 0;
-                    const standardWorkHours = 8;
+                    // MODIFICATION START: Use employee-specific daily hours for processing attendance file
+                    const standardWorkHours = employee.dailyWorkHours || 8; // Use employee-specific hours, default to 8
+                    // MODIFICATION END
                     const companyStartTime = state.settings.startTime || '09:00';
                     const [startHour, startMinute] = companyStartTime.split(':').map(Number);
                     const tardinessRule = employee.tardinessRule;
@@ -2438,7 +2457,7 @@
                             attendedDays++;
                             const checkInTime = new Date(`1970-01-01T${checkIn}:00`);
                             const checkOutTime = new Date(`1970-01-01T${checkOut}:00`);
-                            
+
                             const [checkInHour, checkInMinute] = checkIn.split(':').map(Number);
                             const dailyLateMinutes = (checkInHour - startHour) * 60 + (checkInMinute - startMinute);
                             if (dailyLateMinutes > 0) {
@@ -2447,7 +2466,7 @@
                                     lateIncidentsOverGrace++;
                                 }
                             }
-                            
+
                             const durationMs = checkOutTime - checkInTime;
                             const durationHours = durationMs / (1000 * 60 * 60);
 
@@ -2496,7 +2515,7 @@
 
         const handleAttendanceUploadFormSubmit = async (event) => {
             event.preventDefault();
-            
+
             const form = event.target;
             const employeeId = form['upload-attendance-employee-id'].value;
             const month = form['upload-attendance-month'].value;
@@ -2532,7 +2551,7 @@
             const month = form['attendance-month'].value;
             const year = form['attendance-year'].value;
             const attendanceId = `${year}-${String(parseInt(month) + 1).padStart(2, '0')}`;
-            
+
             const totalDaysInMonth = getDaysInMonth(parseInt(year), parseInt(month));
 
             const attendanceData = {
@@ -2577,7 +2596,7 @@
                 </tr>`;
             }).join("");
         }
-        
+
         function updateMonthDaysDisplay() {
             const month = parseInt(document.getElementById('attendance-month').value);
             const year = parseInt(document.getElementById('attendance-year').value);
@@ -2594,7 +2613,7 @@
             const originalButtonText = submitButton.innerHTML;
             submitButton.disabled = true;
             submitButton.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> جاري الحفظ...`;
-            
+
             const settingsData = {
                 name: ui.companyNameInput.value.trim(),
                 address: ui.companyAddressInput.value.trim(),
@@ -2608,7 +2627,7 @@
                 submitButton.innerHTML = originalButtonText;
                 return;
             }
-            
+
             try {
                 const settingsRef = doc(db, "hr-data", userId, "settings", "companyProfile");
                 await setDoc(settingsRef, settingsData, { merge: true });
@@ -2661,7 +2680,7 @@
 
         function renderLeaveTypesSettings() {
             if (!ui.leaveTypesTableBody) return;
-            
+
             ui.leaveTypesTableBody.innerHTML = state.leaveTypes.map(lt => {
                 const paymentText = { paid: 'مدفوعة', unpaid: 'بدون أجر', paid_in_advance: 'مدفوعة مقدماً' };
                 const recurringText = { annually: 'سنوي', once: 'مرة واحدة', 'multiple_per_year': 'متعددة سنوياً', none: 'غير متكرر' };
@@ -2679,7 +2698,7 @@
                 `;
             }).join('');
         }
-        
+
         window.editLeaveType = (id) => {
             const leaveType = state.leaveTypes.find(lt => lt.id === id);
             if (!leaveType) return;
@@ -2709,7 +2728,7 @@
         function populateLeaveTypeDropdown() {
             const select = document.getElementById('leave-type');
             select.innerHTML = '';
-            
+
             state.leaveTypes.sort((a,b) => a.name.localeCompare(b.name)).forEach(lt => {
                 const option = document.createElement('option');
                 option.value = lt.id;
@@ -2726,7 +2745,7 @@
         ui.settingsForm.addEventListener('submit', handleSettingsSubmit);
         ui.leaveRequestForm.addEventListener('submit', handleLeaveRequestSubmit);
         ui.leaveTypeForm.addEventListener('submit', handleLeaveTypeFormSubmit);
-        
+
         document.getElementById('process-attendance-file-btn').addEventListener('click', handleProcessAttendanceFile);
         ui.attendanceUploadForm.addEventListener('submit', handleAttendanceUploadFormSubmit);
 
@@ -2740,5 +2759,5 @@
         initializeFirebase();
 
     </script>
-</body> 
+</body>
 </html>
