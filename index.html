@@ -1714,19 +1714,54 @@
         }
 
 
-        const handleLeaveRequestSubmit = async (event) => {
+            const handleAttendanceFormSubmit = async (event) => {
             event.preventDefault();
             const form = event.target;
-            const employeeId = form['leave-employee-id'].value;
-            const employee = state.employees.find(e => e.id === employeeId);
-            const startDateStr = form['leave-start-date'].value;
-            const endDateStr = form['leave-end-date'].value;
-            const leaveTypeKey = form['leave-type'].value;
+            const employeeId = form['attendance-employee-id'].value;
+            const month = form['attendance-month'].value;
+            const year = form['attendance-year'].value;
+            const attendanceId = `${year}-${String(parseInt(month) + 1).padStart(2, '0')}`;
 
-            if (!employeeId || !startDateStr || !endDateStr || !leaveTypeKey) {
-                showAlert('بيانات ناقصة', 'يرجى ملء جميع الحقول المطلوبة.');
+            const totalDaysInMonth = getDaysInMonth(parseInt(year), parseInt(month));
+
+            // --- MODIFICATION START ---
+            // Correctly calculate total overtime minutes from their respective fields.
+            const weekdayOvertimeHours = Number(form['weekday-overtime-hours'].value) || 0;
+            const weekdayOvertimeMinutesRaw = Number(form['weekday-overtime-minutes'].value) || 0;
+            const totalWeekdayOvertimeMinutes = (weekdayOvertimeHours * 60) + weekdayOvertimeMinutesRaw;
+
+            const weekendOvertimeHours = Number(form['weekend-overtime-hours'].value) || 0;
+            const weekendOvertimeMinutesRaw = Number(form['weekend-overtime-minutes'].value) || 0;
+            const totalWeekendOvertimeMinutes = (weekendOvertimeHours * 60) + weekendOvertimeMinutesRaw;
+
+            const attendanceData = {
+                totalDaysInMonth: totalDaysInMonth,
+                attendedDays: Number(form['attended-days'].value),
+                lateHours: Number(form['late-hours'].value) || 0,
+                lateMinutes: Number(form['late-minutes'].value) || 0,
+                lateIncidentsOverGrace: Number(form['late-incidents-over-grace'].value) || 0,
+                // Save overtime as total minutes per category, matching what the payroll system expects.
+                weekdayOvertimeMinutes: totalWeekdayOvertimeMinutes,
+                weekendOvertimeMinutes: totalWeekendOvertimeMinutes,
+            };
+            // --- MODIFICATION END ---
+
+
+            if (isNaN(attendanceData.attendedDays)) {
+                showAlert('بيانات ناقصة', 'يرجى إدخال أيام الحضور الفعلية.');
                 return;
             }
+
+            try {
+                const attendanceDocRef = doc(db, "hr-data", userId, "employees", employeeId, "attendance", attendanceId);
+                await setDoc(attendanceDocRef, attendanceData, { merge: true }); // Use merge: true to be safe
+                showAlert('نجاح', 'تم حفظ بيانات الحضور بنجاح.');
+                closeModal('attendanceModal');
+            } catch (e) {
+                console.error("Error saving attendance:", e);
+                showAlert('خطأ', 'فشل حفظ بيانات الحضور.');
+            }
+        };
 
             const newLeaveStart = new Date(startDateStr);
             const newLeaveEnd = new Date(endDateStr);
